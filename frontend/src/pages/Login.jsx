@@ -9,7 +9,7 @@ function Login() {
 
         <div className='bg-gray-200 p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-4'>
           <img src="../assets/ehb.jpg"alt="Logo van ehb" className='h-20 mb-4'></img>
-          <p className='text-2xl font-semibold m-auto'><span>{state}</span>Login</p>
+          <p className='text-2xl font-semibold m-auto'><span>{state}</span> Login</p>
           <div className='w-full'>
             <p>Email</p>
             <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="email" required/>
