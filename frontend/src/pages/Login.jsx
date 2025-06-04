@@ -1,23 +1,36 @@
 import React from 'react'
-import {assets} from '../assets'
 
 function Login() {
-  const [state,setState]= useState('Admin')
+  const [state, setState]= React.useState('Student');
   return (
-    
-    <form>
-        <div>
-          <p><span>{state}</span>Login</p>
-          <div>
+    <form className='min-h-screen flex flex-col items-center justify-center text-black'>
+        <h1 className='text-center text-lg font-semibold mb-6'>Welkom bij Carreer Match!</h1>
+
+        <div className='bg-gray-200 p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-4'>
+          <img src="../assets/ehb.pjg"alt="Logo van ehb" className='h-20 mb-4'></img>
+          <p className='text-2xl font-semibold m-auto'><span>{state}</span>Login</p>
+          <div className='w-full'>
             <p>Email</p>
-            <input type="email" required/>
+            <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="email" required/>
           </div>
-          <div>
+          <div className='w-full'>
             <p>Password</p>
-            <input type="password" required/>
+            <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="password" required/>
           </div>
-          <button>Login</button>
+          <button className='bg-primary text-white w-full py-2 rounded-md text-base' >Login</button>
+          
+          {
+            state==='Admin'?(
+              <p>Student Login?<span onClick={()=>setState('Student')}>Click here</span></p>
+            ):state ==='Student'?(
+              <p>Bedrijf Login?<span onClick={()=>setState('Bedrijf')}>Click here</span></p>
+            ):(<p>Admin Login?<span onClick={()=>setState('Admin')}>Click here</span></p>)
+          }
         </div>
+      <div className='flex items-center'>
+        <p>Nieuwe {state}?</p>
+        <button className='bg-primary text-white w-full py-2 rounded-md text-base'></button>
+      </div>
     </form>
   )
 }
