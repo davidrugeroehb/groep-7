@@ -10,13 +10,13 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md px-8 py-4 flex items-center justify-between">
-      {/* Logo + Titre à gauche */}
+      {/* Logo + Titel links */}
       <div className="flex items-center space-x-3">
         <img src={logo} alt="logo" className="h-10 w-auto" />
         <h1 className="text-xl font-bold">Career Match</h1>
       </div>
 
-      {/* Liens centrés dans de juiste volgorde */}
+      {/* alle navlinks in het midden zetten */}
       <ul className="flex space-x-6 text-sm font-medium justify-center flex-1">
         <li><NavLink to="/speeddates" className={navLinkClass}>Speeddates</NavLink></li>
         <li><NavLink to="/mijnaanvragen" className={navLinkClass}>Mijn Aanvragen</NavLink></li>
@@ -25,7 +25,7 @@ const Navbar = () => {
         <li><NavLink to="/about" className={navLinkClass}>About</NavLink></li>
       </ul>
 
-      {/* Login button à droite */}
+      {/* Login button helemaal rechts */}
       <div>
         <NavLink
           to="/login"

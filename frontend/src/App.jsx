@@ -15,7 +15,7 @@ function App() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to="/speeddates" />} /> // wanneer we naar de localhost gaan gaat het direct naar de homepage dus speeddates
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
