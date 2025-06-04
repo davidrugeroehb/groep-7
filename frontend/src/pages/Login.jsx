@@ -4,10 +4,10 @@ function Login() {
   const [state, setState]= React.useState('Student');
   return (
   <form className='min-h-screen flex flex-col items-center justify-center text-black'>
-        <h1 className='text-center text-lg font-semibold mb-6'>Welkom bij Carreer Match!</h1>
+        <h1 className='text-center text-lg font-semibold mb-6'>Welkom bij Career Match!</h1>
 
         <div className='bg-gray-200 p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-4'>
-          <img src="../assets/ehb.pjg"alt="Logo van ehb" className='h-20 mb-4'></img>
+          <img src="../assets/ehb.jpg"alt="Logo van ehb" className='h-20 mb-4'></img>
           <p className='text-2xl font-semibold m-auto'><span>{state}</span>Login</p>
           <div className='w-full'>
             <p>Email</p>
@@ -29,7 +29,7 @@ function Login() {
         </div>
       <div className='flex items-center'>
         <p>Nieuwe {state}?</p>
-        <button className='bg-primary text-white w-full py-2 rounded-md text-base'></button>
+        <button className='bg-primary text-white w-full py-2 rounded-md text-base'>Sign-up</button>
       </div>
     </form>
   )
