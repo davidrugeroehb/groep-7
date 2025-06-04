@@ -3,7 +3,7 @@ import React from 'react'
 function Login() {
   const [state, setState]= React.useState('Student');
   return (
-    <form className='min-h-screen flex flex-col items-center justify-center text-black'>
+  <form className='min-h-screen flex flex-col items-center justify-center text-black'>
         <h1 className='text-center text-lg font-semibold mb-6'>Welkom bij Carreer Match!</h1>
 
         <div className='bg-gray-200 p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-4'>
