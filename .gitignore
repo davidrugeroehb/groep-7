@@ -1,0 +1,41 @@
+# 📦 Node modules
+node_modules/
+
+# ⚙️ Build output
+dist/
+build/
+
+# 🔐 Environment variables
+.env
+.env.*.local
+
+# 🗑 Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🧠 IDE instellingen
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# 📁 OS-specifiek
+.DS_Store
+Thumbs.db
+
+# ⚙️ Vite cache
+.cache/
+*.log
+
+# 🔒 Lockfiles (indien gewenst, afhankelijk van teamvoorkeur)
+# package-lock.json
+# yarn.lock
+
+# 📷 Optional: afbeeldingen van preview/test
+*.png
+*.jpg
+*.jpeg
+*.gif
