@@ -18,20 +18,21 @@ const [selected, setSelected] = useState(null);
 const [filters, setFilters] = useState({ sector: [], type: [], taal: [], });
 const [showFilters, setShowFilters] = useState(false);
 const [resultaten, setResultaten] = useState(speeddatesDummy);
+
 const handleAanvragen = () => {
-  alert(`De bedrijf ${selected.bedrijf} heeft je aanvraag gekregen.`);
+  alert(`Je aanvraag voor  ${selected.bedrijf} is verstuurd. `);
 };
 
 //Beschikbare opties voor filters
   const opties = {
     sector: ['Web Development', 'Cybersecurity', 'AI / Machine Learning'],
     type: ['Stage', 'Afstudeerproject', 'Bijbaan / Werkstudent'],
-    taal: ['Nederlands', 'Engels', 'Spaans', 'Duits'],
+    taal: ['Nederlands', 'Engels', 'Spaans', 'Duits', 'Frans'],
   };
 
   // filters aan en uit zetten 
   const toggle = (categorie, waarde) => {
-    setFilters((prev) => ({
+    setFilters(prev => ({
       ...prev,
       [categorie]: prev[categorie].includes(waarde)
         ? prev[categorie].filter((v) => v !== waarde)
@@ -41,9 +42,12 @@ const handleAanvragen = () => {
 
   // functie op filters toe te passen op data 
   const toepassenFilter = () => {
-    const gefilterd = speeddatesDummy.filter((sd) =>
-      ['sector', 'type', 'taal'].every(
-        (cat) => filters[cat].length === 0 || filters[cat].includes(sd[cat])
+    const gefilterd = speeddatesDummy.filter(sd =>
+      Object.entries(filters).every(([key, values]) => 
+        values.length === 0 || 
+        (Array.isArray(sd[key]) 
+          ? sd[key].some(item => values.includes(item))
+          : values.includes(sd[key]))
       )
     );
     setResultaten(gefilterd);
@@ -51,12 +55,21 @@ const handleAanvragen = () => {
     setSelected(null); 
   };
 
+  // Reset filters
+  const resetFilters = () => {
+    setFilters({ sector: [], type: [], taal: [], focus: [] });
+    setResultaten(speeddatesData);
+    setShowFilters(false);
+  };
+
+  
 return (
-  <div style={{ position: 'relative', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+  <div style={{ position: 'relative', padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}></div>
     <h1  style={{ fontSize: '36px', fontWeight: 'bold', textAlign: 'center', marginBottom: '40px', textTransform: 'uppercase', letterSpacing: '2px' }}>Beschikbare speeddates</h1>
     {/*filterknop*/}
+
     <button onClick={() => setShowFilters(!showFilters)}
-    aria-label = "Filter" 
     style={{
         position: 'absolute',
         top: 20,
@@ -78,7 +91,7 @@ return (
 
  {/*Filterpaneel*/}
   {showFilters && (
-  <div style={{ border: '1px solid gray', padding: '10px', margin: '10px 0' }}>
+  <div style={{ border: '1px solid gray', padding: '20px', marginBottom: '20px', borderRadius: '8px', position: 'absolute', top: '60px', right: 'auto', left: '20px', backgroundColor: 'white', width: '250px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', }}>
     {/*Filter voor Sector*/}
     <strong>Sector (Focus)</strong><br />
     {opties.sector.map((opt) => (
