@@ -8,4 +8,4 @@ function Homebedrijf() {
   );
 }
 
-export default About;
+export default Homebedrijf;
