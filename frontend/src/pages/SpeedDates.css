@@ -211,3 +211,122 @@
     background-color: #f8f9fa;
     border-color: #adb5bd;
   }
+
+  .results-section h2 {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .result-count {
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+  
+  .speeddates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .speeddate-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+  }
+  
+  .speeddate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    padding: 1.2rem 1.5rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .card-header h3 {
+    font-size: 1.2rem;
+    color: var(--dark-color);
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .sector-tag {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .sector-tag.WebDevelopment {
+    background-color: #4361ee;
+  }
+  
+  .sector-tag.Cybersecurity {
+    background-color: #f72585;
+  }
+  
+  .sector-tag.AIMachineLearning {
+    background-color: #4895ef;
+  }
+  
+  .sector-tag.DevOps {
+    background-color: #4cc9f0;
+  }
+  
+  .sector-tag.UXUI {
+    background-color: #7209b7;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-body p {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .card-body i {
+    width: 20px;
+    color: var(--primary-color);
+  }
+  
+  .description {
+    color: #495057;
+    font-size: 0.95rem;
+    margin-top: 1rem !important;
+    line-height: 1.5;
+  }
+  
+  .card-footer {
+    padding: 0 1.5rem 1.5rem;
+    text-align: center;
+  }
+  
+  .details-btn {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .details-btn:hover {
+    background-color: rgba(67, 97, 238, 0.1);
+  }
