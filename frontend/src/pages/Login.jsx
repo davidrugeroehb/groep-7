@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
+import { AdminContext } from '../Context/Admincontext';
+import axios from 'axios';
 
 function Login() {
   const [state, setState]= React.useState('Student');
-  return (
+  const[email,setEmail]=useState('');
+  const[password,setPassword]=useState('');
+  const {setAToken, backendUrl}=useContext(AdminContext)
+  const onSubmitHandler= async (event)=>{
+    event.preventDefault()
+    try{
+      if(state==='Admin'){
+          <const>data</const>=await axios.post(backendUrl+'/api/admin/login',{email,password})
+          if(data.succes){
+            localStorage.setItem('aToken',data.token)
+            console.log(data.token)
+            setAToken(data.token)
+          }
+      }else{
 
-  <form className='min-h-screen flex flex-col items-center justify-center text-black'>
+      }
+    }catch(error){
+
+    }
+  }
+
+  return (
+  <form onSubmit={onSubmitHandler} className='min-h-screen flex flex-col items-center justify-center text-black'>
         <h1 className='text-center text-lg font-semibold mb-6'>Welkom bij Career Match!</h1>
 
         <div className='bg-gray-200 p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-4'>
@@ -12,13 +34,13 @@ function Login() {
           <p className='text-2xl font-semibold m-auto'><span>{state}</span> Login</p>
           <div className='w-full'>
             <p>Email</p>
-            <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="email" required/>
+            <input onChange={(e)=>setEmail(e.target.value)} className='border border-[#DADADA] rounded w-full p-2 mt-1' type="email" required/>
           </div>
           <div className='w-full'>
             <p>Password</p>
-            <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="password" required/>
+            <input onChange={(e)=>setPassword(e.target.value)} className='border border-[#DADADA] rounded w-full p-2 mt-1' type="password" required/>
           </div>
-          <button className='bg-blue-500 hover:bg-blue-600 text-white w-full py-2 rounded-md text-base transition'>Login</button>
+          <button type='submit' className='bg-blue-500 hover:bg-blue-600 text-white w-full py-2 rounded-md text-base transition'>Login</button>
           
           {
             state==='Admin'?(
