@@ -135,16 +135,103 @@ const SpeedDates = () => {
   </div>
 </div>
     <div className="filter-group">
-      
-      <button className="button button--primary">Filters toepassen</button>
-      <button className="button button--secondary">Reset filters</button>
-    </div>
-  </div>
-)}
+    <h3>Type opportuniteit</h3>
+              <div className="checkbox-grid">
+                {["Stage", "Afstudeerproject", "Bijbaan / Werkstudent"].map((type) => (
+                  <label key={type} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={filters.type.includes(type)}
+                      onChange={() => handleFilterChange('type', type)}
+                    />
+                    <span className="checkmark"></span>
+                    {type}
+                  </label>
+                ))}
+              </div>
+            </div>
 
+
+            <div className="filter-group">
+              <h3>Taal</h3>
+              <div className="checkbox-grid">
+                {["Nederlands", "Engels", "Spaans", "Portugees", "Arabisch"].map((taal) => (
+                  <label key={taal} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={filters.taal.includes(taal)}
+                      onChange={() => handleFilterChange('taal', taal)}
+                    />
+                    <span className="checkmark"></span>
+                    {taal}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+
+            <div className="filter-buttons">
+              <button className="apply-btn" onClick={applyFilters}>Filters toepassen</button>
+              <button className="reset-btn" onClick={resetFilters}>Reset filters</button>
+            </div>
+          </div>
+        )}
+
+
+        <div className="results-section">
+          <h2>Beschikbare SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
+         
+          {filteredDates.length > 0 ? (
+            <div className="speeddates-grid">
+              {filteredDates.map((date) => (
+                <div key={date.id} className="speeddate-card">
+                  <div className="card-header">
+                    <h3>{date.bedrijf}</h3>
+                    <span className={`sector-tag ${date.sector.replace(/[^a-zA-Z]/g, '')}`}>{date.sector}</span>
+                  </div>
+                  <div className="card-body">
+                    <p><i className="far fa-clock"></i> {date.uur}</p>
+                    <p><i className="far fa-user"></i> {date.type}</p>
+                    <p><i className="fas fa-language"></i> {date.taal}</p>
+                    <p className="description">{date.beschrijving}</p>
+                  </div>
+                  <div className="card-footer">
+                    <button
+                      className="details-btn"
+                      onClick={() => toggleDetails(date.id)}
+                    >
+                      {expandedId === date.id ? 'Minder details' : 'Bekijk meer'}
+                    </button>
+                  </div>
+                 
+                  {expandedId === date.id && (
+                    <div className="expanded-details">
+                      <h4>Meer informatie</h4>
+                      <p>{date.details}</p>
+                      <button
+                        className="apply-now-btn"
+                        onClick={() => alert(`Sollicitatie gestuurd naar ${date.bedrijf}`)}
+                      >
+                        Afspraak aanvragen
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-results">
+              <i className="far fa-frown"></i>
+              <p>Geen speeddates gevonden met de geselecteerde filters.</p>
+              <button className="reset-btn" onClick={resetFilters}>Reset filters</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
+
 export default SpeedDates;
+      
