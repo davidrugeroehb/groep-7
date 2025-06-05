@@ -114,7 +114,7 @@ return (
 )}
 
 
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', flexGrow: 1 }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center',  flexGrow: 1 }}>
         {resultaten.map((sd) => (
           <div
             key={sd.id}
@@ -125,9 +125,15 @@ return (
               cursor: 'pointer',
               width: '200px',
               flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              backgroundColor: '#fff',
+              transition: 'transform 0.2s ease',
+              textAlign: 'center',
             }}
-          >
-            <h3>{sd.bedrijf}</h3>
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+>
+            <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>{sd.bedrijf}</h3>
             <p><strong>Sector:</strong> {sd.sector}</p>
             <p><strong>Type:</strong> {sd.type}</p>
             <p><strong>Taal:</strong> {sd.taal}</p>
