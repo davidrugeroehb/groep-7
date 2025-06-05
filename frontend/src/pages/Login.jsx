@@ -47,7 +47,7 @@ function Login() {
       {/* Sign-up call to action */}
       <div className='mt-6'>
         <p className='text-sm'>
-          Nog geen account?{" "}
+          Nieuw bedrijf?{" "}
           <button
             type="button"
             className='text-blue-600 font-medium underline hover:text-blue-800 transition cursor-pointer'
