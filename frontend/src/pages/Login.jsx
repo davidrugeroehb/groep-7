@@ -24,8 +24,8 @@ function Login() {
             state==='Admin'?(
               <p>Student Login? <span onClick={()=>setState('Student')} className='text-blue-500 underline'>Click here</span></p>
             ):state ==='Student'?(
-              <p>Bedrijf Login? <span onClick={()=>setState('Bedrijf')}>Click here</span></p>
-            ):(<p>Admin Login? <span onClick={()=>setState('Admin')}>Click here</span></p>)
+              <p>Bedrijf Login? <span onClick={()=>setState('Bedrijf')} className='text-blue-500 underline'>Click here</span></p>
+            ):(<p>Admin Login? <span onClick={()=>setState('Admin')} className='text-blue-500 underline'>Click here</span></p>)
           }
         </div>
       <div className='flex items-center'>
