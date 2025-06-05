@@ -11,7 +11,7 @@ const SpeedDates = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [expandedCardId, setExpandedCardId] = useState(null);
   
-  const speedDatesData = [
+  const speedDates = [
     {
       id: 1,
       company: "TechSolutions",
@@ -63,6 +63,41 @@ const SpeedDates = () => {
       details: "16-24 uur per week | Creatieve vrijheid"
     }
   ];
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => {
+      const newFilters = { ...prev };
+      const index = newFilters[filterType].indexOf(value);
+      
+      if (index === -1) {
+        newFilters[filterType].push(value);
+      } else {
+        newFilters[filterType].splice(index, 1);
+      }
+      
+      return newFilters;
+    });
+  };
+  
+  const resetFilters = () => {
+    setFilters({
+      sector: [],
+      type: [],
+      taal: []
+    });
+  };
+  
+  const applyFilters = () => {
+    setShowFilters(false);
+  };
+  
+  const filteredDates = speedDates.filter(date => {
+    return (
+      (filters.sector.length === 0 || filters.sector.includes(date.sector)) &&
+      (filters.type.length === 0 || filters.type.includes(date.type)) &&
+      (filters.taal.length === 0 || filters.taal.includes(date.taal))
+    );
+  });
+  
 
   return (
     <div className="speeddates">
