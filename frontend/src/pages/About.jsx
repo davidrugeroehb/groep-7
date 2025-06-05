@@ -13,7 +13,7 @@ const About = () => {
           </p>
         </div>
         <div className="md:w-1/2">
-          <img src={teamImage} alt="Ons team" className="rounded-lg shadow-lg" />
+          <img src={teamImage} alt="Ons team"/>
         </div>
       </section>
 
