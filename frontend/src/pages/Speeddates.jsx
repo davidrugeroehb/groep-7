@@ -14,13 +14,13 @@ const SpeedDates = () => {
   const speedDates = [
     {
       id: 1,
-      company: "TechSolutions",
-      sector: "Web Development",
-      type: "Stage",
-      language: "Nederlands",
-      timeSlot: "10:00 - 10:20",
-      description: "Stageplek voor front-end development...",
-      details: "Locatie: Amsterdam | Vereisten: Basiskennis HTML/CSS/JavaScript"
+  bedrijf: "TechSolutions",
+  sector: "Web Development",
+  type: "Stage",
+  taal: "Nederlands",
+  uur: "10:00 - 10:20",
+  beschrijving: "Stageplek voor front-end development met React. Wij zoeken een gemotiveerde stagiair die ons team komt versterken in het ontwikkelen van moderne webapplicaties.",
+  details: "Locatie: Amsterdam | Vereisten: Basiskennis HTML/CSS/JavaScript"
     },
     {
       id: 2,
@@ -129,7 +129,8 @@ const SpeedDates = () => {
           checked={filters.sector.includes(sector)}
           onChange={() => handleFilterChange('sector', sector)}
         />
-        <span className="checkmark">{sector}</span>
+        <span className="checkmark"></span>
+        {sector}
       </label>
     ))}
   </div>
