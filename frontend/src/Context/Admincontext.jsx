@@ -1,4 +1,5 @@
 import {createContext} from 'react'
+import React, { useState, useEffect } from 'react';
 export const AdminContext= createContext()
 const AdminContextProvider=(props)=>{
     const backendUrl=import.meta.env.VITE_BACKEND_URL
@@ -9,9 +10,9 @@ const AdminContextProvider=(props)=>{
     }
 
     return (
-    <AdminContext.provider value={value}>
-        {props.childeren}
-    </AdminContext.provider>
+    <AdminContext.Provider value={value}>
+        {props.children}
+    </AdminContext.Provider>
     )
 }
 
