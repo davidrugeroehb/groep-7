@@ -29,7 +29,18 @@ function Speeddates() {
 
 
 const [selected, setSelected] = useState(null);
+const [filters, setFilters] = useState({
+  sector: [],
+  type: [],
+  taal: [],
+});
+const [resultaten, setResultaten] = useState(speeddatesDummy);
 
+  const opties = {
+    sector: ['Web Development', 'Cybersecurity', 'AI / Machine Learning'],
+    type: ['Stage', 'Afstudeerproject', 'Bijbaan / Werkstudent'],
+    taal: ['Nederlands', 'Engels', 'Spaans', 'Duits'],
+  };
 
 return (
   <div>
