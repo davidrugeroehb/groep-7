@@ -3,6 +3,14 @@ import React, { useState } from 'react';
 import './SpeedDates.css';
 
 const SpeedDates = () => {
+  const [filters, setFilters] = useState({
+    sector: [],
+    type: [],
+    taal: []
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  const [expandedCardId, setExpandedCardId] = useState(null);
+  
   return (
     <div className="speeddates">
       <header className="speeddates__header">
