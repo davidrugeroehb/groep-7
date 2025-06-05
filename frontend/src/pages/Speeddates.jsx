@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function Speeddates() {
-  //data
+  //Dummy data met bedrijven en hun speeddates
   const speeddatesDummy = [
     { id: 1, bedrijf: "TechCorp", sector: "Web Development", type: "Stage", taal: "Nederlands", uur: "10:00 - 10:20",
       beschrijving: "TechCorp is een innovatief webbedrijf dat werkt met React en Node.js.",
@@ -18,12 +18,18 @@ const [selected, setSelected] = useState(null);
 const [filters, setFilters] = useState({ sector: [], type: [], taal: [], });
 const [showFilters, setShowFilters] = useState(false);
 const [resultaten, setResultaten] = useState(speeddatesDummy);
+const handleAanvragen = () => {
+  alert(`De bedrijf ${selected.bedrijf} heeft je aanvraag gekregen.`);
+};
 
+//Beschikbare opties voor filters
   const opties = {
     sector: ['Web Development', 'Cybersecurity', 'AI / Machine Learning'],
     type: ['Stage', 'Afstudeerproject', 'Bijbaan / Werkstudent'],
     taal: ['Nederlands', 'Engels', 'Spaans', 'Duits'],
   };
+
+  // filters aan en uit zetten 
   const toggle = (categorie, waarde) => {
     setFilters((prev) => ({
       ...prev,
@@ -33,6 +39,7 @@ const [resultaten, setResultaten] = useState(speeddatesDummy);
     }));
   };
 
+  // functie op filters toe te passen op data 
   const toepassenFilter = () => {
     const gefilterd = speeddatesDummy.filter((sd) =>
       ['sector', 'type', 'taal'].every(
@@ -45,8 +52,9 @@ const [resultaten, setResultaten] = useState(speeddatesDummy);
   };
 
 return (
-  <div style={{ position: 'relative', padding: '20px' }}>
+  <div style={{ position: 'relative', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
     <h1  style={{ fontSize: '36px', fontWeight: 'bold', textAlign: 'center', marginBottom: '40px', textTransform: 'uppercase', letterSpacing: '2px' }}>Beschikbare speeddates</h1>
+    {/*filterknop*/}
     <button onClick={() => setShowFilters(!showFilters)}
     aria-label = "Filter" 
     style={{
@@ -68,9 +76,10 @@ return (
       filter
  </button>
 
- <div style={{ display: 'flex', alignItems: 'flex-start', gap: '40px' }}></div>
+ {/*Filterpaneel*/}
   {showFilters && (
   <div style={{ border: '1px solid gray', padding: '10px', margin: '10px 0' }}>
+    {/*Filter voor Sector*/}
     <strong>Sector (Focus)</strong><br />
     {opties.sector.map((opt) => (
       <label key={opt} style={{ marginRight: '10px', display: 'block' }}>
@@ -83,6 +92,7 @@ return (
       </label>
     ))}
 
+{/*Filter voor type*/}
     <br /><strong>Type</strong><br />
     {opties.type.map((opt) => (
       <label key={opt} style={{ marginRight: '10px' }}>
@@ -94,6 +104,8 @@ return (
         {opt}
       </label>
     ))}
+
+    {/*Filter voor taal*/}
 
     <br /><strong>Taal</strong><br />
     {opties.taal.map((opt) => (
@@ -107,12 +119,14 @@ return (
       </label>
     ))}
 
-    <br /><button onClick={toepassenFilter} style={{ marginTop: '10px' }}>
+    {/*knop om filters toe te passen*/}
+ <br /><button onClick={toepassenFilter} style={{ marginTop: '10px' }}>
       Toepassen
     </button>
   </div>
 )}
 
+{/*Resultatenlijst van gefilterde speeddates*/}
 
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center',  flexGrow: 1 }}>
         {resultaten.map((sd) => (
@@ -141,6 +155,8 @@ return (
           </div>
         ))}
   </div>
+
+  {/*Detailsweergave van geselecteerde speeddates*/}
   {selected && (
         <div style={{ marginTop: '30px', borderTop: '1px solid gray', paddingTop: '20px' }}>
           <h2>{selected.bedrijf}</h2>
