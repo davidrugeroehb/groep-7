@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/team-placeholder.png';
 
 function Login() {
+  const navigate = useNavigate();
+
   return (
     <form className='min-h-screen flex flex-col items-center justify-center text-black bg-gray-50 px-4'>
       <h1 className='text-2xl font-bold mb-6'>Welkom bij Career Match!</h1>
@@ -50,6 +53,7 @@ function Login() {
           Nieuw bedrijf?{" "}
           <button
             type="button"
+            onClick={() => navigate('/bedrijf-signup')}
             className='text-blue-600 font-medium underline hover:text-blue-800 transition cursor-pointer'
           >
             Registreer hier
