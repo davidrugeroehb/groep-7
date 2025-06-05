@@ -20,7 +20,8 @@ function BedrijfSignup() {
       gsm: e.target.gsm.value
     };
 
-    // Opslaan in localStorage
+    // Opslaan in localStorage gwn om te tonen dat onze formulier wert, zo'n ding mag je niet doen in een echte site
+    // omdat de localstorage gewijzigd kan worden door iedereen --> onveilig
     localStorage.setItem('bedrijfAccount', JSON.stringify(data));
 
     // Navigeren naar login
