@@ -3,9 +3,15 @@ import React, { useState } from 'react';
 function Speeddates() {
   //data
   const speeddatesDummy = [
-    { id: 1, bedrijf: "TechCorp", sector: "Web Development", type: "Stage", taal: "Nederlands", },
-    { id: 2, bedrijf: "CyberSecure", sector: "Cybersecurity", type: "Afstudeerproject", taal: "Engels",},
-    { id: 3, bedrijf: "AI Minds", sector: "AI / Machine Learning", type: "Bijbaan / Werkstudent", taal: "Engels"}
+    { id: 1, bedrijf: "TechCorp", sector: "Web Development", type: "Stage", taal: "Nederlands", uur: "10:00 - 10:20",
+      beschrijving: "TechCorp is een innovatief webbedrijf dat werkt met React en Node.js.",
+    },
+    { id: 2, bedrijf: "CyberSecure", sector: "Cybersecurity", type: "Afstudeerproject", taal: "Engels", uur: "10:30 - 10:50", 
+      beschrijving: "CyberSecure specialiseert zich in netwerkbeveiliging en ethisch hacken.",
+    },
+    { id: 3, bedrijf: "AI Minds", sector: "AI / Machine Learning", type: "Bijbaan / Werkstudent", taal: "Engels", uur: "11:00 - 11:20",
+      beschrijving: "AI Minds ontwikkelt toepassingen met machine learning en data-analyse.",
+    }
     ];
 
 const [selected, setSelected] = useState(null);
@@ -122,6 +128,7 @@ return (
             <p><strong>Sector:</strong> {sd.sector}</p>
             <p><strong>Type:</strong> {sd.type}</p>
             <p><strong>Taal:</strong> {sd.taal}</p>
+            <p><strong>Uur:</strong> {sd.uur}</p>
           </div>
         ))}
   </div>
