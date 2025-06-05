@@ -8,12 +8,21 @@ dotenv.config();
 const createDemoStudent = async () => {
   await mongoose.connect(process.env.MONGODB_URI);
 
-  const password = await bcrypt.hash('test123', 10);
+  const email = 'student@test.com';
+  const bestaand = await studentModel.findOne({ email });
+
+  if (bestaand) {
+    console.log('⚠️ Student bestaat al:', bestaand.email);
+    await mongoose.disconnect();
+    return;
+  }
+
+  const hashedPassword = await bcrypt.hash('test123', 10);
 
   const newStudent = new studentModel({
     name: 'Test Student',
-    email: 'student@test.com',
-    password: password,
+    email: email,
+    password: hashedPassword,
     richting: 'Toegepaste Informatica',
     taal: 'Nederlands',
   });
@@ -24,7 +33,7 @@ const createDemoStudent = async () => {
   } catch (err) {
     console.error('⚠️ Fout bij opslaan:', err.message);
   } finally {
-    mongoose.disconnect();
+    await mongoose.disconnect();
   }
 };
 
