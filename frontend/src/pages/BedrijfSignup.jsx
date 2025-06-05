@@ -6,6 +6,24 @@ function BedrijfSignup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Verzamel alle formulierdata
+    const data = {
+      bedrijfsnaam: e.target.bedrijfsnaam.value,
+      adres: e.target.adres.value,
+      btw: e.target.btw.value,
+      sector: e.target.sector.value,
+      website: e.target.website.value,
+      contactpersoon: e.target.contactpersoon.value,
+      email: e.target.email.value,
+      wachtwoord: e.target.wachtwoord.value,
+      gsm: e.target.gsm.value
+    };
+
+    // Opslaan in localStorage
+    localStorage.setItem('bedrijfAccount', JSON.stringify(data));
+
+    // Navigeren naar login
     navigate('/login');
   };
 
@@ -23,27 +41,27 @@ function BedrijfSignup() {
 
           <div className="mb-4">
             <label className="block mb-1">Bedrijfsnaam</label>
-            <input type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="bedrijfsnaam" type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-4">
             <label className="block mb-1">Adres</label>
-            <input type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="adres" type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-4">
             <label className="block mb-1">BTW-nummer</label>
-            <input type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="btw" type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-4">
             <label className="block mb-1">Sector</label>
-            <input type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="sector" type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-4">
             <label className="block mb-1">Website</label>
-            <input type="url" className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="website" type="url" className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
         </div>
 
@@ -53,41 +71,29 @@ function BedrijfSignup() {
 
           <div className="mb-4">
             <label className="block mb-1">Voornaam & Achternaam</label>
-            <input type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="contactpersoon" type="text" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-4">
             <label className="block mb-1">E-mailadres</label>
-            <input type="email" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="email" type="email" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-4">
             <label className="block mb-1">Wachtwoord</label>
-            <input type="password" required className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input name="wachtwoord" type="password" required className="w-full border border-gray-300 rounded px-3 py-2" />
           </div>
 
           <div className="mb-6">
             <label className="block mb-1">GSM-nummer</label>
-            <div className="flex gap-2">
-              <select
-                required
-                className="border border-gray-300 rounded px-3 py-2 bg-white text-sm"
-                defaultValue="+32"
-              >
-                <option value="+32">+32</option>
-                <option value="+31">+31</option>
-                <option value="+33">+33</option>
-                <option value="+49">+49</option>
-              </select>
-              <input
-                type="tel"
-                required
-                pattern="[0-9]{6,15}"
-                title="Geef een geldig telefoonnummer in zonder landcode"
-                className="flex-1 border border-gray-300 rounded px-3 py-2"
-                placeholder="470000000"
-              />
-            </div>
+            <input
+              name="gsm"
+              type="tel"
+              required
+              pattern="[0-9]{4,15}"
+              title="Gelieve een geldig telefoonnummer in te geven"
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
           </div>
 
           <div className="text-right">
