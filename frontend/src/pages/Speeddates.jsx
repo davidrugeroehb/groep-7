@@ -39,10 +39,28 @@ const [resultaten, setResultaten] = useState(speeddatesDummy);
   };
 
 return (
-  <div>
+  <div style={{ position: 'relative', padding: '20px' }}>
     <h1>Speeddates</h1>
-    <button onClick={() => setShowFilters(!showFilters)}>
-  Filter </button>
+    <button onClick={() => setShowFilters(!showFilters)}
+    aria-label = "Filter" 
+    style={{
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        backgroundColor: '#007bff',
+        border: 'none',
+        borderRadius: '5px',
+        padding: '8px 12px',
+        cursor: 'pointer',
+        color: 'white',
+        fontWeight: 'bold',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+      }}
+      > 
+      filter
+ </button>
   {showFilters && (
   <div style={{ border: '1px solid gray', padding: '10px', margin: '10px 0' }}>
     <strong>Sector (Focus)</strong><br />
