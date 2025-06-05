@@ -40,7 +40,7 @@ const [resultaten, setResultaten] = useState(speeddatesDummy);
 
 return (
   <div style={{ position: 'relative', padding: '20px' }}>
-    <h1>Speeddates</h1>
+    <h1  style={{ fontSize: '36px', fontWeight: 'bold', textAlign: 'center', marginBottom: '40px', textTransform: 'uppercase', letterSpacing: '2px' }}>Beschikbare speeddates</h1>
     <button onClick={() => setShowFilters(!showFilters)}
     aria-label = "Filter" 
     style={{
