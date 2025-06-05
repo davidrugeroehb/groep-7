@@ -9,7 +9,7 @@ const SpeedDates = () => {
     taal: []
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [expandedCardId, setExpandedCardId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
   
   const speedDates = [
     {
@@ -97,42 +97,45 @@ const SpeedDates = () => {
       (filters.taal.length === 0 || filters.taal.includes(date.taal))
     );
   });
-  
+  const toggleDetails = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
 
   return (
-    <div className="speeddates">
-      <header className="speeddates__header">
+    <div className="speeddates-container">
+      <header className="header">
         <h1 className="speeddates__title">Speeddates</h1>
         <p className="speeddates__subtitle">Vind jouw ideale stage, afstudeerproject of bijbaan</p>
       </header>
 
-      <div className="speeddates__main">
+      <div className="main-content">
       <button 
-  className={`speeddates__filter-toggle ${showFilters ? 'speeddates__filter-toggle--active' : ''}`}
+  className={`filter-toggle ${showFilters ? 'active' : ''}`}
   onClick={() => setShowFilters(!showFilters)}
 >
   {showFilters ? 'Filters verbergen' : 'Filters tonen'}
 </button>
 
 {showFilters && (
-  <div className="speeddates__filter-controls">
+  <div className="filter-section">
     <div className="filter-group">
-  <h3 className="filter-group__title">Sector / Focus</h3>
-  <div className="filter-group__options">
-    {["Web Development", "Cybersecurity"].map((sector) => (
-      <label key={sector} className="filter-option">
+  <h3> "Sector / Focus</h3>
+  <div className="checkbox-grid">
+    {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
+      <label key={sector} className="checkbox-label">
         <input
           type="checkbox"
-          className="filter-option__input"
           checked={filters.sector.includes(sector)}
           onChange={() => handleFilterChange('sector', sector)}
         />
-        <span className="filter-option__label">{sector}</span>
+        <span className="checkmark">{sector}</span>
       </label>
     ))}
   </div>
 </div>
-    <div className="speeddates__filter-actions">
+    <div className="filter-group">
+      
       <button className="button button--primary">Filters toepassen</button>
       <button className="button button--secondary">Reset filters</button>
     </div>
