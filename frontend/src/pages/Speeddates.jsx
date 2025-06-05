@@ -67,11 +67,13 @@ return (
       > 
       filter
  </button>
+
+ <div style={{ display: 'flex', alignItems: 'flex-start', gap: '40px' }}></div>
   {showFilters && (
   <div style={{ border: '1px solid gray', padding: '10px', margin: '10px 0' }}>
     <strong>Sector (Focus)</strong><br />
     {opties.sector.map((opt) => (
-      <label key={opt} style={{ marginRight: '10px' }}>
+      <label key={opt} style={{ marginRight: '10px', display: 'block' }}>
         <input
           type="checkbox"
           checked={filters.sector.includes(opt)}
@@ -112,7 +114,7 @@ return (
 )}
 
 
-    <div style={{ display: 'flex', gap: '20px' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', flexGrow: 1 }}>
         {resultaten.map((sd) => (
           <div
             key={sd.id}
@@ -122,6 +124,7 @@ return (
               padding: '10px',
               cursor: 'pointer',
               width: '200px',
+              flexShrink: 0,
             }}
           >
             <h3>{sd.bedrijf}</h3>
