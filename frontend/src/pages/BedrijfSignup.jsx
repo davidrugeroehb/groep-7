@@ -4,29 +4,44 @@ import { useNavigate } from 'react-router-dom';
 function BedrijfSignup() {
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Verzamel alle formulierdata
-    const data = {
-      bedrijfsnaam: e.target.bedrijfsnaam.value,
-      adres: e.target.adres.value,
-      btw: e.target.btw.value,
-      sector: e.target.sector.value,
-      website: e.target.website.value,
-      contactpersoon: e.target.contactpersoon.value,
-      email: e.target.email.value,
-      wachtwoord: e.target.wachtwoord.value,
-      gsm: e.target.gsm.value
-    };
-
-    // Opslaan in localStorage gwn om te tonen dat onze formulier wert, zo'n ding mag je niet doen in een echte site
-    // omdat de localstorage gewijzigd kan worden door iedereen --> onveilig
-    localStorage.setItem('bedrijfAccount', JSON.stringify(data));
-
-    // Navigeren naar login
-    navigate('/login');
+  const data = {
+    name: e.target.bedrijfsnaam.value,
+    adres: e.target.adres.value,
+    btwNummer: e.target.btw.value,
+    sector: e.target.sector.value,
+    website: e.target.website.value,
+    contactpersoon: e.target.contactpersoon.value,
+    email: e.target.email.value,
+    password: e.target.wachtwoord.value,
+    phone: e.target.gsm.value
   };
+
+  try {
+    const res = await fetch('http://localhost:4000/api/bedrijf/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert('✅ Bedrijf succesvol geregistreerd!');
+      navigate('/login');
+    } else {
+      alert('❌ Registratie mislukt: ' + result.message);
+    }
+  } catch (err) {
+    console.error('❌ Fout bij registratie:', err);
+    alert('❌ Er is een fout opgetreden bij het versturen van het formulier.');
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 text-black p-8">

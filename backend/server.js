@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/mongodb.js';
 import connectCloudinary from './config/cloudinary.js';
-
+import bedrijfRoutes from './routes/bedrijfRoutes.js';
 import studentRoutes from './routes/studentRoutes.js'; // <--- toegevoegde route
 
 // app config
@@ -19,6 +19,7 @@ app.use(cors());
 
 // api endpoints
 app.use('/api/student', studentRoutes); // <--- actieve route
+app.use('/api/bedrijf', bedrijfRoutes);
 
 app.get('/', (req, res) => {
   res.send('API WORKING very good');

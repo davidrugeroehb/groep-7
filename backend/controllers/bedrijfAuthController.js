@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 // REGISTRATIE
 export const registerBedrijf = async (req, res) => {
+
   try {
     const { name, adres, btwNummer, website, sector, contactpersoon, email, password, phone } = req.body;
 
