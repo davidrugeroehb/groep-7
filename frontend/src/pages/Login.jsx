@@ -1,40 +1,67 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../assets/team-placeholder.png';
 
 function Login() {
-  const [state, setState]= React.useState('Student');
+  const navigate = useNavigate();
+
   return (
+    <form className='min-h-screen flex flex-col items-center justify-center text-black bg-gray-50 px-4'>
+      <h1 className='text-2xl font-bold mb-6'>Welkom bij Career Match!</h1>
 
-  <form className='min-h-screen flex flex-col items-center justify-center text-black'>
-        <h1 className='text-center text-lg font-semibold mb-6'>Welkom bij Career Match!</h1>
+      <div className='bg-white p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-5'>
+        {/* Logo */}
+        <img src={logo} alt="EHB logo" className='h-20' />
 
-        <div className='bg-gray-200 p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-4'>
-          <img src="../assets/ehb.jpg"alt="Logo van ehb" className='h-20 mb-4'></img>
-          <p className='text-2xl font-semibold m-auto'><span>{state}</span>Login</p>
-          <div className='w-full'>
-            <p>Email</p>
-            <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="email" required/>
-          </div>
-          <div className='w-full'>
-            <p>Password</p>
-            <input className='border border-[#DADADA] rounded w-full p-2 mt-1' type="password" required/>
-          </div>
-          <button className='bg-primary text-white w-full py-2 rounded-md text-base' >Login</button>
-          
-          {
-            state==='Admin'?(
-              <p>Student Login?<span onClick={()=>setState('Student')}>Click here</span></p>
-            ):state ==='Student'?(
-              <p>Bedrijf Login?<span onClick={()=>setState('Bedrijf')}>Click here</span></p>
-            ):(<p>Admin Login?<span onClick={()=>setState('Admin')}>Click here</span></p>)
-          }
+        {/* Titel */}
+        <h2 className='text-2xl font-semibold text-center'>Login</h2>
+
+        {/* Email */}
+        <div className='w-full'>
+          <label className='block mb-1 font-medium'>Email</label>
+          <input
+            type="email"
+            required
+            placeholder="jouw@email.com"
+            className='border border-gray-300 rounded w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
+          />
         </div>
-      <div className='flex items-center'>
-        <p>Nieuwe {state}?</p>
-        <button className='bg-primary text-white w-full py-2 rounded-md text-base'>Sign-up</button>
+
+        {/* Wachtwoord */}
+        <div className='w-full'>
+          <label className='block mb-1 font-medium'>Wachtwoord</label>
+          <input
+            type="password"
+            required
+            placeholder="••••••••"
+            className='border border-gray-300 rounded w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
+          />
+        </div>
+
+        {/* Login knop */}
+        <button
+          type="submit"
+          className='bg-blue-500 hover:bg-blue-600 text-white w-full py-2 rounded-md transition'
+        >
+          Inloggen
+        </button>
+      </div>
+
+      {/* Sign-up call to action */}
+      <div className='mt-6'>
+        <p className='text-sm'>
+          Nieuw bedrijf?{" "}
+          <button
+            type="button"
+            onClick={() => navigate('/bedrijf-signup')}
+            className='text-blue-600 font-medium underline hover:text-blue-800 transition cursor-pointer'
+          >
+            Registreer hier
+          </button>
+        </p>
       </div>
     </form>
-  )
-
+  );
 }
 
 export default Login;
