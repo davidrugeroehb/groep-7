@@ -26,7 +26,12 @@ const About = () => {
           <ul className="space-y-3">
             <li className="flex items-center gap-2">
               <span>📧</span>
-              <span>E-mail: info@careerlaunch.be</span>
+              <span>
+  E-mail:{" "}
+  <a href="mailto:info@careerlaunch.be" className="text-blue-600 underline hover:text-blue-800">
+    info@careerlaunch.be
+  </a>
+</span>
             </li>
             <li className="flex items-center gap-2">
               <span>📞</span>
