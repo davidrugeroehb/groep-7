@@ -29,10 +29,10 @@ function MijnAanvragen() {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {aanvragen.map((aanvraag)=>(
             <div key={aanvraag.id} className='bg-gray-500 p-4 rounded-md shadow-md flex flex-col gap-3'>
-              <p className='font-bold'><span className=''>Bedrijf: </span>{aanvraag.bedrijf}</p>
-              <p><span className=''>Focus: </span>{aanvraag.focus}</p>
-              <p><span className=''>Tijdstip: </span>{aanvraag.tijd}</p>
-              <p><span className=''>Lokaal: </span>{aanvraag.lokaal}</p>
+              <p className='font-semibold'><span className='font-bold'>Bedrijf: </span>{aanvraag.bedrijf}</p>
+              <p><span className='font-bold'>Focus: </span>{aanvraag.focus}</p>
+              <p><span className='font-bold'>Tijdstip: </span>{aanvraag.tijd}</p>
+              <p><span className='font-bold'>Lokaal: </span>{aanvraag.lokaal}</p>
 
               <div className='flex gap-3 mt-2'>
                 <button onClick={()=> annuleer(aanvraag.id)} className='bg-red-500 text-white px-3 py-1 rounded text-sm'>Annuleren</button>
