@@ -6,6 +6,11 @@ const HomeBedrijf = () => {
     type: [],
     taal: []
   });
+  const verwijderSpeeddate=(id)=>{
+    if(window.confirm("Weet u zeker dat u de speeddate wilt verwijderen?")){
+      setSpeedDates((prev) => prev.filter((date) => date.id !== id));
+    }
+  }
   const [showFilters, setShowFilters] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   
@@ -200,6 +205,9 @@ const HomeBedrijf = () => {
                       onClick={() => toggleDetails(date.id)}
                     >
                       {expandedId === date.id ? 'Minder details' : 'Bekijk meer'}
+                    </button>
+                    <button onClick={() => verwijderSpeeddate(date.id)} className='bg-red-600 text-white w-full py-2 rounded-md text-base transition'>
+                      Verwijder SpeedDate
                     </button>
                   </div>
                  
