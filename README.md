@@ -134,5 +134,5 @@ De frontend draait normaal op `http://localhost:5173` en de backend op `http://l
 Momenteel niet beschikbaar 
 
 ### Student
-- **Email**: `student@mail.com`
+- **Email**: `student@demo.com`
 - **Wachtwoord**: `student123`
