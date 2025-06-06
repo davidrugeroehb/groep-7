@@ -16,6 +16,7 @@ function BedrijfsProfiel() {
         if (!res.ok) throw new Error("Profiel ophalen mislukt.");
 
         const data = await res.json();
+        console.log("Gekregen profiel:", data); // handig voor debugging
         setProfiel(data);
       } catch (err) {
         console.error(err);
