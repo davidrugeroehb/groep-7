@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/fotoehb.png';
@@ -73,10 +74,11 @@ function Login() {
             className='border border-gray-300 rounded w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
           />
 
+
         </div>
       <div className='flex items-center'>
         <p>Nieuwe {state}?</p>
-        <button className='bg-primary text-white w-full py-2 rounded-md text-base'>Sign-up</button>
+        <button className='bg-primary bg-blue-500 text-black w-full py-2 rounded-md text-base'>Sign-up</button>
       </div>
     </form>
   )

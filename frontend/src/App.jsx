@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './index.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -10,8 +10,10 @@ import MijnAanvragen from './pages/MijnAanvragen';
 import MijnAfspraken from './pages/MijnAfspraken';
 import MijnProfiel from './pages/MijnProfiel';
 import Speeddates from './pages/Speeddates';
+import { AppContext } from './Context/AppContext';
 
 function App() {
+  const{aToken}=useContext(AppContext)
   return (
     <>
       <Navbar />
