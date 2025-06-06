@@ -72,7 +72,7 @@ DATABASE_URL=mongodb://localhost:27017/career-match
 PORT=4000
 ```
 
-## 🗃️ MongoDB Schema (Bedrijf)
+## MongoDB Schema (Bedrijf)
 ```js
 const bedrijfSchema = new mongoose.Schema({
   name: String,
