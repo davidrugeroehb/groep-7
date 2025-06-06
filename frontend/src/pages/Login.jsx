@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/fotoehb.png';
@@ -71,32 +72,15 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             className='border border-gray-300 rounded w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
           />
+
         </div>
-
-        {/* Login knop */}
-        <button
-          type="submit"
-          className='bg-blue-500 hover:bg-blue-600 text-white w-full py-2 rounded-md transition'
-        >
-          Inloggen
-        </button>
-      </div>
-
-      {/* Sign-up call to action */}
-      <div className='mt-6'>
-        <p className='text-sm'>
-          Nieuw bedrijf?{" "}
-          <button
-            type="button"
-            onClick={() => navigate('/bedrijf-signup')}
-            className='text-blue-600 font-medium underline hover:text-blue-800 transition cursor-pointer'
-          >
-            Registreer hier
-          </button>
-        </p>
+      <div className='flex items-center'>
+        <p>Nieuwe {state}?</p>
+        <button className='bg-primary text-white w-full py-2 rounded-md text-base'>Sign-up</button>
       </div>
     </form>
-  );
+  )
+
 }
 
 export default Login;
