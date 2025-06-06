@@ -11,10 +11,7 @@ function Bedrijvenbeheer() {
         const token = localStorage.getItem('bedrijfToken');
 
         const [speeddateRes, aanvragenRes] = await Promise.all([
-          fetch('http://localhost:4000/api/bedrijf/speeddates', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch('http://localhost:4000/api/bedrijf/aanvragen/count', {
+          fetch('http://localhost:4000/api/bedrijf/speeddates', { //maak in API aan met alle speeddates--> makkelijker
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
