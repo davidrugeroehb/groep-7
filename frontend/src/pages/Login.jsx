@@ -11,6 +11,21 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Demo login voor student
+    if (email === "student@demo.com" && password === "student123") {
+      alert("Welkom student!");
+      localStorage.setItem("role", "student");
+      return navigate("/speeddates");
+    }
+
+    // ✅ Demo login voor admin
+    if (email === "admin@ehb.be" && password === "admin123") {
+      alert("Welkom admin!");
+      localStorage.setItem("role", "admin");
+      return navigate("/admin"); // Pas aan als route anders is
+    }
+
+    // ✅ Login voor bedrijf via backend
     try {
       const res = await fetch("http://localhost:4000/api/bedrijf/login", {
         method: "POST",
@@ -22,8 +37,9 @@ function Login() {
 
       if (res.ok) {
         localStorage.setItem("bedrijfToken", data.token);
+        localStorage.setItem("role", "bedrijf");
         alert(`Welkom, ${data.name}!`);
-        navigate("/mijnprofiel");
+        return navigate("/bedrijf-home");
       } else {
         alert(data.message || "Login mislukt");
       }
@@ -79,12 +95,12 @@ function Login() {
           />
         </div>
 
-        {/* Sign-up knop */}
+        {/* Sign-up knop voor bedrijven */}
         <div className="w-full text-center mt-4">
           <p className="mb-2">Nieuw bedrijf?</p>
           <button
             type="button"
-            onClick={() => navigate("/bedrijf/signup")}
+            onClick={() => navigate('/bedrijf/signup')}
             className="bg-blue-500 text-white w-full py-2 rounded-md text-base hover:bg-blue-600 transition"
           >
             Sign-up

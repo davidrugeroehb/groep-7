@@ -1,31 +1,59 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import './index.css';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import BedrijfNavbar from './components/BedrijfNavbar';
 
+// Algemeen
 import About from './pages/About';
-import BedrijfSignup from './pages/BedrijfSignup';
 import Login from './pages/Login';
-import MijnAanvragen from './pages/MijnAanvragen';
-import MijnAfspraken from './pages/MijnAfspraken';
-import MijnProfiel from './pages/MijnProfiel';
-import Speeddates from './pages/Speeddates';
-import { AppContext } from './Context/AppContext';
+
+// Bedrijf
+import BedrijfSignup from './pages/Bedrijf/BedrijfSignup';
+import Home from './pages/Bedrijf/Home';
+import Aanmaken from './pages/Bedrijf/Aanmaken';
+import Aanvragen from './pages/Bedrijf/Aanvragen';
+import BedrijfProfiel from './pages/Bedrijf/BedrijfProfiel';
+import StudentenZoeken from './pages/Bedrijf/StudentenZoeken';
+
+// Student
+import Speeddates from './pages/Student/Speeddates';
+import MijnAanvragen from './pages/Student/MijnAanvragen';
+import MijnAfspraken from './pages/Student/MijnAfspraken';
+import MijnProfiel from './pages/Student/MijnProfiel';
 
 function App() {
-  const{aToken}=useContext(AppContext)
+  const location = useLocation();
+  const role = localStorage.getItem("role"); // "student" of "bedrijf"
+
+  // Toon juiste navbar op basis van rol
+  const hideNavbar = ["/login", "/bedrijf/signup"].includes(location.pathname);
+
   return (
     <>
-      <Navbar />
+      {!hideNavbar && (role === "bedrijf" ? <BedrijfNavbar /> : <Navbar />)}
+
       <Routes>
-      <Route path="/" element={<Navigate to="/speeddates" />} /> // wanneer we naar de localhost gaan gaat het direct naar de homepage dus speeddates
+        {/* Redirect */}
+        <Route path="/" element={<Navigate to="/speeddates" />} />
+
+        {/* Algemeen */}
         <Route path="/about" element={<About />} />
-        <Route path="/bedrijf-signup" element={<BedrijfSignup />} />
         <Route path="/login" element={<Login />} />
+
+        {/* Bedrijf */}
+        <Route path="/bedrijf/signup" element={<BedrijfSignup />} />
+        <Route path="/bedrijf-home" element={<Home />} />
+        <Route path="/aanmaken" element={<Aanmaken />} />
+        <Route path="/bedrijf-aanvragen" element={<Aanvragen />} />
+        <Route path="/bedrijf-profiel" element={<BedrijfProfiel />} />
+        <Route path="/studenten-zoeken" element={<StudentenZoeken />} />
+
+        {/* Student */}
+        <Route path="/speeddates" element={<Speeddates />} />
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
         <Route path="/mijnafspraken" element={<MijnAfspraken />} />
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
-        <Route path="/speeddates" element={<Speeddates />} />
       </Routes>
     </>
   );
