@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
-
+ 
 function BedrijfsProfiel() {
   const [profiel, setProfiel] = useState(null);
   const [error, setError] = useState(null);
-
+ 
   useEffect(() => {
     const fetchProfiel = async () => {
       try {
         const token = localStorage.getItem("bedrijfToken");
+
+ 
+        const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+ 
+        if (!res.ok) throw new Error("Profiel ophalen mislukt.");
+ 
+        const data = await res.json();
+
 
         const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
           headers: { Authorization: `Bearer ${token}` },
@@ -23,6 +33,10 @@ function BedrijfsProfiel() {
         setError("Fout bij ophalen van bedrijfsprofiel.");
       }
     };
+ 
+    fetchProfiel();
+  }, []);
+ 
 
     fetchProfiel();
   }, []);
@@ -34,8 +48,11 @@ function BedrijfsProfiel() {
           Mijn Bedrijfsprofiel
         </h1>
 
+ 
         {error && <p className="text-red-600 text-center">{error}</p>}
+ 
 
+        {error && <p className="text-red-600 text-center">{error}</p>}
         {profiel ? (
           <div className="space-y-4 text-gray-700">
             <p><strong>Naam:</strong> {profiel.name}</p>
@@ -54,5 +71,6 @@ function BedrijfsProfiel() {
     </div>
   );
 }
+
 
 export default BedrijfsProfiel;
