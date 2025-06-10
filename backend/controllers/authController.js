@@ -2,6 +2,7 @@ import studentModel from '../models/studentModel.js'; // Import the Student mode
 import bedrijfModel from '../models/bedrijfModel.js'; // Import the Bedrijf (Company) model - Use 'bedrijfModel' if that's your export name
 import bcrypt from 'bcryptjs'; // For password comparison
 import jwt from 'jsonwebtoken'; // For generating tokens
+import adminModel from '../models/adminModel.js';
 
 // Unified login function
 export const loginUser = async (req, res) => {
@@ -43,7 +44,13 @@ export const loginUser = async (req, res) => {
 
     // 3. If user not found in any role
     if (!user) {
-      return res.status(404).json({ message: 'Gebruiker niet gevonden. Controleer uw e-mailadres.' });
+      user = await adminModel.findOne({ email })
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        role = 'admin'
+      }else{
+        return res.status(401).json({message : 'Verkeerd wachtwoord voor admin.'})
+      }
     }
 
     // Generate JWT token (assuming JWT_SECRET is set in your .env)
