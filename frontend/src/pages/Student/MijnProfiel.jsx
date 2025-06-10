@@ -46,10 +46,42 @@ function MijnProfiel() {
     );
   }
 
+
+  const inputStyle = 'bg-white border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all';
+
+  const [wijzig, setWijzig] = useState(false);
+
+
+{/*het opslaan van de bewerkte gegevens*/}
+  const OpslaanBewerk = async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/student/mijnprofiel", {
+        method: "PUT", // of PATCH, afhankelijk van je backend
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(profiel),
+      });
+  
+      if (!res.ok) throw new Error("Opslaan mislukt");
+  
+      const updated = await res.json();
+      setProfiel(updated);
+      setWijzig(false);
+    } catch (err) {
+      console.error(err);
+      alert("Fout bij opslaan van profiel");
+    }
+  };
+  
+
+
   return (
+    
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
         <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Mijn Profiel</h1>
+
 
         <div className="space-y-6 text-gray-700">
           {/* Accountgegevens */}
@@ -61,6 +93,7 @@ function MijnProfiel() {
             <p><strong>GSM nr:</strong> {profiel.gsm}</p>
           </div>
 
+
           {/* Academiegegevens */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Academiegegevens:</h2>
@@ -68,6 +101,7 @@ function MijnProfiel() {
             <p><strong>Specialisatie:</strong> {profiel.specialisatie}</p>
             <p><strong>Taal:</strong> {profiel.talen}</p>
           </div>
+
 
           {/* Bewerken-knop */}
           <div className="text-right mt-4">
@@ -78,6 +112,7 @@ function MijnProfiel() {
         </div>
       </div>
     </div>
+
   );
 }
 
