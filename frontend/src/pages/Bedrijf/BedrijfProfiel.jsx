@@ -4,42 +4,28 @@ function BedrijfsProfiel() {
   const [profiel, setProfiel] = useState(null);
   const [error, setError] = useState(null);
  
-  useEffect(() => {
-    const fetchProfiel = async () => {
-      try {
-        const token = localStorage.getItem("bedrijfToken");
+   useEffect(() => {
+  const fetchProfiel = async () => {
+    try {
+      const token = localStorage.getItem("bedrijfToken");
 
- 
-        const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
- 
-        if (!res.ok) throw new Error("Profiel ophalen mislukt.");
- 
-        const data = await res.json();
+      const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
+      if (!res.ok) throw new Error("Profiel ophalen mislukt.");
 
-        const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const data = await res.json();
+      console.log("Gekregen profiel:", data);
+      setProfiel(data);
+    } catch (err) {
+      console.error(err);
+      setError("Fout bij ophalen van bedrijfsprofiel.");
+    }
+  };
 
-        if (!res.ok) throw new Error("Profiel ophalen mislukt.");
-
-        const data = await res.json();
-        console.log("Gekregen profiel:", data); // handig voor debugging
-        setProfiel(data);
-      } catch (err) {
-        console.error(err);
-        setError("Fout bij ophalen van bedrijfsprofiel.");
-      }
-    };
- 
-    fetchProfiel();
-  }, []);
- 
-
-    fetchProfiel();
-  }, []);
+  fetchProfiel();
+}, []);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
