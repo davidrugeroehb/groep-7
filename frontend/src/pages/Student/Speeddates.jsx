@@ -1,16 +1,13 @@
+// SpeedDates.js
 import React, { useState } from 'react';
+import './SpeedDates.css';
 
-const HomeBedrijf = () => {
+const SpeedDates = () => {
   const [filters, setFilters] = useState({
     sector: [],
     type: [],
     taal: []
   });
-  const verwijderSpeeddate=(id)=>{
-    if(window.confirm("Weet u zeker dat u de speeddate wilt verwijderen?")){
-      setSpeedDates((prev) => prev.filter((date) => date.id !== id));
-    }
-  }
   const [showFilters, setShowFilters] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   
@@ -27,7 +24,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 2,
-      bedrijf: "TechSolutions",
+      bedrijf: "SecureIT",
       sector: "Cybersecurity",
       type: "Afstudeerproject",
       taal: "Engels",
@@ -37,7 +34,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 3,
-      bedrijf: "TechSolutions",
+      bedrijf: "AI Minds",
       sector: "AI / Machine Learning",
       type: "Bijbaan / Werkstudent",
       taal: "Engels",
@@ -47,7 +44,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 4,
-      bedrijf: "TechSolutions",
+      bedrijf: "CloudExperts",
       sector: "DevOps",
       type: "Stage",
       taal: "Spaans",
@@ -57,7 +54,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 5,
-      bedrijf: "TechSolutions",
+      bedrijf: "DesignHub",
       sector: "UX/UI",
       type: "Bijbaan / Werkstudent",
       taal: "Portugees",
@@ -109,7 +106,7 @@ const HomeBedrijf = () => {
     <div className="speeddates-container">
       <header className="header">
         <h1 className="speeddates__title">Speeddates</h1>
-        <p className="speeddates__subtitle">Speeddates beheer</p>
+        <p className="speeddates__subtitle">Vind jouw ideale stage, afstudeerproject of bijbaan</p>
       </header>
 
       <div className="main-content">
@@ -123,7 +120,7 @@ const HomeBedrijf = () => {
 {showFilters && (
   <div className="filter-section">
     <div className="filter-group">
-  <h3> "Sector / Focus</h3>
+  <h3> Sector / Focus</h3>
   <div className="checkbox-grid">
     {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
       <label key={sector} className="checkbox-label">
@@ -183,7 +180,7 @@ const HomeBedrijf = () => {
 
 
         <div className="results-section">
-          <h2>Speeddates beheer<span className="result-count">({filteredDates.length})</span></h2>
+          <h2>Beschikbare SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
          
           {filteredDates.length > 0 ? (
             <div className="speeddates-grid">
@@ -206,15 +203,18 @@ const HomeBedrijf = () => {
                     >
                       {expandedId === date.id ? 'Minder details' : 'Bekijk meer'}
                     </button>
-                    <button onClick={() => verwijderSpeeddate(date.id)} className='bg-red-600 text-white w-full py-2 rounded-md text-base transition'>
-                      Verwijder SpeedDate
-                    </button>
                   </div>
                  
                   {expandedId === date.id && (
                     <div className="expanded-details">
                       <h4>Meer informatie</h4>
                       <p>{date.details}</p>
+                      <button
+                        className="apply-now-btn"
+                        onClick={() => alert(`Sollicitatie gestuurd naar ${date.bedrijf}`)}
+                      >
+                        Afspraak aanvragen
+                      </button>
                     </div>
                   )}
                 </div>
@@ -234,4 +234,5 @@ const HomeBedrijf = () => {
 };
 
 
-export default HomeBedrijf;
+export default SpeedDates;
+      
