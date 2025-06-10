@@ -27,7 +27,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 2,
-      bedrijf: "SecureIT",
+      bedrijf: "TechSolutions",
       sector: "Cybersecurity",
       type: "Afstudeerproject",
       taal: "Engels",
@@ -37,7 +37,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 3,
-      bedrijf: "AI Minds",
+      bedrijf: "TechSolutions",
       sector: "AI / Machine Learning",
       type: "Bijbaan / Werkstudent",
       taal: "Engels",
@@ -47,7 +47,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 4,
-      bedrijf: "CloudExperts",
+      bedrijf: "TechSolutions",
       sector: "DevOps",
       type: "Stage",
       taal: "Spaans",
@@ -57,7 +57,7 @@ const HomeBedrijf = () => {
     },
     {
       id: 5,
-      bedrijf: "DesignHub",
+      bedrijf: "TechSolutions",
       sector: "UX/UI",
       type: "Bijbaan / Werkstudent",
       taal: "Portugees",
@@ -183,7 +183,7 @@ const HomeBedrijf = () => {
 
 
         <div className="results-section">
-          <h2>Beschikbare SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
+          <h2>Speeddates beheer<span className="result-count">({filteredDates.length})</span></h2>
          
           {filteredDates.length > 0 ? (
             <div className="speeddates-grid">
@@ -215,12 +215,6 @@ const HomeBedrijf = () => {
                     <div className="expanded-details">
                       <h4>Meer informatie</h4>
                       <p>{date.details}</p>
-                      <button
-                        className="apply-now-btn"
-                        onClick={() => alert(`Sollicitatie gestuurd naar ${date.bedrijf}`)}
-                      >
-                        Afspraak aanvragen
-                      </button>
                     </div>
                   )}
                 </div>
