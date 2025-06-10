@@ -8,6 +8,7 @@ function BedrijfsProfiel() {
     const fetchProfiel = async () => {
       try {
         const token = localStorage.getItem("bedrijfToken");
+
  
         const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
           headers: { Authorization: `Bearer ${token}` },
@@ -16,6 +17,16 @@ function BedrijfsProfiel() {
         if (!res.ok) throw new Error("Profiel ophalen mislukt.");
  
         const data = await res.json();
+
+
+        const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error("Profiel ophalen mislukt.");
+
+        const data = await res.json();
+        console.log("Gekregen profiel:", data); // handig voor debugging
         setProfiel(data);
       } catch (err) {
         console.error(err);
@@ -26,15 +37,22 @@ function BedrijfsProfiel() {
     fetchProfiel();
   }, []);
  
+
+    fetchProfiel();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
         <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">
           Mijn Bedrijfsprofiel
         </h1>
+
  
         {error && <p className="text-red-600 text-center">{error}</p>}
  
+
+        {error && <p className="text-red-600 text-center">{error}</p>}
         {profiel ? (
           <div className="space-y-4 text-gray-700">
             <p><strong>Naam:</strong> {profiel.name}</p>
@@ -53,5 +71,6 @@ function BedrijfsProfiel() {
     </div>
   );
 }
- 
-export default BedrijfsProfiel
+
+
+export default BedrijfsProfiel;
