@@ -5,31 +5,51 @@ function BedrijfsProfiel() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProfiel = async () => {
-      try {
-        const token = localStorage.getItem("bedrijfToken");
-        if (!token) {
-          setError("Geen token gevonden. Log opnieuw in.");
+      const fetchProfiel = async () => {
+        const role = localStorage.getItem("role");
+        if (role !== "bedrijf") {
+          setError("Besrijf niet gevonden.");
           return;
         }
-
-        const res = await fetch("http://localhost:4000/api/bedrijf/profiel", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) throw new Error("Profiel ophalen mislukt.");
-
-        const data = await res.json();
-        console.log("Gekregen profiel:", data);
-        setProfiel(data);
-      } catch (err) {
-        console.error(err);
-        setError("Fout bij ophalen van bedrijfsprofiel.");
-      }
-    };
+  
+        try {
+          const res = await fetch("http://localhost:4000/api/bedrijf/bedrijfprofiel");
+  
+          if (!res.ok) {
+            throw new Error("Profiel ophalen mislukt.");
+          }
+  
+          const data = await res.json();
+          setProfiel(data);
+        } catch (err) {
+          console.error(err);
+          setError("Fout bij ophalen van je profiel.");
+        }
+      };
 
     fetchProfiel();
   }, []);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (!profiel) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Profiel wordt geladen...</p>
+      </div>
+    );
+  }
+
+  const inputStyle = 'bg-white border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all';
+  
+  const [wijzig, setWijzig] = useState(false);
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
@@ -38,7 +58,7 @@ function BedrijfsProfiel() {
           Mijn Bedrijfsprofiel
         </h1>
 
-        {error && <p className="text-red-600 text-center">{error}</p>}
+      
 
         {profiel ? (
           <div className="space-y-4 text-gray-700">
