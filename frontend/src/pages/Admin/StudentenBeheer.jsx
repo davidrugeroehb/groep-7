@@ -5,6 +5,9 @@ function Aanmaken() {
   
   const [studenten, setStudenten] = useState([]);
   const [error, setError] = useState(null);
+  const verwijderStudent=(id)=>{
+    setStudenten(studenten.filter((student)=>student.id!==id));
+  }
 
   useEffect(() => {
     const fetchStudenten = async () => {
@@ -65,6 +68,7 @@ function Aanmaken() {
                 <p className="text-gray-700">
                   <strong>Talen:</strong> {s.talen || "—"}
                 </p>
+                <button className="bg-red-600" text-white px-3 py-1 rounded onClick={()=>verwijderStudent(studenten.id)}>Verwijder</button>
               </div>
             ))}
           </div>
