@@ -7,8 +7,8 @@ function MailIntresse() {
                 Host: "smtp.yourisp.com",
                 Username: "username",
                 Password: "password",
-                To: 'recipient@example.com',
-                From: "sender@example.com",
+                To: 'recipient@example.com', //mail van de bedrijf
+                From: "sender@example.com", //mail van de student
                 Subject: "Career launch intresse",
                 Body: inhoudMail
             })
