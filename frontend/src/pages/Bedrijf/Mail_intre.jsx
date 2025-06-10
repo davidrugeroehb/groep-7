@@ -8,4 +8,4 @@ function MailIntresse() {
 }
 
 
-export default BedrijfsProfiel;
+export default MailIntresse;
