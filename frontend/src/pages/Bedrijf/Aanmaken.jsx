@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react"; // Import useEffect
+import React, { useState, useEffect } from "react";
 
 function Aanmaken() {
   const [form, setForm] = useState({
     starttijd: "",
     eindtijd: "",
-    gespreksduur: "30",
-    pauze: false,
+    // gespreksduur en pauze zijn verwijderd
     vakgebied: "",
     focus: "",
     opportuniteit: [],
@@ -13,22 +12,19 @@ function Aanmaken() {
     beschrijving: "",
   });
 
-  const [bedrijfId, setBedrijfId] = useState(null); // State to store the company ID
+  const [bedrijfId, setBedrijfId] = useState(null); // State om het bedrijfs-ID op te slaan
 
-  // Fetch company ID from localStorage when the component mounts
+  // Haal bedrijfs-ID op uit localStorage wanneer de component wordt geladen
   useEffect(() => {
-    // Assuming you store the company ID in localStorage after login
-    // For example: localStorage.setItem('bedrijfId', 'your_company_id');
     const storedBedrijfId = localStorage.getItem('bedrijfId');
     if (storedBedrijfId) {
       setBedrijfId(storedBedrijfId);
     } else {
-      // Handle cases where company ID is not found (e.g., redirect to login, show error)
-      console.warn("Bedrijf ID not found in localStorage. Please log in.");
-      // You might want to redirect to login or show a message to the user
-      // navigate('/login'); // Example if you have useNavigate hook
+      console.warn("Bedrijf ID niet gevonden in localStorage. Gelieve in te loggen.");
+      // Optioneel: navigeer naar login of toon een foutmelding
+      // navigate('/login');
     }
-  }, []); // Run once on component mount
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -40,11 +36,10 @@ function Aanmaken() {
           ? [...prev[name], value]
           : prev[name].filter((item) => item !== value),
       }));
-    } else if (type === "radio") {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    } else {
+    } else { // radio buttons (if any) and text inputs
       setForm((prev) => ({ ...prev, [name]: value }));
     }
+    // De pauze checkbox heeft nu geen speciale handeling meer nodig omdat deze is verwijderd
   };
 
   const handleSubmit = async (e) => {
@@ -52,31 +47,28 @@ function Aanmaken() {
 
     if (!bedrijfId) {
       alert("Kan speeddate niet aanmaken: Bedrijf ID is niet beschikbaar. Log opnieuw in.");
-      return; // Stop the submission if company ID is missing
+      return;
     }
 
     try {
-      // Include the bedrijfId in the form data sent to the backend
       const dataToSend = { ...form, bedrijfId: bedrijfId };
 
       const res = await fetch("http://localhost:4000/api/bedrijf/speeddates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend), // Send dataToSend
+        body: JSON.stringify(dataToSend),
       });
 
       if (!res.ok) {
-        const errorData = await res.json(); // Get error details from backend
+        const errorData = await res.json();
         throw new Error(errorData.message || "Aanmaken mislukt");
       }
 
       alert("Speeddate aangemaakt!");
-      // Reset form after successful submission
+      // Reset formulier na succesvolle verzending
       setForm({
         starttijd: "",
         eindtijd: "",
-        gespreksduur: "30",
-        pauze: false,
         vakgebied: "",
         focus: "",
         opportuniteit: [],
@@ -125,6 +117,8 @@ function Aanmaken() {
               </div>
             </div>
 
+            {/* Gesprkstijd per student en Pauze inplannen zijn verwijderd */}
+            {/* Oude code voor gespreksduur en pauze:
             <div className="mt-4">
               <label className="block font-medium mb-1">
                 Gesprekstijd per student
@@ -152,6 +146,7 @@ function Aanmaken() {
               />
               Pauze inplannen?
             </label>
+            */}
           </div>
 
           {/* Focus */}
