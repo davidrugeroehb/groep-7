@@ -16,15 +16,22 @@ function BedrijfSignup() {
     phone: "",
   });
 
+  const [error, setError] = useState("");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "phone" && !/^\d*$/.test(value)) return; // Alleen cijfers voor GSM
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const res = await fetch("http://localhost:4000/api/bedrijf/signup", {
+      const res = await fetch("http://localhost:4000/api/bedrijf/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -46,11 +53,11 @@ function BedrijfSignup() {
         });
         navigate("/login");
       } else {
-        alert(data.message || "Registratie mislukt.");
+        setError(data.message || "Registratie mislukt.");
       }
     } catch (error) {
       console.error(error);
-      alert("Er ging iets mis bij registratie.");
+      setError("Er ging iets mis bij registratie.");
     }
   };
 
@@ -60,122 +67,35 @@ function BedrijfSignup() {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
           Bedrijf Registreren
         </h1>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-gray-700 font-medium">
-              Bedrijfsnaam
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
 
-          <div>
-            <label className="block text-gray-700 font-medium">Adres</label>
-            <input
-              type="text"
-              name="adres"
-              value={formData.adres}
-              onChange={handleChange}
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
+        {error && (
+          <p className="text-red-600 text-center mb-6 font-semibold">{error}</p>
+        )}
 
-          <div>
-            <label className="block text-gray-700 font-medium">
-              BTW-nummer
-            </label>
-            <input
-              type="text"
-              name="btwNummer"
-              value={formData.btwNummer}
-              onChange={handleChange}
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium">Website</label>
-            <input
-              type="text"
-              name="website"
-              value={formData.website}
-              onChange={handleChange}
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium">Sector</label>
-            <input
-              type="text"
-              name="sector"
-              value={formData.sector}
-              onChange={handleChange}
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium">
-              Contactpersoon
-            </label>
-            <input
-              type="text"
-              name="contactpersoon"
-              value={formData.contactpersoon}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium">
-              E-mailadres
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium">
-              Wachtwoord
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-medium">
-              GSM-nummer
-            </label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border border-gray-300 rounded"
-            />
-          </div>
+        <form className="space-y-6" onSubmit={handleSubmit} autoComplete="off">
+          {[
+            { label: "Bedrijfsnaam", name: "name", required: true },
+            { label: "Adres", name: "adres" },
+            { label: "BTW-nummer", name: "btwNummer" },
+            { label: "Website", name: "website" },
+            { label: "Sector", name: "sector" },
+            { label: "Contactpersoon", name: "contactpersoon", required: true },
+            { label: "E-mailadres", name: "email", type: "email", required: true },
+            { label: "Wachtwoord", name: "password", type: "password", required: true },
+            { label: "GSM-nummer", name: "phone", required: true },
+          ].map(({ label, name, type = "text", required }) => (
+            <div key={name}>
+              <label className="block text-gray-700 font-medium">{label}</label>
+              <input
+                type={type}
+                name={name}
+                value={formData[name]}
+                onChange={handleChange}
+                required={required}
+                className="w-full p-2 mt-1 border border-gray-300 rounded"
+              />
+            </div>
+          ))}
 
           <button
             type="submit"
