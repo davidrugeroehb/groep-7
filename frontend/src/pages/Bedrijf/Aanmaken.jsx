@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Import useEffect
 
 function Aanmaken() {
   const [form, setForm] = useState({
@@ -12,6 +12,23 @@ function Aanmaken() {
     talen: [],
     beschrijving: "",
   });
+
+  const [bedrijfId, setBedrijfId] = useState(null); // State to store the company ID
+
+  // Fetch company ID from localStorage when the component mounts
+  useEffect(() => {
+    // Assuming you store the company ID in localStorage after login
+    // For example: localStorage.setItem('bedrijfId', 'your_company_id');
+    const storedBedrijfId = localStorage.getItem('bedrijfId');
+    if (storedBedrijfId) {
+      setBedrijfId(storedBedrijfId);
+    } else {
+      // Handle cases where company ID is not found (e.g., redirect to login, show error)
+      console.warn("Bedrijf ID not found in localStorage. Please log in.");
+      // You might want to redirect to login or show a message to the user
+      // navigate('/login'); // Example if you have useNavigate hook
+    }
+  }, []); // Run once on component mount
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,16 +49,29 @@ function Aanmaken() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!bedrijfId) {
+      alert("Kan speeddate niet aanmaken: Bedrijf ID is niet beschikbaar. Log opnieuw in.");
+      return; // Stop the submission if company ID is missing
+    }
+
     try {
+      // Include the bedrijfId in the form data sent to the backend
+      const dataToSend = { ...form, bedrijfId: bedrijfId };
+
       const res = await fetch("http://localhost:4000/api/bedrijf/speeddates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(dataToSend), // Send dataToSend
       });
 
-      if (!res.ok) throw new Error("Aanmaken mislukt");
+      if (!res.ok) {
+        const errorData = await res.json(); // Get error details from backend
+        throw new Error(errorData.message || "Aanmaken mislukt");
+      }
 
       alert("Speeddate aangemaakt!");
+      // Reset form after successful submission
       setForm({
         starttijd: "",
         eindtijd: "",
@@ -55,7 +85,7 @@ function Aanmaken() {
       });
     } catch (err) {
       console.error(err);
-      alert("Er ging iets mis bij het aanmaken.");
+      alert(`Er ging iets mis bij het aanmaken: ${err.message || "Onbekende fout"}`);
     }
   };
 
