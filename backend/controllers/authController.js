@@ -1,7 +1,8 @@
-import studentModel from '../models/studentModel.js'; // Import the Student model
-import bedrijfModel from '../models/bedrijfModel.js'; // Import the Bedrijf (Company) model - Use 'bedrijfModel' if that's your export name
-import bcrypt from 'bcryptjs'; // For password comparison
-import jwt from 'jsonwebtoken'; // For generating tokens
+import studentModel from '../models/studentModel.js';
+import bedrijfModel from '../models/bedrijfModel.js';
+import adminModel from '../models/adminModel.js'; // NIEUW: Importeer het Admin model
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // Unified login function
 export const loginUser = async (req, res) => {
@@ -15,51 +16,62 @@ export const loginUser = async (req, res) => {
     let user = null;
     let role = null;
 
-    // 1. Try to find user as a Student
-    user = await studentModel.findOne({ email });
+    // 1. Probeer de gebruiker te vinden als een Admin
+    user = await adminModel.findOne({ email }); // Zoek in de admin collectie
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
-        role = 'student';
+        role = 'admin';
       } else {
-        // If password doesn't match for student, don't try other roles
-        return res.status(401).json({ message: 'Verkeerd wachtwoord voor student.' });
+        return res.status(401).json({ message: 'Verkeerd wachtwoord voor beheerder.' });
       }
     }
 
-    // 2. If not found as Student, try to find user as a Bedrijf (Company)
-    if (!user) { // Only try company if student wasn't found
-      user = await bedrijfModel.findOne({ email }); // Use 'bedrijfModel' here
+    // 2. Als admin niet gevonden, probeer dan als Student
+    if (!user) { // Alleen proberen als er nog geen gebruiker is gevonden
+      user = await studentModel.findOne({ email });
+      if (user) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          role = 'student';
+        } else {
+          return res.status(401).json({ message: 'Verkeerd wachtwoord voor student.' });
+        }
+      }
+    }
+
+    // 3. Als student niet gevonden, probeer dan als Bedrijf
+    if (!user) { // Alleen proberen als er nog geen gebruiker is gevonden
+      user = await bedrijfModel.findOne({ email });
       if (user) {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
           role = 'bedrijf';
         } else {
-          // If password doesn't match for company, don't try other roles
           return res.status(401).json({ message: 'Verkeerd wachtwoord voor bedrijf.' });
         }
       }
     }
 
-    // 3. If user not found in any role
+    // 4. Als gebruiker niet gevonden in welke rol dan ook
     if (!user) {
       return res.status(404).json({ message: 'Gebruiker niet gevonden. Controleer uw e-mailadres.' });
     }
 
-    // Generate JWT token (assuming JWT_SECRET is set in your .env)
+    // Genereer JWT token (aannemende dat JWT_SECRET is ingesteld in je .env)
     const token = jwt.sign(
       { id: user._id, role: role },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' } // Token expires in 1 day
+      { expiresIn: '1d' }
     );
 
-    // Respond with token, user ID, and detected role
+    // Stuur token, user ID en gedetecteerde rol terug
     res.json({
       token,
       userId: user._id,
-      name: user.name, // Assuming both student and bedrijf models have a 'name' field
+      name: user.name || 'Onbekend', // Zorg ervoor dat 'name' bestaat voor alle user types
       role: role,
-      message: `${role === 'student' ? 'Student' : 'Bedrijf'} succesvol ingelogd!`
+      message: `${role === 'student' ? 'Student' : (role === 'bedrijf' ? 'Bedrijf' : 'Beheerder')} succesvol ingelogd!`
     });
 
   } catch (err) {

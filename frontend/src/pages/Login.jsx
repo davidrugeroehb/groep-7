@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/fotoehb.png"; // Make sure this path is correct for your logo
+import logo from "../assets/fotoehb.png"; // Zorg ervoor dat dit pad klopt voor je logo
 
 function Login() {
   const navigate = useNavigate();
 
-  // Use a single state for email and password, consistent with new backend approach
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,58 +17,48 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { email, password } = formData; // Destructure for easier use
+    // Verwijder de hardcoded Admin login check hier
+    // if (email === "admin@ehb.be" && password === "admin123") {
+    //   alert("Welkom admin!");
+    //   localStorage.setItem("role", "admin");
+    //   localStorage.setItem("userId", "admin_id_placeholder");
+    //   return navigate("/admin");
+    // }
 
-    // ✅ Hardcoded Admin login check (kept from your original code)
-    if (email === "admin@ehb.be" && password === "admin123") {
-      alert("Welkom admin!");
-      localStorage.setItem("role", "admin");
-      localStorage.setItem("userId", "admin_id_placeholder"); // Placeholder for admin ID
-      return navigate("/admin");
-    }
-
-    // ✅ Attempt unified login via the new backend endpoint
+    // Probeer login via de universele backend endpoint
     try {
       const res = await fetch("http://localhost:4000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData), // Send email and password
+        body: JSON.stringify(formData),
       });
 
-      const data = await res.json(); // Parse the response JSON
+      const data = await res.json();
 
       if (res.ok) {
-        alert(data.message); // E.g., "Student succesvol ingelogd!" or "Bedrijf succesvol ingelogd!"
+        alert(data.message);
 
-        // Store detected role and userId in localStorage
         localStorage.setItem("role", data.role);
-        localStorage.setItem("userId", data.userId); // Universal ID for student or company
+        localStorage.setItem("userId", data.userId);
 
-        // Store role-specific IDs for backward compatibility if needed, or if other parts of app rely on them
         if (data.role === "student") {
           localStorage.setItem("studentId", data.userId);
-          // localStorage.setItem("studentToken", data.token); // If your student-specific components still use this
           navigate("/speeddates");
         } else if (data.role === "bedrijf") {
           localStorage.setItem("bedrijfId", data.userId);
-          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
           navigate("/bedrijf-home");
-        }else if (data.role === "admin") {
+        } else if (data.role === "admin") { // Deze zal nu correct worden uitgevoerd
           localStorage.setItem("adminId", data.userId);
-          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
-          navigate("/admin-home");
+          navigate("/admin-home"); // Stuurt naar de admin homepagina
         } else {
-          // Fallback for unexpected roles from backend
           console.warn("Onbekende rol ontvangen na login:", data.role);
-          navigate("/"); // Default redirect
+          navigate("/");
         }
       } else {
-        // If response is NOT ok (e.g., 400, 401, 404 from authController.js)
         alert(data.message || "Login mislukt. Controleer uw gegevens.");
         console.error("Login API error:", data.message);
       }
     } catch (err) {
-      // Network errors or other unexpected issues
       console.error("Fout bij login fetch request:", err);
       alert(`Er ging iets mis bij het inloggen: ${err.message || "Controleer uw internetverbinding."}`);
     }
@@ -88,7 +77,7 @@ function Login() {
             <label className="block text-gray-700 font-medium">Email</label>
             <input
               type="email"
-              name="email" // Added name attribute
+              name="email"
               value={formData.email}
               onChange={handleChange}
               required
@@ -100,7 +89,7 @@ function Login() {
             <label className="block text-gray-700 font-medium">Wachtwoord</label>
             <input
               type="password"
-              name="password" // Added name attribute
+              name="password"
               value={formData.password}
               onChange={handleChange}
               required
