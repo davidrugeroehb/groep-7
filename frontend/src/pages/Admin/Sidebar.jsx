@@ -26,10 +26,10 @@ function Sidebar() {
           <Link to="/adspeeddate"><BsLightningChargeFill className="icoon" /> Speeddates</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/adstudenten"><BsPeopleFill className="icoon" /> Studenten</Link>
+          <Link to="/adminstudentbeheer"><BsPeopleFill className="icoon" /> Studenten</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/adbedrijven"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
+          <Link to="/adminbedrijfbeheer"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
         </li>
         <li className="sidebar-list-item">
           <Link to="/adinstellingen"><BsFillGearFill className="icoon" /> Instellingen</Link>

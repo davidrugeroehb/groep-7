@@ -85,21 +85,6 @@ function App() {
             </ProtectRoute>
           } />
 
-        <Route path="/adstudenten" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-              <AdminLayout>
-                <Studenten />
-              </AdminLayout>
-            </ProtectRoute>
-          } />
-
-        <Route path="/adbedrijven" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-              <AdminLayout>
-                <Bedrijven />
-              </AdminLayout>
-            </ProtectRoute>
-          } />
 
         <Route path="/adinstellingen" element={
             <ProtectRoute allowedRoles={["admin"]}>
