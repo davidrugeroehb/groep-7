@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 
 const ProtectRoute=({allowedRoles,children})=>{
     const role=localStorage.getItem('role');
-    return a.includes(role) ? b: <Navigate to="/login" replace/>
+    return allowedRoles.includes(role) ? children: <Navigate to="/login" replace/>
 }
 
 export default ProtectRoute
