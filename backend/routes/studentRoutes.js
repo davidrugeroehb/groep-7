@@ -1,8 +1,12 @@
 import express from "express";
-import { loginStudent } from "../controllers/studentAuthController.js";
+// Only import getAllSpeeddates, as login is now handled by authController.js
+import { getAllSpeeddates } from '../controllers/studentController.js';
 
 const router = express.Router();
 
-router.post("/login", loginStudent);
+// REMOVED: router.post("/login", loginStudent); // This login is now handled by /api/auth/login
+
+// Route to get all speeddates (for students)
+router.get('/speeddates', getAllSpeeddates);
 
 export default router;
