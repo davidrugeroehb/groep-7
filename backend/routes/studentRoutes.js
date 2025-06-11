@@ -4,7 +4,7 @@ import { getAllSpeeddates, getStudentProfile, updateStudentProfile, getAllStuden
 
 const router = express.Router();
 
-router.get('/api/studenten', getAllStudenten); //api/studenten moet die getten
+router.get('/studenten', getAllStudenten); //api/studenten moet die getten
 
 // Route om alle speeddates op te halen voor studenten
 router.get('/speeddates', getAllSpeeddates);

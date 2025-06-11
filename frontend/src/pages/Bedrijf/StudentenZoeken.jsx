@@ -7,7 +7,7 @@ function StudentenZoeken() {
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/studenten", {
+        const res = await fetch("http://localhost:4000/api/student/studenten", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`, //is dit nodig voor alle studenten info??
           },
@@ -19,6 +19,7 @@ function StudentenZoeken() {
 
         const data = await res.json();
         setStudenten(data);
+        setError(null)
       } catch (err) {
         console.error(err);
         setError("Kan studenten niet ophalen.");
