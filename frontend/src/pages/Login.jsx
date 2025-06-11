@@ -1,64 +1,77 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/fotoehb.png";
+import logo from "../assets/fotoehb.png"; // Make sure this path is correct for your logo
 
 function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Use a single state for email and password, consistent with new backend approach
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Admin login (hardcoded)
+    const { email, password } = formData; // Destructure for easier use
+
+    // ✅ Hardcoded Admin login check (kept from your original code)
     if (email === "admin@ehb.be" && password === "admin123") {
       alert("Welkom admin!");
       localStorage.setItem("role", "admin");
+      localStorage.setItem("userId", "admin_id_placeholder"); // Placeholder for admin ID
       return navigate("/admin");
     }
 
-    // ✅ Probeer student login
+    // ✅ Attempt unified login via the new backend endpoint
     try {
-      const res = await fetch("http://localhost:4000/api/student/login", {
+      const res = await fetch("http://localhost:4000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData), // Send email and password
       });
 
-      const data = await res.json();
+      const data = await res.json(); // Parse the response JSON
 
       if (res.ok) {
-        localStorage.setItem("studentToken", data.token);
-        localStorage.setItem("role", "student");
-        alert(`Welkom student, ${data.name}!`);
-        return navigate("/speeddates");
-      }
-    } catch (err) {
-      console.warn("Student login mislukt:", err.message);
-    }
+        alert(data.message); // E.g., "Student succesvol ingelogd!" or "Bedrijf succesvol ingelogd!"
 
-    // ✅ Probeer bedrijf login
-    try {
-      const res = await fetch("http://localhost:4000/api/bedrijf/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+        // Store detected role and userId in localStorage
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("userId", data.userId); // Universal ID for student or company
 
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem("bedrijfToken", data.token);
-        localStorage.setItem("role", "bedrijf");
-        alert(`Welkom, ${data.name}!`);
-        return navigate("/bedrijf-home");
+        // Store role-specific IDs for backward compatibility if needed, or if other parts of app rely on them
+        if (data.role === "student") {
+          localStorage.setItem("studentId", data.userId);
+          // localStorage.setItem("studentToken", data.token); // If your student-specific components still use this
+          navigate("/speeddates");
+        } else if (data.role === "bedrijf") {
+          localStorage.setItem("bedrijfId", data.userId);
+          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
+          navigate("/bedrijf-home");
+        }else if (data.role === "admin") {
+          localStorage.setItem("adminId", data.userId);
+          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
+          navigate("/admin-home");
+        } else {
+          // Fallback for unexpected roles from backend
+          console.warn("Onbekende rol ontvangen na login:", data.role);
+          navigate("/"); // Default redirect
+        }
       } else {
-        alert(data.message || "Login mislukt");
+        // If response is NOT ok (e.g., 400, 401, 404 from authController.js)
+        alert(data.message || "Login mislukt. Controleer uw gegevens.");
+        console.error("Login API error:", data.message);
       }
     } catch (err) {
-      console.error("Bedrijf login error:", err);
-      alert("Er ging iets mis bij login.");
+      // Network errors or other unexpected issues
+      console.error("Fout bij login fetch request:", err);
+      alert(`Er ging iets mis bij het inloggen: ${err.message || "Controleer uw internetverbinding."}`);
     }
   };
 
@@ -75,8 +88,9 @@ function Login() {
             <label className="block text-gray-700 font-medium">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email" // Added name attribute
+              value={formData.email}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 mt-1 border border-gray-300 rounded"
             />
@@ -86,8 +100,9 @@ function Login() {
             <label className="block text-gray-700 font-medium">Wachtwoord</label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password" // Added name attribute
+              value={formData.password}
+              onChange={handleChange}
               required
               className="w-full px-4 py-2 mt-1 border border-gray-300 rounded"
             />

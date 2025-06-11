@@ -3,18 +3,22 @@ import React, { useEffect, useState } from 'react';
 function MijnAanvragen() {
   const [aanvragen, setAanvragen] = useState([]);
   const [error, setError] = useState(null);
-
-  const isStudent = localStorage.getItem("role") === "student";
+  const [loading, setLoading] = useState(true);
+  const studentId = localStorage.getItem("userId"); // Haal student ID op uit localStorage
 
   useEffect(() => {
     const fetchAanvragen = async () => {
-      if (!isStudent) {
+      if (!studentId) {
         setError("Je bent niet ingelogd als student.");
+        setLoading(false);
         return;
       }
 
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/student/aanvragen");
+        // Gebruik het nieuwe endpoint voor student specifieke aanvragen
+        const res = await fetch(`http://localhost:4000/api/aanvragen/student/${studentId}`);
 
         if (!res.ok) {
           throw new Error("Kon de aanvragen niet ophalen.");
@@ -23,31 +27,47 @@ function MijnAanvragen() {
         const data = await res.json();
         setAanvragen(data);
       } catch (err) {
-        console.error(err);
+        console.error("Fout bij ophalen van student aanvragen:", err);
         setError("Fout bij ophalen van jouw aanvragen.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAanvragen();
-  }, [isStudent]);
+  }, [studentId]); // Herlaad bij wijziging van studentId
 
   const annuleerAanvraag = async (id) => {
+    if (!window.confirm("Weet u zeker dat u deze aanvraag wilt annuleren?")) {
+      return;
+    }
+
     try {
-      const res = await fetch(`http://localhost:4000/api/student/aanvragen/${id}`, {
+      // Gebruik het DELETE endpoint voor aanvragen
+      const res = await fetch(`http://localhost:4000/api/aanvragen/${id}`, {
         method: "DELETE",
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Verwijderen mislukt");
+        throw new Error(data.message || "Annuleren mislukt.");
       }
 
-      // verwijder lokaal uit de lijst
+      alert(data.message);
+      // Verwijder de aanvraag lokaal uit de lijst
       setAanvragen((prev) => prev.filter((a) => a._id !== id));
+      // Optioneel: refresh de speeddates lijst op de speeddates pagina om de status te updaten
+      // Dit vereist een manier om de Speeddates component te triggeren, bijv. via Context API of een globale state management.
     } catch (err) {
-      console.error(err);
-      alert("Annuleren mislukt.");
+      console.error("Fout bij annuleren aanvraag:", err);
+      alert(`Annuleren mislukt: ${err.message || "Onbekende fout"}`);
     }
   };
+
+  if (loading) {
+    return <div className="text-center py-10">Laden van aanvragen...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -76,8 +96,15 @@ function MijnAanvragen() {
                 </div>
 
                 <p className="text-gray-700 mb-2">
-                  <strong>Sector:</strong> {aanvraag.sector || "N/B"}
+                  <strong>Focus:</strong> {aanvraag.focus || "N/B"}
                 </p>
+                <p className="text-gray-700 mb-2">
+                  <strong>Vakgebied:</strong> {aanvraag.vakgebied || "N/B"}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <strong>Tijden:</strong> {aanvraag.starttijd} - {aanvraag.eindtijd}
+                </p>
+
 
                 {aanvraag.status === "in behandeling" && (
                   <button
@@ -86,6 +113,16 @@ function MijnAanvragen() {
                   >
                     Annuleer aanvraag
                   </button>
+                )}
+                 {aanvraag.status === "goedgekeurd" && (
+                  <p className="mt-3 text-green-700 font-medium">
+                    Afspraak goedgekeurd. Bekijk "Mijn afspraken" voor details.
+                  </p>
+                )}
+                 {aanvraag.status === "afgekeurd" && (
+                  <p className="mt-3 text-red-700 font-medium">
+                    Aanvraag afgekeurd.
+                  </p>
                 )}
               </div>
             ))}

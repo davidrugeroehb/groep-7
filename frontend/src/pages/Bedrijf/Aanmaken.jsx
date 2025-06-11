@@ -1,17 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function Aanmaken() {
   const [form, setForm] = useState({
     starttijd: "",
     eindtijd: "",
-    gespreksduur: "30",
-    pauze: false,
+    lokaal: "", // NIEUW: Lokaal veld in de state
     vakgebied: "",
     focus: "",
     opportuniteit: [],
     talen: [],
     beschrijving: "",
   });
+
+  const [bedrijfId, setBedrijfId] = useState(null);
+
+  useEffect(() => {
+    const storedBedrijfId = localStorage.getItem('bedrijfId');
+    if (storedBedrijfId) {
+      setBedrijfId(storedBedrijfId);
+    } else {
+      console.warn("Bedrijf ID niet gevonden in localStorage. Gelieve in te loggen.");
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -23,8 +33,6 @@ function Aanmaken() {
           ? [...prev[name], value]
           : prev[name].filter((item) => item !== value),
       }));
-    } else if (type === "radio") {
-      setForm((prev) => ({ ...prev, [name]: value }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -32,21 +40,31 @@ function Aanmaken() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!bedrijfId) {
+      alert("Kan speeddate niet aanmaken: Bedrijf ID is niet beschikbaar. Log opnieuw in.");
+      return;
+    }
+
     try {
+      const dataToSend = { ...form, bedrijfId: bedrijfId };
+
       const res = await fetch("http://localhost:4000/api/bedrijf/speeddates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(dataToSend),
       });
 
-      if (!res.ok) throw new Error("Aanmaken mislukt");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Aanmaken mislukt");
+      }
 
       alert("Speeddate aangemaakt!");
       setForm({
         starttijd: "",
         eindtijd: "",
-        gespreksduur: "30",
-        pauze: false,
+        lokaal: "", // NIEUW: Lokaal resetten
         vakgebied: "",
         focus: "",
         opportuniteit: [],
@@ -55,7 +73,7 @@ function Aanmaken() {
       });
     } catch (err) {
       console.error(err);
-      alert("Er ging iets mis bij het aanmaken.");
+      alert(`Er ging iets mis bij het aanmaken: ${err.message || "Onbekende fout"}`);
     }
   };
 
@@ -69,7 +87,7 @@ function Aanmaken() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Tijd */}
           <div>
-            <h2 className="text-xl font-semibold mb-2">⏰ Tijd</h2>
+            <h2 className="text-xl font-semibold mb-2">⏰ Tijd & Lokaal</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block font-medium mb-1">Starttijd</label>
@@ -94,34 +112,19 @@ function Aanmaken() {
                 />
               </div>
             </div>
-
+            {/* NIEUW: Lokaal invoerveld */}
             <div className="mt-4">
-              <label className="block font-medium mb-1">
-                Gesprekstijd per student
-              </label>
-              <select
-                name="gespreksduur"
-                value={form.gespreksduur}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-              >
-                <option value="15">15 min</option>
-                <option value="20">20 min</option>
-                <option value="30">30 min</option>
-              </select>
-            </div>
-
-            <label className="flex items-center gap-2 mt-4">
+              <label className="block font-medium mb-1">Lokaal</label>
               <input
-                type="checkbox"
-                name="pauze"
-                checked={form.pauze}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, pauze: e.target.checked }))
-                }
+                type="text"
+                name="lokaal"
+                value={form.lokaal}
+                onChange={handleChange}
+                placeholder="bv. Lokaal A1.01"
+                required
+                className="w-full border p-2 rounded"
               />
-              Pauze inplannen?
-            </label>
+            </div>
           </div>
 
           {/* Focus */}

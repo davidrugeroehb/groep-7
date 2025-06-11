@@ -1,106 +1,140 @@
 // SpeedDates.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './SpeedDates.css';
 
 const SpeedDates = () => {
+  const [speedDates, setSpeedDates] = useState([]);
   const [filters, setFilters] = useState({
     sector: [],
-    type: [],
+    opportuniteit: [],
     taal: []
   });
   const [showFilters, setShowFilters] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
-  
-  const speedDates = [
-    {
-      id: 1,
-  bedrijf: "TechSolutions",
-  sector: "Web Development",
-  type: "Stage",
-  taal: "Nederlands",
-  uur: "10:00 - 10:20",
-  beschrijving: "Stageplek voor front-end development met React. Wij zoeken een gemotiveerde stagiair die ons team komt versterken in het ontwikkelen van moderne webapplicaties.",
-  details: "Locatie: Amsterdam | Vereisten: Basiskennis HTML/CSS/JavaScript"
-    },
-    {
-      id: 2,
-      bedrijf: "SecureIT",
-      sector: "Cybersecurity",
-      type: "Afstudeerproject",
-      taal: "Engels",
-      uur: "10:30 - 10:50",
-      beschrijving: "Onderzoek naar nieuwe cybersecurity threats en ontwikkelen van preventieve maatregelen.",
-      details: "Locatie: Rotterdam | Begeleiding: 1x per week"
-    },
-    {
-      id: 3,
-      bedrijf: "AI Minds",
-      sector: "AI / Machine Learning",
-      type: "Bijbaan / Werkstudent",
-      taal: "Engels",
-      uur: "11:00 - 11:20",
-      beschrijving: "AI Minds ontwikkelt toepassingen met machine learning en data-analyse. Werk aan innovatieve AI oplossingen.",
-      details: "Flexibele uren | Thuiswerk mogelijk"
-    },
-    {
-      id: 4,
-      bedrijf: "CloudExperts",
-      sector: "DevOps",
-      type: "Stage",
-      taal: "Spaans",
-      uur: "11:30 - 11:50",
-      beschrijving: "DevOps stage met focus op cloud infrastructure en CI/CD pipelines.",
-      details: "Duur: 6 maanden | Vergoeding: €500 p/m"
-    },
-    {
-      id: 5,
-      bedrijf: "DesignHub",
-      sector: "UX/UI",
-      type: "Bijbaan / Werkstudent",
-      taal: "Portugees",
-      uur: "12:00 - 12:20",
-      beschrijving: "UI design voor internationale klanten in een creatief team.",
-      details: "16-24 uur per week | Creatieve vrijheid"
-    }
-  ];
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const studentId = localStorage.getItem('userId');
+
+  useEffect(() => {
+    const fetchSpeeddates = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("http://localhost:4000/api/student/speeddates");
+        if (!res.ok) {
+          throw new Error("Kon speeddates niet ophalen.");
+        }
+        const data = await res.json();
+        setSpeedDates(data.speeddates);
+      } catch (err) {
+        console.error("Fout bij ophalen speeddates:", err);
+        setError("Fout bij het laden van speeddates.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSpeeddates();
+  }, []);
+
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => {
       const newFilters = { ...prev };
       const index = newFilters[filterType].indexOf(value);
-      
+
       if (index === -1) {
         newFilters[filterType].push(value);
       } else {
         newFilters[filterType].splice(index, 1);
       }
-      
       return newFilters;
     });
   };
-  
+
   const resetFilters = () => {
     setFilters({
       sector: [],
-      type: [],
+      opportuniteit: [],
       taal: []
     });
   };
-  
+
   const applyFilters = () => {
     setShowFilters(false);
   };
-  
+
   const filteredDates = speedDates.filter(date => {
     return (
-      (filters.sector.length === 0 || filters.sector.includes(date.sector)) &&
-      (filters.type.length === 0 || filters.type.includes(date.type)) &&
-      (filters.taal.length === 0 || filters.taal.includes(date.taal))
+      (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
+      (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
+      (filters.taal.length === 0 || filters.talen.some(t => date.talen.includes(t)))
     );
   });
+
   const toggleDetails = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const handleApply = async (speeddateId) => {
+    if (!studentId) {
+      alert("Log in als student om een afspraak aan te vragen.");
+      return;
+    }
+
+    if (!window.confirm("Weet je zeker dat je deze speeddate wilt aanvragen?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:4000/api/aanvragen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ speeddateId, studentId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Aanvraag mislukt.");
+      }
+
+      alert(data.message);
+      setSpeedDates(prevDates =>
+        prevDates.map(date =>
+          date._id === speeddateId ? { ...date, status: 'aangevraagd', aangevraagdDoor: studentId } : date
+        )
+      );
+    } catch (err) {
+      console.error("Fout bij aanvragen:", err);
+      alert(`Fout bij het aanvragen: ${err.message || "Onbekende fout"}`);
+    }
+  };
+
+  const isApplyDisabled = (speeddate) => {
+    return speeddate.status !== 'open' || speeddate.aangevraagdDoor !== null;
+  };
+
+  const getApplyButtonText = (speeddate) => {
+    if (speeddate.status === 'aangevraagd' && speeddate.aangevraagdDoor === studentId) {
+      return 'Reeds aangevraagd door jou';
+    }
+    if (speeddate.status === 'bevestigd') {
+      return 'Afspraak bevestigd';
+    }
+    if (speeddate.status === 'aangevraagd') {
+      return 'Reeds aangevraagd';
+    }
+    return 'Afspraak aanvragen';
+  };
+
+
+  if (loading) {
+    return <div className="text-center py-10">Laden van speeddates...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-10 text-red-600">{error}</div>;
+  }
 
   return (
     <div className="speeddates-container">
@@ -110,40 +144,40 @@ const SpeedDates = () => {
       </header>
 
       <div className="main-content">
-      <button 
-  className={`filter-toggle ${showFilters ? 'active' : ''}`}
-  onClick={() => setShowFilters(!showFilters)}
->
-  {showFilters ? 'Filters verbergen' : 'Filters tonen'}
-</button>
+        <button
+          className={`filter-toggle ${showFilters ? 'active' : ''}`}
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          {showFilters ? 'Filters verbergen' : 'Filters tonen'}
+        </button>
 
-{showFilters && (
-  <div className="filter-section">
-    <div className="filter-group">
-  <h3> Sector / Focus</h3>
-  <div className="checkbox-grid">
-    {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
-      <label key={sector} className="checkbox-label">
-        <input
-          type="checkbox"
-          checked={filters.sector.includes(sector)}
-          onChange={() => handleFilterChange('sector', sector)}
-        />
-        <span className="checkmark"></span>
-        {sector}
-      </label>
-    ))}
-  </div>
-</div>
-    <div className="filter-group">
-    <h3>Type opportuniteit</h3>
+        {showFilters && (
+          <div className="filter-section">
+            <div className="filter-group">
+              <h3>Sector / Focus</h3>
+              <div className="checkbox-grid">
+                {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
+                  <label key={sector} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={filters.sector.includes(sector)}
+                      onChange={() => handleFilterChange('sector', sector)}
+                    />
+                    <span className="checkmark"></span>
+                    {sector}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group">
+              <h3>Type opportuniteit</h3>
               <div className="checkbox-grid">
                 {["Stage", "Afstudeerproject", "Bijbaan / Werkstudent"].map((type) => (
                   <label key={type} className="checkbox-label">
                     <input
                       type="checkbox"
-                      checked={filters.type.includes(type)}
-                      onChange={() => handleFilterChange('type', type)}
+                      checked={filters.opportuniteit.includes(type)}
+                      onChange={() => handleFilterChange('opportuniteit', type)}
                     />
                     <span className="checkmark"></span>
                     {type}
@@ -151,7 +185,6 @@ const SpeedDates = () => {
                 ))}
               </div>
             </div>
-
 
             <div className="filter-group">
               <h3>Taal</h3>
@@ -170,7 +203,6 @@ const SpeedDates = () => {
               </div>
             </div>
 
-
             <div className="filter-buttons">
               <button className="apply-btn" onClick={applyFilters}>Filters toepassen</button>
               <button className="reset-btn" onClick={resetFilters}>Reset filters</button>
@@ -178,42 +210,49 @@ const SpeedDates = () => {
           </div>
         )}
 
-
         <div className="results-section">
           <h2>Beschikbare SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
-         
+
           {filteredDates.length > 0 ? (
             <div className="speeddates-grid">
               {filteredDates.map((date) => (
-                <div key={date.id} className="speeddate-card">
+                <div key={date._id} className="speeddate-card">
                   <div className="card-header">
-                    <h3>{date.bedrijf}</h3>
-                    <span className={`sector-tag ${date.sector.replace(/[^a-zA-Z]/g, '')}`}>{date.sector}</span>
+                    <h3>{date.bedrijf?.name || 'Laden...'}</h3>
+                    <span className={`sector-tag ${date.vakgebied.replace(/[^a-zA-Z]/g, '')}`}>{date.vakgebied}</span>
                   </div>
                   <div className="card-body">
-                    <p><i className="far fa-clock"></i> {date.uur}</p>
-                    <p><i className="far fa-user"></i> {date.type}</p>
-                    <p><i className="fas fa-language"></i> {date.taal}</p>
+                    <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p> {/* NIEUW: Toon lokaal */}
+                    <p><i className="fas fa-microscope"></i> {date.focus}</p>
+                    <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
+                    <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
                     <p className="description">{date.beschrijving}</p>
                   </div>
                   <div className="card-footer">
                     <button
                       className="details-btn"
-                      onClick={() => toggleDetails(date.id)}
+                      onClick={() => toggleDetails(date._id)}
                     >
-                      {expandedId === date.id ? 'Minder details' : 'Bekijk meer'}
+                      {expandedId === date._id ? 'Minder details' : 'Bekijk meer'}
                     </button>
                   </div>
-                 
-                  {expandedId === date.id && (
+
+                  {expandedId === date._id && (
                     <div className="expanded-details">
                       <h4>Meer informatie</h4>
-                      <p>{date.details}</p>
+                      <p>
+                        Deze speeddate is een uitgelezen kans om te spreken over {date.focus} binnen {date.vakgebied}.<br />
+                        Locatie: {date.lokaal}<br /> {/* Toon lokaal in details */}
+                        Beschikbare talen: {date.talen.join(', ')}.<br />
+                        Gezochte opportuniteiten: {date.opportuniteit.join(', ')}.
+                      </p>
                       <button
                         className="apply-now-btn"
-                        onClick={() => alert(`Sollicitatie gestuurd naar ${date.bedrijf}`)}
+                        onClick={() => handleApply(date._id)}
+                        disabled={isApplyDisabled(date)}
                       >
-                        Afspraak aanvragen
+                        {getApplyButtonText(date)}
                       </button>
                     </div>
                   )}
@@ -233,6 +272,4 @@ const SpeedDates = () => {
   );
 };
 
-
 export default SpeedDates;
-      

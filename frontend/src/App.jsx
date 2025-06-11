@@ -3,7 +3,7 @@ import './index.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BedrijfNavbar from './components/BedrijfNavbar';
-
+import ProtectRoute from './components/ProtectRoute';
 
 
 // Algemeen
@@ -17,6 +17,7 @@ import Aanmaken from './pages/Bedrijf/Aanmaken';
 import Aanvragen from './pages/Bedrijf/Aanvragen';
 import BedrijfProfiel from './pages/Bedrijf/BedrijfProfiel';
 import StudentenZoeken from './pages/Bedrijf/StudentenZoeken';
+import MailIntre from './pages/Bedrijf/Mail_intre'
 
 // Student
 import Speeddates from './pages/Student/Speeddates';
@@ -28,10 +29,11 @@ import MijnProfiel from './pages/Student/MijnProfiel';
 
 import Dashboard from './pages/Admin/Dashboard';
 import AdSpeeddates from './pages/Admin/AdSpeeddate';
-import Studenten from './pages/Admin/AdStudenten';
-import Bedrijven from './pages/Admin/AdBedrijven';
 import Instellingen from './pages/Admin/AdInstellingen';
 import AdminLayout from './pages/Admin/AdminLayOut';
+import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
+import Studentenbeheer from './pages/Admin/Studentenbeheer';
+
 
 function App() {
   const location = useLocation();
@@ -59,7 +61,7 @@ function App() {
         <Route path="/bedrijf-aanvragen" element={<Aanvragen />} />
         <Route path="/bedrijf-profiel" element={<BedrijfProfiel />} />
         <Route path="/studenten-zoeken" element={<StudentenZoeken />} />
-
+        <Route path="/bedrijf-mail" element={<MailIntre />} />
         {/* Student */}
         <Route path="/speeddates" element={<Speeddates />} />
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
@@ -67,12 +69,61 @@ function App() {
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
 
         {/* Admin */}
-        <Route path="/admindashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/adspeeddate" element={<AdminLayout><AdSpeeddates /></AdminLayout>} />
-        <Route path="/adstudenten" element={<AdminLayout><Studenten /></AdminLayout>} />
-        <Route path="/adbedrijven" element={<AdminLayout><Bedrijven /></AdminLayout>} />
-        <Route path="/adinstellingen" element={<AdminLayout><Instellingen /></AdminLayout>} />
+        <Route path="/admindashboard" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+              <AdminLayout>
+                <Dashboard />
+              </AdminLayout>
+            </ProtectRoute>
+          } />
 
+        <Route path="/adspeeddate" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+              <AdminLayout>
+                <AdSpeeddates />
+              </AdminLayout>
+            </ProtectRoute>
+          } />
+
+        <Route path="/adstudenten" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+              <AdminLayout>
+                <Studenten />
+              </AdminLayout>
+            </ProtectRoute>
+          } />
+
+        <Route path="/adbedrijven" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+              <AdminLayout>
+                <Bedrijven />
+              </AdminLayout>
+            </ProtectRoute>
+          } />
+
+        <Route path="/adinstellingen" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+              <AdminLayout>
+                <Instellingen />
+              </AdminLayout>
+            </ProtectRoute>
+          } />
+
+        
+        <Route path="/adminbedrijfbeheer" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+                <AdminLayout>
+                  <Bedrijvenbeheer />
+                </AdminLayout>
+            </ProtectRoute>
+          }/>
+        <Route path="/adminstudentbeheer" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+            <AdminLayout>
+                <Studentenbeheer />
+            </AdminLayout>
+            </ProtectRoute>
+          }/>
       </Routes>
     </>
   );
