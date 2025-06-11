@@ -1,121 +1,132 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/team-placeholder.png";
+import logo from "../assets/fotoehb.png"; // Make sure this path is correct for your logo
 
 function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Use a single state for email and password, consistent with new backend approach
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Demo login voor student
-    if (email === "student@demo.com" && password === "student123") {
-      alert("Welkom student!");
-      localStorage.setItem("role", "student");
-      return navigate("/speeddates");
-    }
+    const { email, password } = formData; // Destructure for easier use
 
-    // ✅ Demo login voor admin
+    // ✅ Hardcoded Admin login check (kept from your original code)
     if (email === "admin@ehb.be" && password === "admin123") {
       alert("Welkom admin!");
       localStorage.setItem("role", "admin");
-      return navigate("/admin"); // Pas aan als route anders is
+      localStorage.setItem("userId", "admin_id_placeholder"); // Placeholder for admin ID
+      return navigate("/admin");
     }
 
-    // ✅ Login voor bedrijf via backend
+    // ✅ Attempt unified login via the new backend endpoint
     try {
-      const res = await fetch("http://localhost:4000/api/bedrijf/login", {
+      const res = await fetch("http://localhost:4000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData), // Send email and password
       });
 
-      const data = await res.json();
+      const data = await res.json(); // Parse the response JSON
 
       if (res.ok) {
-        localStorage.setItem("bedrijfToken", data.token);
-        localStorage.setItem("role", "bedrijf");
-        alert(`Welkom, ${data.name}!`);
-        return navigate("/bedrijf-home");
+        alert(data.message); // E.g., "Student succesvol ingelogd!" or "Bedrijf succesvol ingelogd!"
+
+        // Store detected role and userId in localStorage
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("userId", data.userId); // Universal ID for student or company
+
+        // Store role-specific IDs for backward compatibility if needed, or if other parts of app rely on them
+        if (data.role === "student") {
+          localStorage.setItem("studentId", data.userId);
+          // localStorage.setItem("studentToken", data.token); // If your student-specific components still use this
+          navigate("/speeddates");
+        } else if (data.role === "bedrijf") {
+          localStorage.setItem("bedrijfId", data.userId);
+          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
+          navigate("/bedrijf-home");
+        }else if (data.role === "admin") {
+          localStorage.setItem("adminId", data.userId);
+          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
+          navigate("/admin-home");
+        } else {
+          // Fallback for unexpected roles from backend
+          console.warn("Onbekende rol ontvangen na login:", data.role);
+          navigate("/"); // Default redirect
+        }
       } else {
-        alert(data.message || "Login mislukt");
+        // If response is NOT ok (e.g., 400, 401, 404 from authController.js)
+        alert(data.message || "Login mislukt. Controleer uw gegevens.");
+        console.error("Login API error:", data.message);
       }
     } catch (err) {
-      console.error(err);
-      alert("Serverfout bij login");
+      // Network errors or other unexpected issues
+      console.error("Fout bij login fetch request:", err);
+      alert(`Er ging iets mis bij het inloggen: ${err.message || "Controleer uw internetverbinding."}`);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="min-h-screen flex flex-col items-center justify-center text-black bg-gray-50 px-4"
-    >
-      <h1 className="text-2xl font-bold mb-6">Welkom bij Career Match!</h1>
-
-      <div className="bg-white p-10 rounded-lg shadow-md w-full max-w-md flex flex-col items-center gap-5">
-        {/* Logo */}
-        <img src={logo} alt="EHB logo" className="h-20" />
-
-        {/* Titel */}
-        <h2 className="text-2xl font-semibold text-center">Login</h2>
-
-        {/* Email */}
-        <div className="w-full">
-          <label htmlFor="email" className="block mb-1 font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            placeholder="jouw@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border border-gray-300 rounded w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-
-        {/* Wachtwoord */}
-        <div className="w-full">
-          <label htmlFor="password" className="block mb-1 font-medium">
-            Wachtwoord
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border border-gray-300 rounded w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-
-        {/* Sign-up knop voor bedrijven */}
-        <div className="w-full text-center mt-4">
-          <p className="mb-2">Nieuw bedrijf?</p>
-          <button
-            type="button"
-            onClick={() => navigate('/bedrijf/signup')}
-            className="bg-blue-500 text-white w-full py-2 rounded-md text-base hover:bg-blue-600 transition"
-          >
-            Sign-up
-          </button>
-        </div>
-
-        {/* Login knop */}
-        <button
-          type="submit"
-          className="bg-green-500 text-white w-full py-2 rounded-md text-base hover:bg-green-600 transition mt-4"
-        >
+    <main className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md">
+        <img src={logo} alt="Logo" className="mx-auto mb-6 h-16" />
+        <h2 className="text-center text-2xl font-bold text-gray-800 mb-4">
           Login
-        </button>
+        </h2>
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-gray-700 font-medium">Email</label>
+            <input
+              type="email"
+              name="email" // Added name attribute
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium">Wachtwoord</label>
+            <input
+              type="password"
+              name="password" // Added name attribute
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          >
+            Login
+          </button>
+        </form>
+
+        <p className="text-center text-sm mt-6">
+          Nog geen bedrijfsaccount?{" "}
+          <button
+            onClick={() => navigate("/bedrijf/signup")}
+            className="text-blue-600 hover:underline"
+          >
+            Registreer hier
+          </button>
+        </p>
       </div>
-    </form>
+    </main>
   );
 }
 

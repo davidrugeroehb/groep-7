@@ -3,17 +3,22 @@ import React, { useEffect, useState } from "react";
 function MijnAfspraken() {
   const [afspraken, setAfspraken] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const studentId = localStorage.getItem("userId"); // Haal student ID op
 
   useEffect(() => {
     const fetchAfspraken = async () => {
-      const role = localStorage.getItem("role");
-      if (role !== "student") {
+      if (!studentId) {
         setError("Je bent niet ingelogd als student.");
+        setLoading(false);
         return;
       }
 
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/student/afspraken");
+        // Gebruik het nieuwe endpoint voor student specifieke afspraken
+        const res = await fetch(`http://localhost:4000/api/afspraken/student/${studentId}`);
 
         if (!res.ok) {
           throw new Error("Kan afspraken niet ophalen.");
@@ -22,30 +27,44 @@ function MijnAfspraken() {
         const data = await res.json();
         setAfspraken(data);
       } catch (err) {
-        console.error(err);
+        console.error("Fout bij het ophalen van student afspraken:", err);
         setError("Fout bij het ophalen van afspraken.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAfspraken();
-  }, []);
+  }, [studentId]); // Herlaad bij wijziging van studentId
 
   const annuleerAfspraak = async (id) => {
+    if (!window.confirm("Weet u zeker dat u deze afspraak wilt annuleren? Dit kan alleen als het bedrijf nog niet heeft geaccepteerd.")) {
+      return;
+    }
     try {
-      const res = await fetch(`http://localhost:4000/api/student/afspraken/${id}`, {
+      // Annuleer de aanvraag (niet de afspraak direct, maar de onderliggende aanvraag)
+      const res = await fetch(`http://localhost:4000/api/aanvragen/${id}`, {
         method: "DELETE",
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Verwijderen mislukt.");
+        throw new Error(data.message || "Annuleren mislukt.");
       }
 
+      alert(data.message);
       setAfspraken((prev) => prev.filter((a) => a._id !== id));
+      // Optioneel: refresh de MijnAanvragen pagina of speeddates pagina
     } catch (err) {
-      console.error(err);
-      alert("Annuleren mislukt.");
+      console.error("Fout bij annuleren afspraak:", err);
+      alert(`Annuleren mislukt: ${err.message || "Onbekende fout"}`);
     }
   };
+
+  if (loading) {
+    return <div className="text-center py-10">Laden van afspraken...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -101,3 +120,5 @@ function MijnAfspraken() {
 }
 
 export default MijnAfspraken;
+
+
