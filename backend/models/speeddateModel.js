@@ -9,6 +9,10 @@ const speeddateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  lokaal: { // NIEUW: Lokaal veld
+    type: String,
+    required: true, // Maak dit verplicht als het altijd ingevuld moet worden
+  },
   vakgebied: {
     type: String,
     required: true,
@@ -31,12 +35,12 @@ const speeddateSchema = new mongoose.Schema({
   },
   bedrijf: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'bedrijf', // <--- WIJZIGING: Hoofdletter 'B' naar kleine letter 'b'
+    ref: 'bedrijf', // Klein letter 'b' conform eerdere fix
     required: true,
   },
   aangevraagdDoor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student', // Dit is al 'Student' (hoofdletter), dus controleer studentModel.js
+    ref: 'student', // Klein letter 's' conform eerdere fix
     default: null,
   },
   status: {

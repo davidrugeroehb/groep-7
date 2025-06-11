@@ -1,36 +1,38 @@
-import Speeddate from '../models/speeddateModel.js'; // Zorg voor correct pad en naam
+import Speeddate from '../models/speeddateModel.js';
 
 // Functie om een nieuwe speeddate aan te maken
 const createSpeeddate = async (req, res) => {
   try {
-    // Haal speeddate gegevens uit de request body
-    // gespreksduur en pauze zijn verwijderd
     const {
       starttijd,
       eindtijd,
+      lokaal, // NIEUW: Haal lokaal op
       vakgebied,
       focus,
       opportuniteit,
       talen,
       beschrijving,
-      bedrijfId // Verwacht nog steeds bedrijfId van de frontend
+      bedrijfId
     } = req.body;
 
-    // Basisvalidatie: zorg ervoor dat bedrijfId is opgegeven
     if (!bedrijfId) {
       return res.status(400).json({ message: 'Bedrijf ID is vereist om een speeddate aan te maken.' });
+    }
+    // Voeg validatie toe voor lokaal
+    if (!lokaal) {
+        return res.status(400).json({ message: 'Lokaal is vereist om een speeddate aan te maken.' });
     }
 
     const newSpeeddate = new Speeddate({
       starttijd,
       eindtijd,
-      // gespreksduur en pauze zijn verwijderd uit de creatie van de speeddate
+      lokaal, // NIEUW: Sla lokaal op
       vakgebied,
       focus,
       opportuniteit,
       talen,
       beschrijving,
-      bedrijf: bedrijfId, // Koppel de speeddate aan het bedrijfs-ID
+      bedrijf: bedrijfId,
     });
 
     const savedSpeeddate = await newSpeeddate.save();
@@ -57,6 +59,7 @@ const getCompanySpeeddates = async (req, res) => {
       return res.status(400).json({ message: 'Bedrijf ID is vereist.' });
     }
 
+    // Voeg .populate('bedrijf') toe als je bedrijfsdetails wilt ophalen
     const speeddates = await Speeddate.find({ bedrijf: bedrijfId });
 
     res.status(200).json({

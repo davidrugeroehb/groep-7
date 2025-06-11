@@ -1,32 +1,31 @@
 // SpeedDates.js
 import React, { useState, useEffect } from 'react';
-import './SpeedDates.css'; // Zorg ervoor dat de CSS nog steeds werkt
+import './SpeedDates.css';
 
 const SpeedDates = () => {
-  const [speedDates, setSpeedDates] = useState([]); // Hier slaan we de dynamische speeddates op
+  const [speedDates, setSpeedDates] = useState([]);
   const [filters, setFilters] = useState({
     sector: [],
-    opportuniteit: [], // Naam aangepast van 'type' naar 'opportuniteit' voor consistentie
+    opportuniteit: [],
     taal: []
   });
   const [showFilters, setShowFilters] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const studentId = localStorage.getItem('userId'); // Haal student ID op uit localStorage
+  const studentId = localStorage.getItem('userId');
 
-  // Functie om alle speeddates op te halen
   useEffect(() => {
     const fetchSpeeddates = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/student/speeddates"); // Endpoint voor alle speeddates
+        const res = await fetch("http://localhost:4000/api/student/speeddates");
         if (!res.ok) {
           throw new Error("Kon speeddates niet ophalen.");
         }
         const data = await res.json();
-        setSpeedDates(data.speeddates); // De API response heeft 'speeddates' als een array
+        setSpeedDates(data.speeddates);
       } catch (err) {
         console.error("Fout bij ophalen speeddates:", err);
         setError("Fout bij het laden van speeddates.");
@@ -36,7 +35,7 @@ const SpeedDates = () => {
     };
 
     fetchSpeeddates();
-  }, []); // Lege array zorgt ervoor dat dit één keer gebeurt bij mount
+  }, []);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => {
@@ -66,9 +65,9 @@ const SpeedDates = () => {
 
   const filteredDates = speedDates.filter(date => {
     return (
-      (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) && // Filter op vakgebied i.p.v. sector
-      (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) && // Check opportuniteit array
-      (filters.taal.length === 0 || filters.taal.some(t => date.talen.includes(t))) // Check talen array
+      (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
+      (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
+      (filters.taal.length === 0 || filters.talen.some(t => date.talen.includes(t)))
     );
   });
 
@@ -82,7 +81,6 @@ const SpeedDates = () => {
       return;
     }
 
-    // Voeg een bevestiging toe voor het aanvragen
     if (!window.confirm("Weet je zeker dat je deze speeddate wilt aanvragen?")) {
       return;
     }
@@ -100,8 +98,7 @@ const SpeedDates = () => {
         throw new Error(data.message || "Aanvraag mislukt.");
       }
 
-      alert(data.message); // Toon succesbericht
-      // Update lokaal de status van de speeddate zodat deze niet opnieuw aangevraagd kan worden
+      alert(data.message);
       setSpeedDates(prevDates =>
         prevDates.map(date =>
           date._id === speeddateId ? { ...date, status: 'aangevraagd', aangevraagdDoor: studentId } : date
@@ -113,7 +110,6 @@ const SpeedDates = () => {
     }
   };
 
-  // Helper om te bepalen of de aanvraagknop uitgeschakeld moet zijn
   const isApplyDisabled = (speeddate) => {
     return speeddate.status !== 'open' || speeddate.aangevraagdDoor !== null;
   };
@@ -139,7 +135,6 @@ const SpeedDates = () => {
   if (error) {
     return <div className="text-center py-10 text-red-600">{error}</div>;
   }
-
 
   return (
     <div className="speeddates-container">
@@ -223,13 +218,13 @@ const SpeedDates = () => {
               {filteredDates.map((date) => (
                 <div key={date._id} className="speeddate-card">
                   <div className="card-header">
-                    {/* Toon bedrijfsnaam - we moeten deze nog populaten via de backend of apart ophalen */}
-                    <h3>{date.bedrijf?.name || 'Laden...'}</h3> {/* Bedrijfsnaam populaten */}
+                    <h3>{date.bedrijf?.name || 'Laden...'}</h3>
                     <span className={`sector-tag ${date.vakgebied.replace(/[^a-zA-Z]/g, '')}`}>{date.vakgebied}</span>
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
-                    <p><i className="fas fa-microscope"></i> {date.focus}</p> {/* Icoon voor focus */}
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p> {/* NIEUW: Toon lokaal */}
+                    <p><i className="fas fa-microscope"></i> {date.focus}</p>
                     <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
                     <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
                     <p className="description">{date.beschrijving}</p>
@@ -246,16 +241,16 @@ const SpeedDates = () => {
                   {expandedId === date._id && (
                     <div className="expanded-details">
                       <h4>Meer informatie</h4>
-                      {/* Hier kun je meer specifieke details tonen die niet in de korte beschrijving staan */}
                       <p>
                         Deze speeddate is een uitgelezen kans om te spreken over {date.focus} binnen {date.vakgebied}.<br />
+                        Locatie: {date.lokaal}<br /> {/* Toon lokaal in details */}
                         Beschikbare talen: {date.talen.join(', ')}.<br />
                         Gezochte opportuniteiten: {date.opportuniteit.join(', ')}.
                       </p>
                       <button
                         className="apply-now-btn"
-                        onClick={() => handleApply(date._id)} // Gebruik de _id van de speeddate
-                        disabled={isApplyDisabled(date)} // Knop uitschakelen indien niet beschikbaar
+                        onClick={() => handleApply(date._id)}
+                        disabled={isApplyDisabled(date)}
                       >
                         {getApplyButtonText(date)}
                       </button>
