@@ -54,6 +54,10 @@ function App() {
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
         <Route path="/mijnafspraken" element={<MijnAfspraken />} />
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
+
+
+        {/* Admin */}
+        
       </Routes>
     </>
   );

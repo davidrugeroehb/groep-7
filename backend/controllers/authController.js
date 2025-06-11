@@ -42,7 +42,7 @@ export const loginUser = async (req, res) => {
       }
     }
 
-    // 3. If user not found in any role
+    // 3. vinden van admin
     if (!user) {
       user = await adminModel.findOne({ email })
       const isMatch = await bcrypt.compare(password, user.password);
