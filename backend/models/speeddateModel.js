@@ -9,14 +9,6 @@ const speeddateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  gespreksduur: {
-    type: String,
-    required: true,
-  },
-  pauze: {
-    type: Boolean,
-    default: false,
-  },
   vakgebied: {
     type: String,
     required: true,
@@ -37,11 +29,21 @@ const speeddateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // Crucial for linking to the company
   bedrijf: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Bedrijf', // Assuming your company model is named 'Bedrijf'
-    required: true, // Making it required to ensure linkage
+    ref: 'bedrijf', // <--- WIJZIGING: Hoofdletter 'B' naar kleine letter 'b'
+    required: true,
+  },
+  aangevraagdDoor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student', // Dit is al 'Student' (hoofdletter), dus controleer studentModel.js
+    default: null,
+  },
+  status: {
+    type: String,
+    enum: ['open', 'aangevraagd', 'bevestigd'],
+    default: 'open',
+    required: true,
   },
   createdAt: {
     type: Date,

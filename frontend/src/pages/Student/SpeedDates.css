@@ -423,3 +423,24 @@
       padding: 1rem;
     }
   }
+
+  
+
+.status-indicator {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.status-indicator .px-2 { /* Generieke stijl voor de status badges */
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px; /* Fully rounded */
+  font-weight: 600;
+  display: inline-block; /* Zodat span-tags naast elkaar blijven */
+}
+
+/* Aanvullende icoon stijlen voor consistentie */
+.card-body i {
+  width: 20px; /* Zorgt voor consistente uitlijning */
+  text-align: center;
+  color: var(--primary-color); /* Gebruik je primaire kleur */
+}

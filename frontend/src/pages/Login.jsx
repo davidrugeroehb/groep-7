@@ -54,6 +54,10 @@ function Login() {
           localStorage.setItem("bedrijfId", data.userId);
           // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
           navigate("/bedrijf-home");
+        }else if (data.role === "admin") {
+          localStorage.setItem("adminId", data.userId);
+          // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
+          navigate("/admin-home");
         } else {
           // Fallback for unexpected roles from backend
           console.warn("Onbekende rol ontvangen na login:", data.role);
