@@ -9,8 +9,10 @@ import {
 } from 'react-icons/bs'
 import { Link } from 'react-router-dom'
 
-function Sidebar() {
+// Ontvang 'props' als argument van de functie
+function Sidebar(props) {
   return (
+    // Voeg props toe aan de aside tag.
     <aside id="sidebar" className='area-sidebar'{...props}>
       <div className="sidebar-title">
         <div className="sidebar-brand">
@@ -19,20 +21,22 @@ function Sidebar() {
         <span className="icoon close_icon">X</span>
       </div>
       <ul className="sidebar-list">
+        {/* Pas de Link 'to' paden aan om overeen te komen met de geneste admin routes */}
+        {/* Bijvoorbeeld, van "/" naar "/admin/dashboard" */}
         <li className="sidebar-list-item">
-          <Link to="/"><BsGrid1X2Fill className="icoon" /> Dashboard</Link>
+          <Link to="/admin/dashboard"><BsGrid1X2Fill className="icoon" /> Dashboard</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/adspeeddate"><BsLightningChargeFill className="icoon" /> Speeddates</Link>
+          <Link to="/admin/speeddatesbeheer"><BsLightningChargeFill className="icoon" /> Speeddates</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/adminstudentbeheer"><BsPeopleFill className="icoon" /> Studenten</Link>
+          <Link to="/admin/studentenbeheer"><BsPeopleFill className="icoon" /> Studenten</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/adminbedrijfbeheer"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
+          <Link to="/admin/bedrijvenbeheer"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/adinstellingen"><BsFillGearFill className="icoon" /> Instellingen</Link>
+          <Link to="/admin/instellingen"><BsFillGearFill className="icoon" /> Instellingen</Link>
         </li>
       </ul>
     </aside>

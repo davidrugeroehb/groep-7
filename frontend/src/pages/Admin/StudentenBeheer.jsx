@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-function Aanmaken() {
-
-  
+// Verander de functienaam van 'Aanmaken' naar 'StudentenBeheer'
+function StudentenBeheer() { // AANPASSING: Functienaam
   const [studenten, setStudenten] = useState([]);
   const [error, setError] = useState(null);
   const verwijderStudent=async(id)=>{
@@ -10,9 +9,7 @@ function Aanmaken() {
     setStudenten(studenten.filter((student)=>student._id!==id));
     }catch(err){
       console.error('Verwijderen mislukt', err)
-
     }
-
   }
 
   useEffect(() => {
@@ -43,7 +40,7 @@ function Aanmaken() {
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Studenten zoeken
+          Studenten beheren {/* AANPASSING: Titel */}
         </h1>
 
         {error && (
@@ -84,4 +81,5 @@ function Aanmaken() {
   );
 }
 
-export default Aanmaken;
+// Exporteer de component met de juiste naam
+export default StudentenBeheer; // AANPASSING: Exporteernaam

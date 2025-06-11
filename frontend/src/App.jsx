@@ -3,8 +3,7 @@ import './index.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BedrijfNavbar from './components/BedrijfNavbar';
-import ProtectRoute from './components/ProtectRoute';
-
+import ProtectRoute from './components/ProtectRoute'; // Zorg dat deze import correct is
 
 // Algemeen
 import About from './pages/About';
@@ -26,131 +25,70 @@ import MijnAfspraken from './pages/Student/MijnAfspraken';
 import MijnProfiel from './pages/Student/MijnProfiel';
 
 //Admin
-
 import Dashboard from './pages/Admin/Dashboard';
 import AdSpeeddates from './pages/Admin/AdSpeeddate';
 import Instellingen from './pages/Admin/AdInstellingen';
 import AdminLayout from './pages/Admin/AdminLayOut';
 import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
-import Aanmaak from './pages/Admin/StudentenBeheer';
+import StudentenBeheer from './pages/Admin/StudentenBeheer'; // Importeer als StudentenBeheer
 
 
 function App() {
   const location = useLocation();
-  const role = localStorage.getItem("role"); // "student" of "bedrijf"
+  const role = localStorage.getItem("role");
 
-  // Toon juiste navbar op basis van rol
   const hideNavbar = ["/login", "/bedrijf/signup"].includes(location.pathname);
+
+  let currentNavbar = <Navbar />;
+  if (role === "bedrijf") {
+    currentNavbar = <BedrijfNavbar />;
+  }
+  // Als je een aparte AdminNavbar wilt, voeg hier toe:
+  // else if (role === "admin") {
+  //   currentNavbar = <AdminNavbar />; // Zorg dat AdminNavbar is geïmporteerd en bestaat
+  // }
 
   return (
     <>
-      {!hideNavbar && (role === "bedrijf" ? <BedrijfNavbar /> : <Navbar />)}
+      {!hideNavbar && currentNavbar}
 
       <Routes>
-        {/* Redirect */}
         <Route path="/" element={<Navigate to="/speeddates" />} />
-
-        {/* Algemeen */}
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
 
-      {/* Bedrijf*/}
-      <Route path="/bedrijf/signup" element={<BedrijfSignup />} />
-      <Route path="/bedrijf-home" element={
-        <ProtectRoute allowedRoles={["bedrijf"]}>
-          <Home />
-        </ProtectRoute>
-      } />
-      <Route path="/aanmaken" element={
-        <ProtectRoute allowedRoles={["bedrijf"]}>
-          <Aanmaken />
-        </ProtectRoute>
-      } />
-      <Route path="/bedrijf-aanvragen" element={
-        <ProtectRoute allowedRoles={["bedrijf"]}>
-          <Aanvragen />
-        </ProtectRoute>
-      } />
-      <Route path="/bedrijf-profiel" element={
-        <ProtectRoute allowedRoles={["bedrijf"]}>
-          <BedrijfProfiel />
-        </ProtectRoute>
-      } />
-      <Route path="/studenten-zoeken" element={
-        <ProtectRoute allowedRoles={["bedrijf"]}>
-          <StudentenZoeken />
-        </ProtectRoute>
-      } />
-        <Route path="/bedrijf-mail" element={
-         <ProtectRoute allowedRoles={["bedrijf"]}>
-            <MailIntre />
-          </ProtectRoute>
-      } />
+
+        {/* Bedrijf Routes */}
+        <Route path="/bedrijf/signup" element={<BedrijfSignup />} />
+        <Route path="/bedrijf-home" element={<Home />} />
+        <Route path="/aanmaken" element={<Aanmaken />} />
+        <Route path="/bedrijf-aanvragen" element={<Aanvragen />} />
+        <Route path="/bedrijf-profiel" element={<BedrijfProfiel />} />
+        <Route path="/studenten-zoeken" element={<StudentenZoeken />} />
+        <Route path="/bedrijf-mail" element={<MailIntre />} />
+
+        {/* Student Routes */}
+        <Route path="/speeddates" element={<Speeddates />} />
+        <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
+        <Route path="/mijnafspraken" element={<MijnAfspraken />} />
+        <Route path="/mijnprofiel" element={<MijnProfiel />} />
 
 
-      {/* Student*/}
-      <Route path="/speeddates" element={
-        <ProtectRoute allowedRoles={["student"]}>
-          <Speeddates />
-        </ProtectRoute>
-      } />
-      <Route path="/mijnaanvragen" element={
-        <ProtectRoute allowedRoles={["student"]}>
-          <MijnAanvragen />
-        </ProtectRoute>
-      } />
-      <Route path="/mijnafspraken" element={
-        <ProtectRoute allowedRoles={["student"]}>
-          <MijnAfspraken />
-        </ProtectRoute>
-      } />
-      <Route path="/mijnprofiel" element={
-        <ProtectRoute allowedRoles={["student"]}>
-          <MijnProfiel />
-        </ProtectRoute>
-      } />
+        {/* Admin Routes - Geneste routes binnen een ProtectRoute */}
+        <Route path="/admin" element={<ProtectRoute allowedRoles={["admin"]} />}>
+          <Route path="dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
+          <Route path="bedrijvenbeheer" element={<AdminLayout><Bedrijvenbeheer /></AdminLayout>} />
+          <Route path="studentenbeheer" element={<AdminLayout><StudentenBeheer /></AdminLayout>} />
+          <Route path="speeddatesbeheer" element={<AdminLayout><AdSpeeddates /></AdminLayout>} />
+          <Route path="instellingen" element={<AdminLayout><Instellingen /></AdminLayout>} />
+          {/* Standaard redirect voor /admin als het direct wordt bezocht */}
+          <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
 
-        {/* Admin */}
-        <Route path="/admindashboard" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-              <AdminLayout>
-                <Dashboard />
-              </AdminLayout>
-            </ProtectRoute>
-          } />
-
-        <Route path="/adspeeddate" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-              <AdminLayout>
-                <AdSpeeddates />
-              </AdminLayout>
-            </ProtectRoute>
-          } />
-
-
-        <Route path="/adinstellingen" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-              <AdminLayout>
-                <Instellingen />
-              </AdminLayout>
-            </ProtectRoute>
-          } />
-
-        
-        <Route path="/adminbedrijfbeheer" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-                <AdminLayout>
-                  <Bedrijvenbeheer />
-                </AdminLayout>
-            </ProtectRoute>
-          }/>
-        <Route path="/adminstudentbeheer" element={
-            <ProtectRoute allowedRoles={["admin"]}>
-            <AdminLayout>
-                <Aanmaak />
-            </AdminLayout>
-            </ProtectRoute>
-          }/>
+        {/* Catch-all route voor het geval /admin-home of /admindashboard nog ergens worden gebruikt en je ze wilt redirecten */}
+        {/* Optioneel: als je zeker weet dat alle navigatie /admin/dashboard gebruikt, kun je deze weglaten */}
+        <Route path="/admin-home" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admindashboard" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     </>
   );
