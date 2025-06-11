@@ -1,12 +1,19 @@
 import express from "express";
-// Only import getAllSpeeddates, as login is now handled by authController.js
-import { getAllSpeeddates } from '../controllers/studentController.js';
+// Importeer de nieuwe functies voor het profielbeheer
+import { getAllSpeeddates, getStudentProfile, updateStudentProfile } from '../controllers/studentController.js';
 
 const router = express.Router();
 
-// REMOVED: router.post("/login", loginStudent); // This login is now handled by /api/auth/login
-
-// Route to get all speeddates (for students)
+// Route om alle speeddates op te halen voor studenten
 router.get('/speeddates', getAllSpeeddates);
+
+// NIEUWE ROUTE: Profiel van een specifieke student ophalen
+// studentId komt uit de URL parameter (e.g., /api/student/mijnprofiel/654321abcd)
+router.get('/mijnprofiel/:studentId', getStudentProfile);
+
+// NIEUWE ROUTE: Profiel van een specifieke student bijwerken
+// Gebruik PUT voor volledige vervanging, of PATCH voor gedeeltelijke update
+router.put('/mijnprofiel/:studentId', updateStudentProfile);
+
 
 export default router;
