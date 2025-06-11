@@ -1,9 +1,11 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
+
 const ProtectRoute = ({ allowedRoles }) => {
   const userRole = localStorage.getItem('role');
   const userId = localStorage.getItem('userId'); // Controleer ook of de gebruiker überhaupt een ID heeft opgeslagen
+
 
   // 1. Controleer of de gebruiker is ingelogd (heeft een userId en een rol)
   if (!userId || !userRole) {

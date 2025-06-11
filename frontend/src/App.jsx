@@ -57,6 +57,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
 
+
         {/* Bedrijf Routes */}
         <Route path="/bedrijf/signup" element={<BedrijfSignup />} />
         <Route path="/bedrijf-home" element={<Home />} />
@@ -71,6 +72,7 @@ function App() {
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
         <Route path="/mijnafspraken" element={<MijnAfspraken />} />
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
+
 
         {/* Admin Routes - Geneste routes binnen een ProtectRoute */}
         <Route path="/admin" element={<ProtectRoute allowedRoles={["admin"]} />}>
