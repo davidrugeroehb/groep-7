@@ -1,8 +1,7 @@
-// Aangepaste import: gebruik 'aanvraagModel.js' als de bestandsnaam
 import Aanvraag from '../models/aanvraagModel.js';
 import Speeddate from '../models/speeddateModel.js';
-import Student from '../models/studentModel.js'; // Nodig voor populatie van studentgegevens
-import Bedrijf from '../models/bedrijfModel.js';   // Nodig voor populatie van bedrijfgegevens (let op de naam 'bedrijfModel' hier)
+import Student from '../models/studentModel.js';
+import Bedrijf from '../models/bedrijfModel.js';
 
 // 1. Functie om een aanvraag voor een speeddate te creëren (door student)
 const createAanvraag = async (req, res) => {
@@ -87,7 +86,10 @@ const getStudentAanvragen = async (req, res) => {
       talen: aanvraag.speeddate.talen,
       beschrijving: aanvraag.speeddate.beschrijving,
       status: aanvraag.status,
-      afspraakDetails: aanvraag.afspraakDetails,
+      afspraakDetails: {
+        tijd: `${aanvraag.speeddate.starttijd} - ${aanvraag.speeddate.eindtijd}`,
+        lokaal: aanvraag.afspraakDetails?.lokaal || 'Nader te bepalen',
+      },
       createdAt: aanvraag.createdAt,
     }));
 
@@ -148,11 +150,10 @@ const getBedrijfAanvragen = async (req, res) => {
 
 
 // 4. Functie om de status van een aanvraag bij te werken (door bedrijf)
-// Hier wordt ook de speeddate status bijgewerkt en afspraakDetails toegevoegd
 const updateAanvraagStatus = async (req, res) => {
   try {
     const { aanvraagId } = req.params;
-    const { status, afspraakDetails } = req.body;
+    const { status, afspraakDetails = {} } = req.body;
 
     if (!aanvraagId || !status) {
       return res.status(400).json({ message: 'Aanvraag ID en status zijn vereist.' });
@@ -162,32 +163,29 @@ const updateAanvraagStatus = async (req, res) => {
     if (!aanvraag) {
       return res.status(404).json({ message: 'Aanvraag niet gevonden.' });
     }
+    if (!aanvraag.speeddate) {
+        return res.status(404).json({ message: 'Gekoppelde speeddate niet gevonden.' });
+    }
 
     const oldStatus = aanvraag.status;
     aanvraag.status = status;
 
     if (status === 'goedgekeurd') {
-      if (!afspraakDetails || !afspraakDetails.tijd || !afspraakDetails.lokaal) {
-        return res.status(400).json({ message: 'Tijd en lokaal zijn vereist voor een goedgekeurde afspraak.' });
-      }
-      aanvraag.afspraakDetails = afspraakDetails;
+      aanvraag.afspraakDetails.tijd = `${aanvraag.speeddate.starttijd} - ${aanvraag.speeddate.eindtijd}`;
+      aanvraag.afspraakDetails.lokaal = afspraakDetails.lokaal || aanvraag.speeddate.lokaal;
 
-      if (aanvraag.speeddate) {
-        aanvraag.speeddate.status = 'bevestigd';
-        await aanvraag.speeddate.save();
-      }
+      aanvraag.speeddate.status = 'bevestigd';
+      await aanvraag.speeddate.save();
+
     } else if (status === 'afgekeurd') {
-      if (aanvraag.speeddate) {
-        aanvraag.speeddate.status = 'open';
-        aanvraag.speeddate.aangevraagdDoor = null;
-        await aanvraag.speeddate.save();
-      }
+      aanvraag.speeddate.status = 'open';
+      aanvraag.speeddate.aangevraagdDoor = null;
+      await aanvraag.speeddate.save();
       aanvraag.afspraakDetails = {};
+
     } else if (status === 'in behandeling' && oldStatus !== 'in behandeling') {
-      if (aanvraag.speeddate) {
-        aanvraag.speeddate.status = 'aangevraagd';
-        await aanvraag.speeddate.save();
-      }
+      aanvraag.speeddate.status = 'aangevraagd';
+      await aanvraag.speeddate.save();
       aanvraag.afspraakDetails = {};
     }
 
@@ -225,7 +223,6 @@ const deleteAanvraag = async (req, res) => {
         return res.status(400).json({ message: 'Bevestigde afspraken kunnen niet geannuleerd worden via deze weg. Neem contact op met het bedrijf.' });
     }
 
-
     await Aanvraag.findByIdAndDelete(aanvraagId);
 
     res.status(200).json({ message: 'Aanvraag succesvol geannuleerd.' });
@@ -250,13 +247,13 @@ const getStudentAfspraken = async (req, res) => {
     const afspraken = await Aanvraag.find({ student: studentId, status: 'goedgekeurd' })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus bedrijf',
+        select: 'starttijd eindtijd vakgebied focus bedrijf lokaal',
         populate: {
           path: 'bedrijf',
           select: 'name sector',
         }
       })
-      .sort({ 'afspraakDetails.tijd': 1 });
+      .sort({ createdAt: 1 });
 
     const formattedAfspraken = afspraken.map(afspraak => ({
       _id: afspraak._id,
@@ -264,8 +261,8 @@ const getStudentAfspraken = async (req, res) => {
       bedrijfNaam: afspraak.speeddate.bedrijf?.name || 'Onbekend Bedrijf',
       sector: afspraak.speeddate.bedrijf?.sector || 'N/B',
       focus: afspraak.speeddate.focus,
-      tijd: afspraak.afspraakDetails?.tijd || 'N/B',
-      lokaal: afspraak.afspraakDetails?.lokaal || 'N/B',
+      tijd: `${afspraak.speeddate.starttijd} - ${afspraak.speeddate.eindtijd}`,
+      lokaal: afspraak.speeddate.lokaal || 'Nader te bepalen',
     }));
 
     res.status(200).json(formattedAfspraken);
