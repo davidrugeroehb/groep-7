@@ -32,7 +32,7 @@ import AdSpeeddates from './pages/Admin/AdSpeeddate';
 import Instellingen from './pages/Admin/AdInstellingen';
 import AdminLayout from './pages/Admin/AdminLayOut';
 import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
-import Studentenbeheer from './pages/Admin/Aanmaken';
+import Aanmaak from './pages/Admin/StudentenBeheer';
 
 
 function App() {
@@ -105,7 +105,7 @@ function App() {
         <Route path="/adminstudentbeheer" element={
             <ProtectRoute allowedRoles={["admin"]}>
             <AdminLayout>
-                <Studentenbeheer />
+                <Aanmaak />
             </AdminLayout>
             </ProtectRoute>
           }/>
