@@ -3,6 +3,8 @@ import './index.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BedrijfNavbar from './components/BedrijfNavbar';
+import './App.css';
+
 
 // Algemeen
 import About from './pages/About';
@@ -21,6 +23,15 @@ import Speeddates from './pages/Student/Speeddates';
 import MijnAanvragen from './pages/Student/MijnAanvragen';
 import MijnAfspraken from './pages/Student/MijnAfspraken';
 import MijnProfiel from './pages/Student/MijnProfiel';
+
+//Admin
+import Header from './Header';
+import Sidebar from './Sidebar';
+import Home from './Home';
+import Speeddates from './Admin/Speeddates';
+import Studenten from './Admin/Studenten';
+import Bedrijven from './Admin/Bedrijven';
+import Instellingen from './Admin/Instellingen';
 
 function App() {
   const location = useLocation();
@@ -54,6 +65,17 @@ function App() {
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
         <Route path="/mijnafspraken" element={<MijnAfspraken />} />
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
+
+        {/* Admin */}
+        <div className='grid-container'>
+          <Header />
+          <Sidebar />
+          <Route path="/" element={<Home />} />
+          <Route path="/speeddates" element={<Speeddates />} />
+          <Route path="/studenten" element={<Studenten />} />
+          <Route path="/bedrijven" element={<Bedrijven />} />
+          <Route path="/instellingen" element={<Instellingen />} />
+        </div>
       </Routes>
     </>
   );
