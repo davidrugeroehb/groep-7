@@ -232,4 +232,4 @@ const Bedrijvenbeheer = () => {
     );
 };
 
-export default Bedrijvenbeheer
+export default Bedrijvenbeheer;
