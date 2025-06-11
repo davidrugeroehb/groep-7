@@ -3,6 +3,7 @@ import './index.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BedrijfNavbar from './components/BedrijfNavbar';
+import ProtectRoute from './components/ProtectRoute';
 
 // Algemeen
 import About from './pages/About';
@@ -21,9 +22,12 @@ import Speeddates from './pages/Student/Speeddates';
 import MijnAanvragen from './pages/Student/MijnAanvragen';
 import MijnAfspraken from './pages/Student/MijnAfspraken';
 import MijnProfiel from './pages/Student/MijnProfiel';
+import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
 //admin
-//import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
-//import Studentenbeheer from './pages/Admin/Studentenbeheer';
+import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
+import Studentenbeheer from './pages/Admin/Studentenbeheer';
+
+
 
 function App() {
   const location = useLocation();
@@ -57,7 +61,17 @@ function App() {
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
         <Route path="/mijnafspraken" element={<MijnAfspraken />} />
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
-        {/*Admin */}
+        {/*Admin + beveiligd*/}
+        <Route path="/adminbedrijfbeheer" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+                <Bedrijvenbeheer />
+            </ProtectRoute>
+          }/>
+        <Route path="/adminstudentbeheer" element={
+            <ProtectRoute allowedRoles={["admin"]}>
+                <Studentenbeheer />
+            </ProtectRoute>
+          }/>
       </Routes>
     </>
   );
