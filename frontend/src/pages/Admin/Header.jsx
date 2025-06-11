@@ -3,7 +3,7 @@ import {BsFillBellFill, BsFillEnvelopeFill, BsPersonCircle, BsSearch, BsJustify}
 
 function Header() {
   return (
-      <header className='header'>
+      <header className='area-sidebar'{...props}>
         <div className='menu-icoon'>
           <BsJustify className='icoon' />
 

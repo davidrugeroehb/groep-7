@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom'
 
 function Sidebar() {
   return (
-    <aside id="sidebar">
+    <aside id="sidebar" className='area-sidebar'{...props}>
       <div className="sidebar-title">
         <div className="sidebar-brand">
           <BsShieldLock className="icoon_header" /> ADMIN
@@ -23,16 +23,16 @@ function Sidebar() {
           <Link to="/"><BsGrid1X2Fill className="icoon" /> Dashboard</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/speeddates"><BsLightningChargeFill className="icoon" /> Speeddates</Link>
+          <Link to="/adspeeddate"><BsLightningChargeFill className="icoon" /> Speeddates</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/studenten"><BsPeopleFill className="icoon" /> Studenten</Link>
+          <Link to="/adstudenten"><BsPeopleFill className="icoon" /> Studenten</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/bedrijven"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
+          <Link to="/adbedrijven"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
         </li>
         <li className="sidebar-list-item">
-          <Link to="/instellingen"><BsFillGearFill className="icoon" /> Instellingen</Link>
+          <Link to="/adinstellingen"><BsFillGearFill className="icoon" /> Instellingen</Link>
         </li>
       </ul>
     </aside>

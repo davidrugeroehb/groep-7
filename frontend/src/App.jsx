@@ -3,7 +3,7 @@ import './index.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BedrijfNavbar from './components/BedrijfNavbar';
-import './App.css';
+
 
 
 // Algemeen
@@ -25,13 +25,13 @@ import MijnAfspraken from './pages/Student/MijnAfspraken';
 import MijnProfiel from './pages/Student/MijnProfiel';
 
 //Admin
-import Header from './Header';
-import Sidebar from './Sidebar';
-import Home from './Home';
-import Speeddates from './Admin/Speeddates';
-import Studenten from './Admin/Studenten';
-import Bedrijven from './Admin/Bedrijven';
-import Instellingen from './Admin/Instellingen';
+
+import Dashboard from './pages/Admin/Dashboard';
+import AdSpeeddates from './pages/Admin/AdSpeeddate';
+import Studenten from './pages/Admin/AdStudenten';
+import Bedrijven from './pages/Admin/AdBedrijven';
+import Instellingen from './pages/Admin/AdInstellingen';
+import AdminLayout from './pages/Admin/AdminLayOut';
 
 function App() {
   const location = useLocation();
@@ -67,15 +67,12 @@ function App() {
         <Route path="/mijnprofiel" element={<MijnProfiel />} />
 
         {/* Admin */}
-        <div className='grid-container'>
-          <Header />
-          <Sidebar />
-          <Route path="/" element={<Home />} />
-          <Route path="/speeddates" element={<Speeddates />} />
-          <Route path="/studenten" element={<Studenten />} />
-          <Route path="/bedrijven" element={<Bedrijven />} />
-          <Route path="/instellingen" element={<Instellingen />} />
-        </div>
+        <Route path="/admindashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
+        <Route path="/adspeeddate" element={<AdminLayout><AdSpeeddates /></AdminLayout>} />
+        <Route path="/adstudenten" element={<AdminLayout><Studenten /></AdminLayout>} />
+        <Route path="/adbedrijven" element={<AdminLayout><Bedrijven /></AdminLayout>} />
+        <Route path="/adinstellingen" element={<AdminLayout><Instellingen /></AdminLayout>} />
+
       </Routes>
     </>
   );
