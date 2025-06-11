@@ -231,3 +231,5 @@ const Bedrijvenbeheer = () => {
         </div>
     );
 };
+
+export default Bedrijvenbeheer;
