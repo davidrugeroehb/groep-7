@@ -1,18 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-function Aanmaken() {
-
-  
+// Verander de functienaam van 'Aanmaken' naar 'StudentenBeheer'
+function StudentenBeheer() { // AANPASSING: Functienaam
   const [studenten, setStudenten] = useState([]);
   const [error, setError] = useState(null);
-  const verwijderStudent=(id)=>{
-    setStudenten(studenten.filter((student)=>student.id!==id));
+  const verwijderStudent=async(id)=>{
+    try{
+    setStudenten(studenten.filter((student)=>student._id!==id));
+    }catch(err){
+      console.error('Verwijderen mislukt', err)
+    }
   }
 
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/bedrijf/studenten", {
+        const res = await fetch("http://localhost:4000/api/studenten", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`,
           },
@@ -37,7 +40,7 @@ function Aanmaken() {
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Studenten zoeken
+          Studenten beheren {/* AANPASSING: Titel */}
         </h1>
 
         {error && (
@@ -68,7 +71,7 @@ function Aanmaken() {
                 <p className="text-gray-700">
                   <strong>Talen:</strong> {s.talen || "—"}
                 </p>
-                <button className="bg-red-600" text-white px-3 py-1 rounded onClick={()=>verwijderStudent(studenten.id)}>Verwijder</button>
+                <button className="bg-red-600 text-white px-3 py-1 rounded" onClick={()=>verwijderStudent(s._id)}>Verwijder</button>
               </div>
             ))}
           </div>
@@ -78,4 +81,5 @@ function Aanmaken() {
   );
 }
 
-export default Aanmaken;
+// Exporteer de component met de juiste naam
+export default StudentenBeheer; // AANPASSING: Exporteernaam
