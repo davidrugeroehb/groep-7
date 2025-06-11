@@ -7,9 +7,9 @@ function StudentenZoeken() {
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/bedrijf/studenten", {
+        const res = await fetch("http://localhost:4000/api/studenten", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`, //is dit nodig voor alle studenten info??
           },
         });
 
