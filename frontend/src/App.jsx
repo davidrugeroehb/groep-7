@@ -54,19 +54,61 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Bedrijf */}
-        <Route path="/bedrijf/signup" element={<BedrijfSignup />} />
-        <Route path="/bedrijf-home" element={<Home />} />
-        <Route path="/aanmaken" element={<Aanmaken />} />
-        <Route path="/bedrijf-aanvragen" element={<Aanvragen />} />
-        <Route path="/bedrijf-profiel" element={<BedrijfProfiel />} />
-        <Route path="/studenten-zoeken" element={<StudentenZoeken />} />
-        <Route path="/bedrijf-mail" element={<MailIntre />} />
-        {/* Student */}
-        <Route path="/speeddates" element={<Speeddates />} />
-        <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
-        <Route path="/mijnafspraken" element={<MijnAfspraken />} />
-        <Route path="/mijnprofiel" element={<MijnProfiel />} />
+      {/* Bedrijf*/}
+      <Route path="/bedrijf/signup" element={<BedrijfSignup />} />
+      <Route path="/bedrijf-home" element={
+        <ProtectRoute allowedRoles={["bedrijf"]}>
+          <Home />
+        </ProtectRoute>
+      } />
+      <Route path="/aanmaken" element={
+        <ProtectRoute allowedRoles={["bedrijf"]}>
+          <Aanmaken />
+        </ProtectRoute>
+      } />
+      <Route path="/bedrijf-aanvragen" element={
+        <ProtectRoute allowedRoles={["bedrijf"]}>
+          <Aanvragen />
+        </ProtectRoute>
+      } />
+      <Route path="/bedrijf-profiel" element={
+        <ProtectRoute allowedRoles={["bedrijf"]}>
+          <BedrijfProfiel />
+        </ProtectRoute>
+      } />
+      <Route path="/studenten-zoeken" element={
+        <ProtectRoute allowedRoles={["bedrijf"]}>
+          <StudentenZoeken />
+        </ProtectRoute>
+      } />
+        <Route path="/bedrijf-mail" element={
+         <ProtectRoute allowedRoles={["bedrijf"]}>
+            <MailIntre />
+          </ProtectRoute>
+      } />
+
+
+      {/* Student*/}
+      <Route path="/speeddates" element={
+        <ProtectRoute allowedRoles={["student"]}>
+          <Speeddates />
+        </ProtectRoute>
+      } />
+      <Route path="/mijnaanvragen" element={
+        <ProtectRoute allowedRoles={["student"]}>
+          <MijnAanvragen />
+        </ProtectRoute>
+      } />
+      <Route path="/mijnafspraken" element={
+        <ProtectRoute allowedRoles={["student"]}>
+          <MijnAfspraken />
+        </ProtectRoute>
+      } />
+      <Route path="/mijnprofiel" element={
+        <ProtectRoute allowedRoles={["student"]}>
+          <MijnProfiel />
+        </ProtectRoute>
+      } />
 
         {/* Admin */}
         <Route path="/admindashboard" element={
