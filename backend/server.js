@@ -28,7 +28,6 @@ app.use('/api/auth', authRoutes); // Voor universele login
 // Bestaande specifieke routes (niet-authenticatie functionaliteiten)
 app.use('/api/student', studentRoutes); // Voor student-specifieke routes (bijv. alle speeddates ophalen)
 app.use('/api/bedrijf', bedrijfRoutes); // Voor bedrijf-specifieke routes (bijv. speeddates aanmaken/ophalen)
-
 // NIEUW: Gebruik de aanvraag routes
 app.use('/api', aanvraagRoutes); // Gebruik /api als basis voor de aanvraag routes
 
