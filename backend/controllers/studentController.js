@@ -1,6 +1,15 @@
 import Speeddate from '../models/speeddateModel.js';
 import Student from '../models/studentModel.js'; // Importeer het studentModel
 
+const getAllStudenten= async(req,res)=>{
+  try{
+    const studenten=await Student.find().select('-password');
+    res.status(200).json(studenten)
+  }catch(err){
+    res.status(500).json({message:'Fout bij het ophalen van studenten',error: err.message})
+  }
+}
+
 // Functie om alle speeddates voor studenten op te halen (bestaat al)
 const getAllSpeeddates = async (req, res) => {
   try {
@@ -85,4 +94,4 @@ const updateStudentProfile = async (req, res) => {
 };
 
 
-export { getAllSpeeddates, getStudentProfile, updateStudentProfile };
+export { getAllSpeeddates, getStudentProfile, updateStudentProfile, getAllStudenten };

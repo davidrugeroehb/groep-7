@@ -1,8 +1,10 @@
 import express from "express";
 // Importeer de nieuwe functies voor het profielbeheer
-import { getAllSpeeddates, getStudentProfile, updateStudentProfile } from '../controllers/studentController.js';
+import { getAllSpeeddates, getStudentProfile, updateStudentProfile, getAllStudenten } from '../controllers/studentController.js';
 
 const router = express.Router();
+
+router.get('/api/studenten', getAllStudenten); //api/studenten moet die getten
 
 // Route om alle speeddates op te halen voor studenten
 router.get('/speeddates', getAllSpeeddates);
