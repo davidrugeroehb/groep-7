@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import BedrijfNavbar from './components/BedrijfNavbar';
 import ProtectRoute from './components/ProtectRoute';
 
+
 // Algemeen
 import About from './pages/About';
 import Login from './pages/Login';
@@ -16,6 +17,7 @@ import Aanmaken from './pages/Bedrijf/Aanmaken';
 import Aanvragen from './pages/Bedrijf/Aanvragen';
 import BedrijfProfiel from './pages/Bedrijf/BedrijfProfiel';
 import StudentenZoeken from './pages/Bedrijf/StudentenZoeken';
+import MailIntre from './pages/Bedrijf/Mail_intre'
 
 // Student
 import Speeddates from './pages/Student/Speeddates';
@@ -55,7 +57,7 @@ function App() {
         <Route path="/bedrijf-aanvragen" element={<Aanvragen />} />
         <Route path="/bedrijf-profiel" element={<BedrijfProfiel />} />
         <Route path="/studenten-zoeken" element={<StudentenZoeken />} />
-
+        <Route path="/bedrijf-mail" element={<MailIntre />} />
         {/* Student */}
         <Route path="/speeddates" element={<Speeddates />} />
         <Route path="/mijnaanvragen" element={<MijnAanvragen />} />
