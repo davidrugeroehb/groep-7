@@ -24,7 +24,6 @@ import Speeddates from './pages/Student/Speeddates';
 import MijnAanvragen from './pages/Student/MijnAanvragen';
 import MijnAfspraken from './pages/Student/MijnAfspraken';
 import MijnProfiel from './pages/Student/MijnProfiel';
-import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
 //admin
 import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
 import Studentenbeheer from './pages/Admin/Studentenbeheer';
