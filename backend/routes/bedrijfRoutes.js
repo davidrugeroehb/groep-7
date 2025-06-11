@@ -1,18 +1,18 @@
 import express from "express";
-// Only import registerBedrijf, as login is now handled by authController.js
 import { registerBedrijf } from "../controllers/bedrijfAuthController.js";
-import { createSpeeddate, getCompanySpeeddates } from '../controllers/bedrijfController.js';
+import { createSpeeddate, getCompanySpeeddates, getCompanyProfile, updateCompanyProfile } from '../controllers/bedrijfController.js'; // Importeer de nieuwe functies
 
 const router = express.Router();
 
-router.post("/register", registerBedrijf); // Keep registration route
+router.post("/register", registerBedrijf); // Bestaande registratie route
 
-// REMOVED: router.post("/login", loginBedrijf); // This login is now handled by /api/auth/login
+router.post("/speeddates", createSpeeddate); // Bestaande speeddate aanmaak route
+router.get("/speeddates/:bedrijfId", getCompanySpeeddates); // Bestaande route voor bedrijf-specifieke speeddates
 
-// Route to create a new speeddate
-router.post("/speeddates", createSpeeddate);
+// NIEUWE ROUTE: Profiel van een specifiek bedrijf ophalen
+router.get('/profiel/:bedrijfId', getCompanyProfile);
 
-// Route to get speeddates for a specific company
-router.get("/speeddates/:bedrijfId", getCompanySpeeddates);
+// NIEUWE ROUTE: Profiel van een specifiek bedrijf bijwerken
+router.put('/profiel/:bedrijfId', updateCompanyProfile);
 
 export default router;
