@@ -4,7 +4,7 @@ function Aanmaken() {
   const [form, setForm] = useState({
     starttijd: "",
     eindtijd: "",
-    // gespreksduur en pauze zijn verwijderd
+    lokaal: "", // NIEUW: Lokaal veld in de state
     vakgebied: "",
     focus: "",
     opportuniteit: [],
@@ -12,17 +12,14 @@ function Aanmaken() {
     beschrijving: "",
   });
 
-  const [bedrijfId, setBedrijfId] = useState(null); // State om het bedrijfs-ID op te slaan
+  const [bedrijfId, setBedrijfId] = useState(null);
 
-  // Haal bedrijfs-ID op uit localStorage wanneer de component wordt geladen
   useEffect(() => {
     const storedBedrijfId = localStorage.getItem('bedrijfId');
     if (storedBedrijfId) {
       setBedrijfId(storedBedrijfId);
     } else {
       console.warn("Bedrijf ID niet gevonden in localStorage. Gelieve in te loggen.");
-      // Optioneel: navigeer naar login of toon een foutmelding
-      // navigate('/login');
     }
   }, []);
 
@@ -36,10 +33,9 @@ function Aanmaken() {
           ? [...prev[name], value]
           : prev[name].filter((item) => item !== value),
       }));
-    } else { // radio buttons (if any) and text inputs
+    } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
-    // De pauze checkbox heeft nu geen speciale handeling meer nodig omdat deze is verwijderd
   };
 
   const handleSubmit = async (e) => {
@@ -65,10 +61,10 @@ function Aanmaken() {
       }
 
       alert("Speeddate aangemaakt!");
-      // Reset formulier na succesvolle verzending
       setForm({
         starttijd: "",
         eindtijd: "",
+        lokaal: "", // NIEUW: Lokaal resetten
         vakgebied: "",
         focus: "",
         opportuniteit: [],
@@ -91,7 +87,7 @@ function Aanmaken() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Tijd */}
           <div>
-            <h2 className="text-xl font-semibold mb-2">⏰ Tijd</h2>
+            <h2 className="text-xl font-semibold mb-2">⏰ Tijd & Lokaal</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block font-medium mb-1">Starttijd</label>
@@ -116,37 +112,19 @@ function Aanmaken() {
                 />
               </div>
             </div>
-
-            {/* Gesprkstijd per student en Pauze inplannen zijn verwijderd */}
-            {/* Oude code voor gespreksduur en pauze:
+            {/* NIEUW: Lokaal invoerveld */}
             <div className="mt-4">
-              <label className="block font-medium mb-1">
-                Gesprekstijd per student
-              </label>
-              <select
-                name="gespreksduur"
-                value={form.gespreksduur}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-              >
-                <option value="15">15 min</option>
-                <option value="20">20 min</option>
-                <option value="30">30 min</option>
-              </select>
-            </div>
-
-            <label className="flex items-center gap-2 mt-4">
+              <label className="block font-medium mb-1">Lokaal</label>
               <input
-                type="checkbox"
-                name="pauze"
-                checked={form.pauze}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, pauze: e.target.checked }))
-                }
+                type="text"
+                name="lokaal"
+                value={form.lokaal}
+                onChange={handleChange}
+                placeholder="bv. Lokaal A1.01"
+                required
+                className="w-full border p-2 rounded"
               />
-              Pauze inplannen?
-            </label>
-            */}
+            </div>
           </div>
 
           {/* Focus */}
