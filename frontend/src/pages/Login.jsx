@@ -55,7 +55,7 @@ function Login() {
           // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
           navigate("/bedrijf-home");
         }else if (data.role === "admin") {
-          localStorage.setItem("adminId", data.adminId);
+          localStorage.setItem("adminId", data.userId);
           // localStorage.setItem("bedrijfToken", data.token); // If your company-specific components still use this
           navigate("/admin-home");
         } else {
