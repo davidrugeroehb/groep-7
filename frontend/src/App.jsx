@@ -32,7 +32,7 @@ import AdSpeeddates from './pages/Admin/AdSpeeddate';
 import Instellingen from './pages/Admin/AdInstellingen';
 import AdminLayout from './pages/Admin/AdminLayOut';
 import Bedrijvenbeheer from './pages/Admin/Bedrijvenbeheer';
-import Studentenbeheer from './pages/Admin/Studentenbeheer';
+import Studentenbeheer from './pages/Admin/Aanmaken';
 
 
 function App() {
