@@ -12,7 +12,7 @@ export const getabout = async (req,res)=>{
 export const updateabout = async (req,res)=>{
     try{
         const{tekst}=req.body;
-        let about=await About.fintOne();
+        let about=await About.findOne();
         if(about){
             about.tekst=tekst;
             await about.save();
