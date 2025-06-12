@@ -1,0 +1,481 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+
+:root {
+  --primary-color: #4361ee;
+  --secondary-color: #3f37c9;
+  --accent-color: #4895ef;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+  --success-color: #4cc9f0;
+  --danger-color: #f72585;
+  --warning-color: #f8961e;
+  --info-color: #4895ef;
+}
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  background-color: #f5f7fa;
+  color: var(--dark-color);
+  line-height: 1.6;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+.bedrijvenbeheer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+.bedrijvenbeheer-container h1 {
+  font-size: 2.5rem;
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  padding-top: 1rem;
+}
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+
+.header h1 {
+  font-size: 2.5rem;
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+
+.header p {
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+
+.main-content {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+}
+
+
+/* Zoekbalk */
+.zoekbalk {
+  margin-bottom: 2rem;
+}
+
+
+.zoekbalk input {
+  width: 100%;
+  padding: 12px 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--light-color);
+  transition: all 0.3s ease;
+}
+
+
+.zoekbalk input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+
+/* Tabbladen */
+.tabbladen {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+
+.tabbladen button {
+  padding: 0.8rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #6c757d;
+  position: relative;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+
+.tabbladen button.actief {
+  color: var(--primary-color);
+}
+
+
+.tabbladen button.actief::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+
+.tabbladen button:hover {
+  color: var(--dark-color);
+}
+
+
+/* Bedrijvenlijst */
+.bedrijven-lijst h2,
+.aanvragen-lijst h2 {
+  font-size: 1.5rem;
+  color: var(--dark-color);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+
+.result-count {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+
+/* Bedrijfscards */
+.bedrijf-card,
+.aanvraag-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+
+.bedrijf-card:hover,
+.aanvraag-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+
+.bedrijf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+
+.bedrijf-header h3 {
+  font-size: 1.2rem;
+  color: var(--dark-color);
+  font-weight: 600;
+  margin: 0;
+}
+
+
+.sector-tag {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--primary-color);
+}
+
+
+.bedrijf-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+
+.bedrijf-meta span {
+  display: flex;
+  align-items: center;
+}
+
+
+.bedrijf-meta i {
+  margin-right: 0.5rem;
+  color: var(--primary-color);
+  width: 16px;
+  text-align: center;
+}
+
+
+.bedrijf-card p,
+.aanvraag-card p {
+  color: #495057;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+
+/* Actieknoppen */
+.bedrijf-acties,
+.aanvraag-acties {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+
+button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+.bewerk-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+
+.bewerk-btn:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+
+.accepteer-btn {
+  background-color: var(--success-color);
+  color: white;
+}
+
+
+.accepteer-btn:hover {
+  background-color: #3aa8d8;
+  transform: translateY(-2px);
+}
+
+
+.weiger-btn {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+
+.weiger-btn:hover {
+  background-color: #e3126e;
+  transform: translateY(-2px);
+}
+
+
+.deactiveer-btn {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+
+.deactiveer-btn:hover {
+  background-color: #e68a19;
+  transform: translateY(-2px);
+}
+
+
+.activeer-btn {
+  background-color: var(--success-color);
+  color: white;
+}
+
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+
+.modal-inhoud {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+
+.modal h2 {
+  font-size: 1.5rem;
+  color: var(--dark-color);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+
+.form-groep {
+  margin-bottom: 1.2rem;
+}
+
+
+.form-groep label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+
+.form-groep input,
+.form-groep select,
+.form-groep textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--light-color);
+  transition: all 0.3s ease;
+}
+
+
+.form-groep input:focus,
+.form-groep select:focus,
+.form-groep textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+
+.form-groep textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+
+.modal-acties {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+
+.annuleer-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+
+.annuleer-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+
+.opslaan-btn {
+  background-color: var(--success-color);
+  color: white;
+}
+
+
+.opslaan-btn:hover {
+  background-color: #3aa8d8;
+  transform: translateY(-2px);
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .bedrijvenbeheer-container {
+    padding: 1rem;
+  }
+
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+
+  .main-content {
+    padding: 1.5rem;
+  }
+
+
+  .tabbladen {
+    flex-direction: column;
+    border-bottom: none;
+  }
+
+
+  .tabbladen button {
+    border-bottom: 1px solid #e9ecef;
+  }
+
+
+  .tabbladen button.actief::after {
+    display: none;
+  }
+
+
+  .bedrijf-acties,
+  .aanvraag-acties {
+    flex-direction: column;
+  }
+
+
+  button {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .modal-inhoud {
+    padding: 1.5rem;
+  }
+}

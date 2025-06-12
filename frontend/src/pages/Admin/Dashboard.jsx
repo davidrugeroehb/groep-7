@@ -48,7 +48,7 @@ function Dashboard() {
       </div>
 
       <div className="charts">
-        {/* Plaats hier je charts-componenten */}
+        {/* hier plaatsen we eventuele charts-componenten, geen prioriteit */}
       </div>
     </main>
   )
