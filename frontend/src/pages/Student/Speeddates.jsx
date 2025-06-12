@@ -1,6 +1,6 @@
-// SpeedDates.js
+// SpeedDates.jsx
 import React, { useState, useEffect } from 'react';
-import './SpeedDates.css';
+import './SpeedDates.css'; // Zorg dat dit CSS-bestand de benodigde stijlen bevat
 
 const SpeedDates = () => {
   const [speedDates, setSpeedDates] = useState([]);
@@ -15,6 +15,13 @@ const SpeedDates = () => {
   const [loading, setLoading] = useState(true);
   const studentId = localStorage.getItem('userId');
 
+  // Staten voor dynamische filteropties
+  const [uniqueSectors, setUniqueSectors] = useState([]);
+  const [uniqueLanguages, setUniqueLanguages] = useState([]);
+
+  // NIEUW: Staat voor sortering
+  const [sortOrder, setSortOrder] = useState('earliest'); // 'earliest' (vroegst) of 'latest' (laatst)
+
   useEffect(() => {
     const fetchSpeeddates = async () => {
       setLoading(true);
@@ -26,6 +33,17 @@ const SpeedDates = () => {
         }
         const data = await res.json();
         setSpeedDates(data.speeddates);
+
+        // Unieke waarden ophalen voor dynamische filters
+        const sectors = new Set();
+        const languages = new Set();
+        data.speeddates.forEach(date => {
+          sectors.add(date.vakgebied);
+          date.talen.forEach(lang => languages.add(lang));
+        });
+        setUniqueSectors(Array.from(sectors).sort());
+        setUniqueLanguages(Array.from(languages).sort());
+
       } catch (err) {
         console.error("Fout bij ophalen speeddates:", err);
         setError("Fout bij het laden van speeddates.");
@@ -57,19 +75,33 @@ const SpeedDates = () => {
       opportuniteit: [],
       taal: []
     });
+    setSortOrder('earliest'); // Reset sortering ook
   };
 
   const applyFilters = () => {
     setShowFilters(false);
   };
 
-  const filteredDates = speedDates.filter(date => {
-    return (
-      (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
-      (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
-      (filters.taal.length === 0 || filters.talen.some(t => date.talen.includes(t)))
-    );
-  });
+  // Eerst filteren, dan sorteren
+  const filteredAndSortedDates = speedDates
+    .filter(date => {
+      return (
+        (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
+        (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
+        (filters.taal.length === 0 || date.talen.some(t => filters.taal.includes(t)))
+      );
+    })
+    .sort((a, b) => {
+      // Datum parseren uit "HH:mm" strings voor vergelijking
+      const timeA = new Date(`2000-01-01T${a.starttijd}:00`);
+      const timeB = new Date(`2000-01-01T${b.starttijd}:00`);
+
+      if (sortOrder === 'earliest') {
+        return timeA - timeB; // Van vroegst naar laatst
+      } else {
+        return timeB - timeA; // Van laatst naar vroegst
+      }
+    });
 
   const toggleDetails = (id) => {
     setExpandedId(expandedId === id ? null : id);
@@ -111,7 +143,7 @@ const SpeedDates = () => {
   };
 
   const isApplyDisabled = (speeddate) => {
-    return speeddate.status !== 'open' || speeddate.aangevraagdDoor !== null;
+    return speeddate.status !== 'open' || (speeddate.aangevraagdDoor && speeddate.aangevraagdDoor !== studentId);
   };
 
   const getApplyButtonText = (speeddate) => {
@@ -122,11 +154,10 @@ const SpeedDates = () => {
       return 'Afspraak bevestigd';
     }
     if (speeddate.status === 'aangevraagd') {
-      return 'Reeds aangevraagd';
+      return 'Reeds aangevraagd door een andere student';
     }
     return 'Afspraak aanvragen';
   };
-
 
   if (loading) {
     return <div className="text-center py-10">Laden van speeddates...</div>;
@@ -135,6 +166,10 @@ const SpeedDates = () => {
   if (error) {
     return <div className="text-center py-10 text-red-600">{error}</div>;
   }
+
+  const getSectorClassName = (sector) => {
+    return sector.replace(/[^a-zA-Z0-9]/g, '');
+  };
 
   return (
     <div className="speeddates-container">
@@ -148,6 +183,7 @@ const SpeedDates = () => {
           className={`filter-toggle ${showFilters ? 'active' : ''}`}
           onClick={() => setShowFilters(!showFilters)}
         >
+          <i className={`fas ${showFilters ? 'fa-times' : 'fa-filter'}`}></i>
           {showFilters ? 'Filters verbergen' : 'Filters tonen'}
         </button>
 
@@ -156,7 +192,7 @@ const SpeedDates = () => {
             <div className="filter-group">
               <h3>Sector / Focus</h3>
               <div className="checkbox-grid">
-                {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
+                {uniqueSectors.map((sector) => (
                   <label key={sector} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -172,7 +208,7 @@ const SpeedDates = () => {
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
               <div className="checkbox-grid">
-                {["Stage", "Afstudeerproject", "Bijbaan / Werkstudent"].map((type) => (
+                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => ( // AANGEPAST: Nieuwe opties
                   <label key={type} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -189,7 +225,7 @@ const SpeedDates = () => {
             <div className="filter-group">
               <h3>Taal</h3>
               <div className="checkbox-grid">
-                {["Nederlands", "Engels", "Spaans", "Portugees", "Arabisch"].map((taal) => (
+                {uniqueLanguages.map((taal) => (
                   <label key={taal} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -203,6 +239,36 @@ const SpeedDates = () => {
               </div>
             </div>
 
+            {/* NIEUW: Sortering op tijd */}
+            <div className="filter-group">
+              <h3>Sorteren op Tijd</h3>
+              <div className="radio-group"> {/* Je kunt een radio-groep of dropdown gebruiken */}
+                <label className="checkbox-label">
+                  <input
+                    type="radio"
+                    name="sortTime"
+                    value="earliest"
+                    checked={sortOrder === 'earliest'}
+                    onChange={() => setSortOrder('earliest')}
+                  />
+                  <span className="checkmark"></span>
+                  Vroegste eerst
+                </label>
+                <label className="checkbox-label">
+                  <input
+                    type="radio"
+                    name="sortTime"
+                    value="latest"
+                    checked={sortOrder === 'latest'}
+                    onChange={() => setSortOrder('latest')}
+                  />
+                  <span className="checkmark"></span>
+                  Laatste eerst
+                </label>
+              </div>
+            </div>
+
+
             <div className="filter-buttons">
               <button className="apply-btn" onClick={applyFilters}>Filters toepassen</button>
               <button className="reset-btn" onClick={resetFilters}>Reset filters</button>
@@ -211,19 +277,19 @@ const SpeedDates = () => {
         )}
 
         <div className="results-section">
-          <h2>Beschikbare SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
+          <h2>Beschikbare SpeedDates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
 
-          {filteredDates.length > 0 ? (
+          {filteredAndSortedDates.length > 0 ? (
             <div className="speeddates-grid">
-              {filteredDates.map((date) => (
+              {filteredAndSortedDates.map((date) => (
                 <div key={date._id} className="speeddate-card">
                   <div className="card-header">
                     <h3>{date.bedrijf?.name || 'Laden...'}</h3>
-                    <span className={`sector-tag ${date.vakgebied.replace(/[^a-zA-Z]/g, '')}`}>{date.vakgebied}</span>
+                    <span className={`sector-tag ${getSectorClassName(date.vakgebied)}`}>{date.vakgebied}</span>
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
-                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p> {/* NIEUW: Toon lokaal */}
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p>
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
                     <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
                     <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
@@ -243,7 +309,7 @@ const SpeedDates = () => {
                       <h4>Meer informatie</h4>
                       <p>
                         Deze speeddate is een uitgelezen kans om te spreken over {date.focus} binnen {date.vakgebied}.<br />
-                        Locatie: {date.lokaal}<br /> {/* Toon lokaal in details */}
+                        Locatie: {date.lokaal}<br />
                         Beschikbare talen: {date.talen.join(', ')}.<br />
                         Gezochte opportuniteiten: {date.opportuniteit.join(', ')}.
                       </p>
