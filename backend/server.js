@@ -4,6 +4,10 @@ import dotenv from 'dotenv';
 import connectDB from './config/mongodb.js';
 import connectCloudinary from './config/cloudinary.js';
 
+//voor aboutbeheer
+import aboutRoutes from './routes/aboutRoutes.js';
+app.use('/api/about', aboutRoutes);
+
 // Import bestaande routes
 import bedrijfRoutes from './routes/bedrijfRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';

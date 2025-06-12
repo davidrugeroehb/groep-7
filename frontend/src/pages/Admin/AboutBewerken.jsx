@@ -9,6 +9,19 @@ function About() {
   );
   const [isEditing, setIsEditing] = useState(false);
   const [Tekst, setTekst] = useState('');
+  useEffect(()=>{ //fetch de about
+    const fetchAbout=async()=>{
+      try{
+          const res = await fetch("http://localhost:4000/api/about");
+          const data = await res.json();
+          setEditableText(data.tekst_about);
+      }catch(error){
+        console.error('Fout bij het ophalen van About')
+
+      }
+    }
+    fetchAbout();
+  });
 
   useEffect(() => {
     const fetchProfiel = async () => {
@@ -37,10 +50,24 @@ function About() {
     setTekst(editableText);
   };
 
-  const handleSaveClick = () => {
-    setEditableText(Tekst);
+  const handleSaveClick = async () => {
+    try{
+      const res = await fetch("http://localhost:4000/api/about", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ tekst: Tekst }),
+    });
+    if (!res.ok) {
+      throw new Error("Fout bij opslaan van tekst.");
+    }
+    const data = await res.json();
+    setEditableText(data.tekst_about);
     setIsEditing(false);
-    // Hier zou je eventueel een PUT-request kunnen sturen om de tekst te updaten in de database
+    }catch (error){
+      console.error('Fout bij het opslaan');
+    }
   };
 
   if (error) {
