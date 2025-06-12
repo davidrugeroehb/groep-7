@@ -37,7 +37,7 @@ function App() {
   const location = useLocation();
   const role = localStorage.getItem("role");
 
-  const hideNavbar = ["/login", "/bedrijf/signup"].includes(location.pathname);
+  const hideNavbar = ["/login", "/bedrijf/signup"].includes(location.pathname) || location.pathname.startsWith("/admin");
 
   let currentNavbar = <Navbar />;
   if (role === "bedrijf") {
