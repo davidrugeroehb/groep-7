@@ -9,34 +9,62 @@ import {
 } from 'react-icons/bs'
 import { Link } from 'react-router-dom'
 
-// Ontvang 'props' als argument van de functie
 function Sidebar(props) {
   return (
-    // Voeg props toe aan de aside tag.
-    <aside id="sidebar" className='area-sidebar'{...props}>
-      <div className="sidebar-title">
-        <div className="sidebar-brand">
-          <BsShieldLock className="icoon_header" /> ADMIN
+    <aside
+      id="sidebar"
+      className="bg-gray-800 text-white p-6 h-full w-full space-y-6"
+      {...props}
+    >
+      {/* Titel */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xl font-bold">
+          <BsShieldLock /> ADMIN
         </div>
-        <span className="icoon close_icon">X</span>
+        
       </div>
-      <ul className="sidebar-list">
-        {/* Pas de Link 'to' paden aan om overeen te komen met de geneste admin routes */}
-        {/* Bijvoorbeeld, van "/" naar "/admin/dashboard" */}
-        <li className="sidebar-list-item">
-          <Link to="/admin/dashboard"><BsGrid1X2Fill className="icoon" /> Dashboard</Link>
+
+      {/* Navigatie */}
+      <ul className="flex flex-col gap-2 text-[13px] font-medium tracking-wide">
+        <li>
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 hover:text-white transition"
+          >
+            <BsGrid1X2Fill /> Dashboard
+          </Link>
         </li>
-        <li className="sidebar-list-item">
-          <Link to="/admin/speeddatesbeheer"><BsLightningChargeFill className="icoon" /> Speeddates</Link>
+        <li>
+          <Link
+            to="/admin/speeddatesbeheer"
+            className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 hover:text-white transition"
+          >
+            <BsLightningChargeFill /> Speeddates
+          </Link>
         </li>
-        <li className="sidebar-list-item">
-          <Link to="/admin/studentenbeheer"><BsPeopleFill className="icoon" /> Studenten</Link>
+        <li>
+          <Link
+            to="/admin/studentenbeheer"
+            className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 hover:text-white transition"
+          >
+            <BsPeopleFill /> Studenten
+          </Link>
         </li>
-        <li className="sidebar-list-item">
-          <Link to="/admin/bedrijvenbeheer"><BsMenuButtonWideFill className="icoon" /> Bedrijven</Link>
+        <li>
+          <Link
+            to="/admin/bedrijvenbeheer"
+            className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 hover:text-white transition"
+          >
+            <BsMenuButtonWideFill /> Bedrijven
+          </Link>
         </li>
-        <li className="sidebar-list-item">
-          <Link to="/admin/instellingen"><BsFillGearFill className="icoon" /> Instellingen</Link>
+        <li>
+          <Link
+            to="/admin/instellingen"
+            className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 hover:text-white transition"
+          >
+            <BsFillGearFill /> Instellingen
+          </Link>
         </li>
       </ul>
     </aside>

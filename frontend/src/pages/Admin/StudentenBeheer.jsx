@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// Verander de functienaam van 'Aanmaken' naar 'StudentenBeheer'
+
 function StudentenBeheer() { // AANPASSING: Functienaam
   const [studenten, setStudenten] = useState([]);
   const [error, setError] = useState(null);
@@ -81,5 +81,5 @@ function StudentenBeheer() { // AANPASSING: Functienaam
   );
 }
 
-// Exporteer de component met de juiste naam
-export default StudentenBeheer; // AANPASSING: Exporteernaam
+
+export default StudentenBeheer;

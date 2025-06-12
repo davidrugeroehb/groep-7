@@ -1,8 +1,9 @@
-import studentModel from '../models/studentModel.js';
-import bedrijfModel from '../models/bedrijfModel.js';
-import adminModel from '../models/adminModel.js'; // NIEUW: Importeer het Admin model
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import studentModel from '../models/studentModel.js'; // Import the Student model
+import bedrijfModel from '../models/bedrijfModel.js'; // Import the Bedrijf (Company) model - Use 'bedrijfModel' if that's your export name
+import bcrypt from 'bcryptjs'; // For password comparison
+import jwt from 'jsonwebtoken'; // For generating tokens
+import adminModel from '../models/adminModel.js';
+
 
 // Unified login function
 export const loginUser = async (req, res) => {
@@ -53,9 +54,19 @@ export const loginUser = async (req, res) => {
       }
     }
 
+//<<<<<<< HEAD
+    // 3. vinden van admin
+//=======
     // 4. Als gebruiker niet gevonden in welke rol dan ook
+//>>>>>>> 9d6255dd790f3f6f6bb672e901c0485fd5e7e3a4
     if (!user) {
-      return res.status(404).json({ message: 'Gebruiker niet gevonden. Controleer uw e-mailadres.' });
+      user = await adminModel.findOne({ email })
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        role = 'admin'
+      }else{
+        return res.status(401).json({message : 'Verkeerd wachtwoord voor admin.'})
+      }
     }
 
     // Genereer JWT token (aannemende dat JWT_SECRET is ingesteld in je .env)

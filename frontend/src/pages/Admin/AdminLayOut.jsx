@@ -1,26 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
 function AdminLayout({ children }) {
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   return (
-    <div
-      className="
-        grid 
-        grid-cols-[260px_1fr_1fr_1fr] 
-        grid-rows-[0.2fr_3fr] 
-        grid-areas-[sidebar_header_header_header_sidebar_main_main_main]
-        h-screen
-      "
-    >
-      <Header className="area-header" />
-      <Sidebar className="area-sidebar" />
-      <main className="area-main">
+    <div className={`grid grid-rows-[auto_1fr] ${sidebarVisible ? 'grid-cols-[260px_1fr]' : 'grid-cols-[1fr]'} h-screen`}>
+
+      {/* Header */}
+      <div className="col-span-2">
+        <Header onMenuClick={toggleSidebar} />
+      </div>
+
+      {/* Sidebar */}
+      {sidebarVisible && (
+        <div className="row-span-1">
+          <Sidebar />
+        </div>
+      )}
+
+      {/* Main */}
+      <main className="p-5 overflow-y-auto bg-gray-50">
         {children}
       </main>
     </div>
   );
 }
-
 
 export default AdminLayout;
