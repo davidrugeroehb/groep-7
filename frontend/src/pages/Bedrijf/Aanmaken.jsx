@@ -69,32 +69,58 @@ function Aanmaken() {
     while (currentTime < end) {
       let slotEndTime = new Date(currentTime.getTime() + slotDuration * 60 * 1000);
 
-      // Check for break
+      // Check if current slot needs to include a break or is entirely a break
       if (parsedBreakStart && parsedBreakEnd) {
-        // If current time is within the break, skip to after the break
-        if (currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
-          currentTime = new Date(parsedBreakEnd);
-          continue; // Skip current iteration and re-evaluate
-        }
-        // If the slot crosses the break, adjust slotEndTime
-        if (currentTime < parsedBreakStart && slotEndTime > parsedBreakStart) {
-          if (slotEndTime > parsedBreakEnd) { // Slot starts before break and ends after break
-            // Add part before break
+        // Case 1: Current slot starts before break and ends within break
+        if (currentTime < parsedBreakStart && slotEndTime > parsedBreakStart && slotEndTime <= parsedBreakEnd) {
+            // Add the part before the break as a regular slot
             if (currentTime < parsedBreakStart) {
                 slots.push({
                     startTime: formatTime(currentTime),
                     endTime: formatTime(parsedBreakStart),
-                    status: 'open',
-                    student: null,
+                    type: 'slot',
                 });
             }
+            // Then add the break itself
+            slots.push({
+                startTime: formatTime(parsedBreakStart),
+                endTime: formatTime(parsedBreakEnd),
+                type: 'break',
+            });
             currentTime = new Date(parsedBreakEnd); // Jump past the break
-            continue; // Re-evaluate with new currentTime
-          } else { // Slot starts before break and ends within break
-            // Do not add this slot, and jump currentTime to after break
-            currentTime = new Date(parsedBreakEnd);
             continue;
-          }
+        }
+        // Case 2: Current slot starts within break
+        if (currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
+            // Add the break itself, extending to its end if the slot duration would exceed it
+            const actualBreakEnd = slotEndTime > parsedBreakEnd ? parsedBreakEnd : slotEndTime;
+            slots.push({
+                startTime: formatTime(currentTime),
+                endTime: formatTime(actualBreakEnd),
+                type: 'break',
+            });
+            currentTime = new Date(actualBreakEnd); // Move past this portion of the break
+            if (currentTime < parsedBreakEnd) { // If still within the defined break, jump to its end
+                currentTime = new Date(parsedBreakEnd);
+            }
+            continue;
+        }
+        // Case 3: Current slot spans across the entire break (starts before, ends after)
+        if (currentTime < parsedBreakStart && slotEndTime > parsedBreakEnd) {
+            // Add part before break
+            slots.push({
+                startTime: formatTime(currentTime),
+                endTime: formatTime(parsedBreakStart),
+                type: 'slot',
+            });
+            // Add the break itself
+            slots.push({
+                startTime: formatTime(parsedBreakStart),
+                endTime: formatTime(parsedBreakEnd),
+                type: 'break',
+            });
+            currentTime = new Date(parsedBreakEnd); // Jump past the break for the next slot
+            continue; // Re-evaluate the new currentTime
         }
       }
 
@@ -103,16 +129,16 @@ function Aanmaken() {
         slotEndTime = end;
       }
 
-      // Only add slot if it has a positive duration
+      // Only add regular slot if it has a positive duration and isn't a partial break
       if (currentTime < slotEndTime) {
         slots.push({
           startTime: formatTime(currentTime),
           endTime: formatTime(slotEndTime),
+          type: 'slot', // Default type for regular slots
           status: 'open', // Default status for sub-speeddates
           student: null, // Initially no student assigned
         });
       }
-
       currentTime = new Date(slotEndTime); // Move to the end of the current slot for the next iteration
     }
     setSpeeddateSlots(slots);
@@ -142,8 +168,11 @@ function Aanmaken() {
       return;
     }
 
-    if (speeddateSlots.length === 0) {
-      alert("Gelieve geldige tijden en een duur per student in te voeren om speeddate slots te genereren.");
+    // Filter out break slots before sending to backend, as backend only cares about bookable slots
+    const bookableSpeeddateSlots = speeddateSlots.filter(slot => slot.type === 'slot');
+
+    if (bookableSpeeddateSlots.length === 0) {
+      alert("Gelieve geldige tijden en een duur per student in te voeren om speeddate slots te genereren. Er zijn geen boekbare slots gegenereerd.");
       return;
     }
 
@@ -151,7 +180,7 @@ function Aanmaken() {
       const dataToSend = {
         ...form,
         bedrijfId: bedrijfId,
-        speeddateSlots: speeddateSlots, // Send the generated slots to backend
+        speeddateSlots: bookableSpeeddateSlots, // Send only bookable slots
       };
 
       // Remove breakStart, breakEnd, timePerStudent from the main form data before sending
@@ -281,8 +310,15 @@ function Aanmaken() {
                   <p className="mb-2 text-gray-600">Deze slots worden gegenereerd op basis van je input:</p>
                   <ul className="list-disc list-inside space-y-1">
                     {speeddateSlots.map((slot, index) => (
-                      <li key={index} className="text-gray-800">
-                        {slot.startTime} - {slot.endTime}
+                      <li
+                        key={index}
+                        className={`py-1 px-2 rounded-md ${
+                          slot.type === 'break'
+                            ? 'bg-red-100 text-red-800' // Distinct color for break slots
+                            : 'bg-green-100 text-green-800' // Default color for regular slots
+                        }`}
+                      >
+                        {slot.startTime} - {slot.endTime} {slot.type === 'break' && "(Pauze)"}
                       </li>
                     ))}
                   </ul>
