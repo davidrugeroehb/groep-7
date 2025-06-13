@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 
-router.get('/api/studenten', getAllStudenten);
+router.get('/studenten', getAllStudenten);
 
 
 // Route om totaal aantal studenten op te halen
