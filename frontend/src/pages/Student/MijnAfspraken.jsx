@@ -17,8 +17,8 @@ function MijnAfspraken() {
       setLoading(true);
       setError(null);
       try {
-        // Gebruik het nieuwe endpoint voor student specifieke afspraken
-        const res = await fetch(`http://localhost:4000/api/afspraken/student/${studentId}`);
+        // Gebruik het endpoint voor student specifieke afspraken
+        const res = await fetch(`http://localhost:4000/api/aanvragen/afspraken/student/${studentId}`);
 
         if (!res.ok) {
           throw new Error("Kan afspraken niet ophalen.");
@@ -38,7 +38,7 @@ function MijnAfspraken() {
   }, [studentId]); // Herlaad bij wijziging van studentId
 
   const annuleerAfspraak = async (id) => {
-    if (!window.confirm("Weet u zeker dat u deze afspraak wilt annuleren? Dit kan alleen als het bedrijf nog niet heeft geaccepteerd.")) {
+    if (!window.confirm("Weet u zeker dat u deze afspraak wilt annuleren? Dit kan alleen als het bedrijf nog niet heeft geaccepteerd of als het een lopende aanvraag is.")) { // Added clarity to message
       return;
     }
     try {
@@ -98,6 +98,7 @@ function MijnAfspraken() {
                 <p className="text-gray-700 mb-1">
                   <strong>Focus:</strong> {afspraak.focus}
                 </p>
+                {/* AANGEPAST: Toon de specifieke slot tijd en lokaal */}
                 <p className="text-gray-700 mb-1">
                   <strong>Tijd:</strong> {afspraak.tijd}
                 </p>
@@ -120,5 +121,3 @@ function MijnAfspraken() {
 }
 
 export default MijnAfspraken;
-
-

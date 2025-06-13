@@ -4,7 +4,10 @@ function Aanmaken() {
   const [form, setForm] = useState({
     starttijd: "",
     eindtijd: "",
-    lokaal: "", // NIEUW: Lokaal veld in de state
+    breakStart: "", // NEW: Break start time
+    breakEnd: "",   // NEW: Break end time
+    timePerStudent: "15", // NEW: Default time per student
+    lokaal: "",
     vakgebied: "",
     focus: "",
     opportuniteit: [],
@@ -13,6 +16,7 @@ function Aanmaken() {
   });
 
   const [bedrijfId, setBedrijfId] = useState(null);
+  const [speeddateSlots, setSpeeddateSlots] = useState([]); // To display calculated slots
 
   useEffect(() => {
     const storedBedrijfId = localStorage.getItem('bedrijfId');
@@ -22,6 +26,98 @@ function Aanmaken() {
       console.warn("Bedrijf ID niet gevonden in localStorage. Gelieve in te loggen.");
     }
   }, []);
+
+  useEffect(() => {
+    // Recalculate speeddate slots whenever main time inputs or break/slot duration change
+    calculateSpeeddateSlots();
+  }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent]);
+
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  };
+
+  const formatTime = (date) => {
+    return date.toTimeString().slice(0, 5); // Returns HH:MM
+  };
+
+  const calculateSpeeddateSlots = () => {
+    const { starttijd, eindtijd, breakStart, breakEnd, timePerStudent } = form;
+
+    if (!starttijd || !eindtijd || !timePerStudent) {
+      setSpeeddateSlots([]);
+      return;
+    }
+
+    const start = parseTime(starttijd);
+    const end = parseTime(eindtijd);
+    const slotDuration = parseInt(timePerStudent, 10);
+
+    if (isNaN(slotDuration) || slotDuration <= 0) {
+      setSpeeddateSlots([]);
+      return;
+    }
+
+    const slots = [];
+    let currentTime = new Date(start);
+
+    const parsedBreakStart = breakStart ? parseTime(breakStart) : null;
+    const parsedBreakEnd = breakEnd ? parseTime(breakEnd) : null;
+
+    while (currentTime < end) {
+      let slotEndTime = new Date(currentTime.getTime() + slotDuration * 60 * 1000);
+
+      // Check for break
+      if (parsedBreakStart && parsedBreakEnd) {
+        // If current time is within the break, skip to after the break
+        if (currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
+          currentTime = new Date(parsedBreakEnd);
+          continue; // Skip current iteration and re-evaluate
+        }
+        // If the slot crosses the break, adjust slotEndTime
+        if (currentTime < parsedBreakStart && slotEndTime > parsedBreakStart) {
+          if (slotEndTime > parsedBreakEnd) { // Slot starts before break and ends after break
+            // Add part before break
+            if (currentTime < parsedBreakStart) {
+                slots.push({
+                    startTime: formatTime(currentTime),
+                    endTime: formatTime(parsedBreakStart),
+                    status: 'open',
+                    student: null,
+                });
+            }
+            currentTime = new Date(parsedBreakEnd); // Jump past the break
+            continue; // Re-evaluate with new currentTime
+          } else { // Slot starts before break and ends within break
+            // Do not add this slot, and jump currentTime to after break
+            currentTime = new Date(parsedBreakEnd);
+            continue;
+          }
+        }
+      }
+
+      // Ensure slot does not extend beyond overall end time
+      if (slotEndTime > end) {
+        slotEndTime = end;
+      }
+
+      // Only add slot if it has a positive duration
+      if (currentTime < slotEndTime) {
+        slots.push({
+          startTime: formatTime(currentTime),
+          endTime: formatTime(slotEndTime),
+          status: 'open', // Default status for sub-speeddates
+          student: null, // Initially no student assigned
+        });
+      }
+
+      currentTime = new Date(slotEndTime); // Move to the end of the current slot for the next iteration
+    }
+    setSpeeddateSlots(slots);
+  };
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,10 +142,25 @@ function Aanmaken() {
       return;
     }
 
-    try {
-      const dataToSend = { ...form, bedrijfId: bedrijfId };
+    if (speeddateSlots.length === 0) {
+      alert("Gelieve geldige tijden en een duur per student in te voeren om speeddate slots te genereren.");
+      return;
+    }
 
-      const res = await fetch("http://localhost:4000/api/bedrijf/speeddates", {
+    try {
+      const dataToSend = {
+        ...form,
+        bedrijfId: bedrijfId,
+        speeddateSlots: speeddateSlots, // Send the generated slots to backend
+      };
+
+      // Remove breakStart, breakEnd, timePerStudent from the main form data before sending
+      // as they are used to generate slots, not stored as separate fields on the main speeddate.
+      delete dataToSend.breakStart;
+      delete dataToSend.breakEnd;
+      delete dataToSend.timePerStudent;
+
+      const res = await fetch("http://localhost:4000/api/speeddates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
@@ -64,13 +175,17 @@ function Aanmaken() {
       setForm({
         starttijd: "",
         eindtijd: "",
-        lokaal: "", // NIEUW: Lokaal resetten
+        breakStart: "",
+        breakEnd: "",
+        timePerStudent: "15",
+        lokaal: "",
         vakgebied: "",
         focus: "",
         opportuniteit: [],
         talen: [],
         beschrijving: "",
       });
+      setSpeeddateSlots([]); // Clear displayed slots after submission
     } catch (err) {
       console.error(err);
       alert(`Er ging iets mis bij het aanmaken: ${err.message || "Onbekende fout"}`);
@@ -85,12 +200,12 @@ function Aanmaken() {
         </h1>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Tijd */}
+          {/* Tijd & Lokaal */}
           <div>
             <h2 className="text-xl font-semibold mb-2">⏰ Tijd & Lokaal</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block font-medium mb-1">Starttijd</label>
+                <label className="block font-medium mb-1">Starttijd periode</label>
                 <input
                   type="time"
                   name="starttijd"
@@ -101,7 +216,7 @@ function Aanmaken() {
                 />
               </div>
               <div>
-                <label className="block font-medium mb-1">Eindtijd</label>
+                <label className="block font-medium mb-1">Eindtijd periode</label>
                 <input
                   type="time"
                   name="eindtijd"
@@ -112,7 +227,72 @@ function Aanmaken() {
                 />
               </div>
             </div>
-            {/* NIEUW: Lokaal invoerveld */}
+
+            {/* Pauze toevoegen */}
+            <div className="mt-4 border p-4 rounded-md bg-gray-50">
+              <h3 className="text-lg font-semibold mb-2">Pauze (optioneel)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium mb-1">Pauze starttijd</label>
+                  <input
+                    type="time"
+                    name="breakStart"
+                    value={form.breakStart}
+                    onChange={handleChange}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Pauze eindtijd</label>
+                  <input
+                    type="time"
+                    name="breakEnd"
+                    value={form.breakEnd}
+                    onChange={handleChange}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tijd per student */}
+            <div className="mt-4">
+              <label className="block font-medium mb-1">Tijd per student (minuten)</label>
+              <select
+                name="timePerStudent"
+                value={form.timePerStudent}
+                onChange={handleChange}
+                required
+                className="w-full border p-2 rounded"
+              >
+                <option value="10">10 min</option>
+                <option value="15">15 min</option>
+                <option value="20">20 min</option>
+                <option value="25">25 min</option>
+                <option value="30">30 min</option>
+              </select>
+            </div>
+
+            {/* Visuele Timeline */}
+            <div className="mt-6">
+              <h2 className="text-xl font-semibold mb-2">🗓️ Beschikbare Speeddate Slots</h2>
+              {speeddateSlots.length > 0 ? (
+                <div className="border p-4 rounded-md bg-white shadow-sm max-h-60 overflow-y-auto">
+                  <p className="mb-2 text-gray-600">Deze slots worden gegenereerd op basis van je input:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {speeddateSlots.map((slot, index) => (
+                      <li key={index} className="text-gray-800">
+                        {slot.startTime} - {slot.endTime}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="text-gray-500">Vul de start-/eindtijd en tijd per student in om de slots te zien.</p>
+              )}
+            </div>
+
+            {/* Lokaal invoerveld */}
             <div className="mt-4">
               <label className="block font-medium mb-1">Lokaal</label>
               <input

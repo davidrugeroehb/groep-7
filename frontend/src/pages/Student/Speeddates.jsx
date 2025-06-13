@@ -10,7 +10,8 @@ const SpeedDates = () => {
     taal: []
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [expandedId, setExpandedId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null); // ID of the main speeddate being expanded
+  const [selectedSlot, setSelectedSlot] = useState(null); // NEW: To store the selected sub-speeddate slot
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const studentId = localStorage.getItem('userId');
@@ -27,11 +28,12 @@ const SpeedDates = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/student/speeddates");
+        const res = await fetch("http://localhost:4000/api/speeddates"); // Adjusted endpoint to fetch all speeddates with their slots
         if (!res.ok) {
           throw new Error("Kon speeddates niet ophalen.");
         }
         const data = await res.json();
+        // Assuming data.speeddates will now include 'slots' array
         setSpeedDates(data.speeddates);
 
         // Unieke waarden ophalen voor dynamische filters
@@ -105,23 +107,34 @@ const SpeedDates = () => {
 
   const toggleDetails = (id) => {
     setExpandedId(expandedId === id ? null : id);
+    setSelectedSlot(null); // Reset selected slot when collapsing/expanding
   };
 
-  const handleApply = async (speeddateId) => {
+  const handleApply = async (mainSpeeddateId) => {
     if (!studentId) {
       alert("Log in als student om een afspraak aan te vragen.");
       return;
     }
 
-    if (!window.confirm("Weet je zeker dat je deze speeddate wilt aanvragen?")) {
+    if (!selectedSlot) {
+      alert("Selecteer een tijdslot om aan te vragen.");
+      return;
+    }
+
+    if (!window.confirm(`Weet je zeker dat je het slot van ${selectedSlot.startTime} - ${selectedSlot.endTime} wilt aanvragen?`)) {
       return;
     }
 
     try {
+      // Send both the main speeddate ID and the specific slot ID
       const res = await fetch("http://localhost:4000/api/aanvragen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ speeddateId, studentId }),
+        body: JSON.stringify({
+          speeddateId: mainSpeeddateId, // Main speeddate ID
+          slotId: selectedSlot._id, // NEW: The specific slot ID
+          studentId: studentId
+        }),
       });
 
       const data = await res.json();
@@ -131,33 +144,70 @@ const SpeedDates = () => {
       }
 
       alert(data.message);
+      // Update the local state to reflect the applied slot status
       setSpeedDates(prevDates =>
-        prevDates.map(date =>
-          date._id === speeddateId ? { ...date, status: 'aangevraagd', aangevraagdDoor: studentId } : date
-        )
+        prevDates.map(date => {
+          if (date._id === mainSpeeddateId) {
+            return {
+              ...date,
+              // Update the specific slot within the main speeddate
+              slots: date.slots.map(slot =>
+                slot._id === selectedSlot._id ? { ...slot, status: 'aangevraagd', student: studentId } : slot
+              )
+            };
+          }
+          return date;
+        })
       );
+      setSelectedSlot(null); // Clear selected slot after successful application
+      setExpandedId(null); // Optionally collapse the card after applying
     } catch (err) {
       console.error("Fout bij aanvragen:", err);
       alert(`Fout bij het aanvragen: ${err.message || "Onbekende fout"}`);
     }
   };
 
-  const isApplyDisabled = (speeddate) => {
-    return speeddate.status !== 'open' || (speeddate.aangevraagdDoor && speeddate.aangevraagdDoor !== studentId);
+  // Check if student has already applied for ANY slot within this main speeddate
+  const hasAppliedForThisMainSpeeddate = (mainSpeeddate) => {
+    return mainSpeeddate.slots.some(slot => slot.student === studentId);
   };
 
-  const getApplyButtonText = (speeddate) => {
-    if (speeddate.status === 'aangevraagd' && speeddate.aangevraagdDoor === studentId) {
+  const getSlotStatusText = (slot, mainSpeeddate) => {
+    if (slot.status === 'aangevraagd' && slot.student === studentId) {
       return 'Reeds aangevraagd door jou';
     }
-    if (speeddate.status === 'bevestigd') {
-      return 'Afspraak bevestigd';
+    if (slot.status === 'bevestigd' && slot.student === studentId) {
+      return 'Afspraak bevestigd (jouw slot)';
     }
-    if (speeddate.status === 'aangevraagd') {
+    if (slot.status === 'bevestigd' && slot.student !== studentId) {
+      return 'Afspraak bevestigd (ander student)';
+    }
+    if (slot.status === 'aangevraagd' && slot.student !== studentId) {
       return 'Reeds aangevraagd door een andere student';
     }
-    return 'Afspraak aanvragen';
+    if (hasAppliedForThisMainSpeeddate(mainSpeeddate)) {
+        return 'Al een slot aangevraagd in deze speeddate'; // If student has applied for any slot in this main speeddate
+    }
+    return 'Beschikbaar';
   };
+
+  const getApplyButtonText = (slot, mainSpeeddate) => {
+      if (slot.status === 'aangevraagd' && slot.student === studentId) return 'Reeds aangevraagd door jou';
+      if (slot.status === 'bevestigd') return 'Afspraak bevestigd';
+      if (slot.status === 'aangevraagd') return 'Aangevraagd door een ander';
+      if (hasAppliedForThisMainSpeeddate(mainSpeeddate)) return 'Al een slot aangevraagd';
+      return 'Afspraak aanvragen';
+  };
+
+  const isSlotDisabled = (slot, mainSpeeddate) => {
+    // Disable if slot is not open
+    if (slot.status !== 'open') return true;
+    // Disable if student has already applied for any slot in this main speeddate
+    if (hasAppliedForThisMainSpeeddate(mainSpeeddate)) return true;
+    // Disable if no slot is selected OR if a different slot is selected
+    return !selectedSlot || selectedSlot._id !== slot._id;
+  };
+
 
   if (loading) {
     return <div className="text-center py-10">Laden van speeddates...</div>;
@@ -208,7 +258,7 @@ const SpeedDates = () => {
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
               <div className="checkbox-grid">
-                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => ( // AANGEPAST: Nieuwe opties
+                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => (
                   <label key={type} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -242,7 +292,7 @@ const SpeedDates = () => {
             {/* NIEUW: Sortering op tijd */}
             <div className="filter-group">
               <h3>Sorteren op Tijd</h3>
-              <div className="radio-group"> {/* Je kunt een radio-groep of dropdown gebruiken */}
+              <div className="radio-group">
                 <label className="checkbox-label">
                   <input
                     type="radio"
@@ -305,21 +355,49 @@ const SpeedDates = () => {
                   </div>
 
                   {expandedId === date._id && (
-                    <div className="expanded-details">
-                      <h4>Meer informatie</h4>
-                      <p>
-                        Deze speeddate is een uitgelezen kans om te spreken over {date.focus} binnen {date.vakgebied}.<br />
-                        Locatie: {date.lokaal}<br />
-                        Beschikbare talen: {date.talen.join(', ')}.<br />
-                        Gezochte opportuniteiten: {date.opportuniteit.join(', ')}.
-                      </p>
-                      <button
-                        className="apply-now-btn"
-                        onClick={() => handleApply(date._id)}
-                        disabled={isApplyDisabled(date)}
-                      >
-                        {getApplyButtonText(date)}
-                      </button>
+                    <div className="expanded-details mt-4 p-3 border-t border-gray-200">
+                      <h4 className="font-semibold text-lg mb-2">Beschikbare Tijdslots:</h4>
+                      {date.slots && date.slots.length > 0 ? (
+                        <div className="space-y-2">
+                          {date.slots.map(slot => (
+                            <label key={slot._id} className={`flex items-center p-2 rounded-md border cursor-pointer
+                              ${slot.status === 'open' && !hasAppliedForThisMainSpeeddate(date) ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 'bg-gray-100 border-gray-200 cursor-not-allowed'}
+                              ${selectedSlot?._id === slot._id ? 'ring-2 ring-blue-500 border-blue-500' : ''}`}>
+                              <input
+                                type="radio"
+                                name={`slot-${date._id}`} // Unique name for each main speeddate
+                                value={slot._id}
+                                checked={selectedSlot?._id === slot._id}
+                                onChange={() => setSelectedSlot(slot)}
+                                disabled={slot.status !== 'open' || hasAppliedForThisMainSpeeddate(date)}
+                                className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                              />
+                              <span className="ml-3 text-sm font-medium text-gray-800">
+                                {slot.startTime} - {slot.endTime}
+                              </span>
+                              <span className={`ml-auto px-2 py-0.5 rounded-full text-xs font-semibold
+                                ${slot.status === 'open' && !hasAppliedForThisMainSpeeddate(date) ? 'bg-green-100 text-green-800' :
+                                  (slot.status === 'aangevraagd' && slot.student === studentId) ? 'bg-yellow-100 text-yellow-800' :
+                                  (slot.status === 'bevestigd' && slot.student === studentId) ? 'bg-blue-100 text-blue-800' :
+                                  'bg-red-100 text-red-800'}`}>
+                                {getSlotStatusText(slot, date)}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-sm">Geen individuele tijdslots beschikbaar.</p>
+                      )}
+
+                      <div className="mt-4">
+                        <button
+                          className="apply-now-btn w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleApply(date._id)}
+                          disabled={!selectedSlot || hasAppliedForThisMainSpeeddate(date)} // Disable if no slot selected or already applied for this main speeddate
+                        >
+                          {hasAppliedForThisMainSpeeddate(date) ? 'Al een slot aangevraagd in deze speeddate' : (selectedSlot ? `Vraag ${selectedSlot.startTime} aan` : 'Selecteer een slot om aan te vragen')}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
