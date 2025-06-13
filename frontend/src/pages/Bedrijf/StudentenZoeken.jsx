@@ -194,7 +194,7 @@ function StudentenZoeken() {
                     <h2 className="text-lg font-semibold text-gray-800 mb-1">
                       {s.voornaam} {s.achternaam}
                     </h2>
-                    <p className="text-gray-700">
+                    <p className="text-blue-500">
                       <strong>Email:</strong> {s.email}
                     </p>
                     <p className="text-gray-700">
