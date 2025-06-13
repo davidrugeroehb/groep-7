@@ -78,6 +78,10 @@ function MijnProfiel() {
     if (!studentId) {
       alert("Student ID ontbreekt. Kan profiel niet opslaan.");
       return;
+    } //checkt als de telefoonnummer alleen bestaat uit cijfer
+    if (!/^\d*$/.test(editableProfiel.gsm)) {
+    alert("GSM-nummer mag alleen uit cijfers bestaan.");
+    return;
     }
     try {
       const res = await fetch(`http://localhost:4000/api/student/mijnprofiel/${studentId}`, {
