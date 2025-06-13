@@ -5,27 +5,36 @@ import {
   getCompanySpeeddates,
   getCompanyProfile,
   updateCompanyProfile,
-  countAllBedrijven, // Importeer deze indien nodig (voor dashboard)
-  getAllBedrijven // Importeer de nieuwe functie
+  countAllBedrijven,
+  getAllBedrijven,
+  getAllPendingBedrijfRegistrations,
+  countPendingBedrijfRegistrations,
+  approveBedrijfRegistration,
+  rejectBedrijfRegistration,
 } from '../controllers/bedrijfController.js';
 
 const router = express.Router();
 
-router.post("/register", registerBedrijf);
+// Registratie van bedrijven
+router.post("/register", registerBedrijf); // <-- Zorg dat deze route '/register' is, NIET '/bedrijf/register'
 
+// Speeddate gerelateerde routes
 router.post("/speeddates", createSpeeddate);
 router.get("/speeddates/:bedrijfId", getCompanySpeeddates);
 
-// Route om het aantal bedrijven te tellen (voor dashboard, deze is al correct)
-router.get('/count', countAllBedrijven);
-
-// Route om de profiel van een bedrijf op te halen (bestaat al)
+// Bedrijfs Profiel gerelateerde routes
 router.get('/profiel/:bedrijfId', getCompanyProfile);
-
-// Route om de profiel van een bedrijf up te daten (bestaat al)
 router.put('/profiel/:bedrijfId', updateCompanyProfile);
 
-// NIEUWE ROUTE: Haal alle bedrijven op
-router.get('/', getAllBedrijven); // Dit zal overeenkomen met /api/bedrijven op je server.js
+// Routes voor het tellen van bedrijven (voor dashboard)
+router.get('/count', countAllBedrijven);
+
+// NIEUWE ROUTES VOOR BEDRIJFSREGISTRATIEBEHEER (voor admin)
+router.get('/', getAllBedrijven); // Haal alle goedgekeurde bedrijven op
+router.get('/pending-registrations', getAllPendingBedrijfRegistrations); // Haal alle afwachtende registraties op
+router.get('/pending-registrations/count', countPendingBedrijfRegistrations); // Tel het aantal afwachtende registraties
+
+router.patch('/approve-registration/:bedrijfId', approveBedrijfRegistration); // Keur een bedrijfsregistratie goed
+router.patch('/reject-registration/:bedrijfId', rejectBedrijfRegistration); // Keur een bedrijfsregistratie af
 
 export default router;

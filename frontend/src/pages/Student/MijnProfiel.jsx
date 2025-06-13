@@ -14,9 +14,11 @@ function MijnProfiel() {
     gsm: '',
     opleiding: '',
     specialisatie: '',
-    talen: [],
-    talenInput: '',
+    talen: [], // Dit is de array die naar de backend gaat
+    talenInput: '', // Dit is de string voor het input veld
   });
+
+  const toegestaneTalen = ['Nederlands', 'Frans', 'Engels']; // Definieer toegestane talen hier
 
   useEffect(() => {
     const fetchProfiel = async () => {
@@ -30,7 +32,8 @@ function MijnProfiel() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:4000/api/student/mijnprofiel/${studentId}`);
+        // AANGEPAST: Correcte route met '/api/students'
+        const res = await fetch(`http://localhost:4000/api/students/mijnprofiel/${studentId}`);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -74,18 +77,18 @@ function MijnProfiel() {
     }
   };
 
-  const OpslaanBewerk = async () => { //checkt als de telefoonnummer alleen bestaat uit cijfer
+  const OpslaanBewerk = async () => {
     if (!studentId) {
       alert("Student ID ontbreekt. Kan profiel niet opslaan.");
       return;
-    } 
+    }
     if (!/^\d*$/.test(editableProfiel.gsm)) {
-    alert("GSM-nummer mag alleen uit cijfers bestaan.");
-    return;
+      alert("GSM-nummer mag alleen uit cijfers bestaan.");
+      return;
     }
 
-    const goedetalen=['Nederlands', "Frans", "Engels"];
-    const slechtetalen=editableProfiel.talen.filter(
+    // Controleer op ongeldige talen
+    const ongeldigeTalen = editableProfiel.talen.filter(
       taal => !toegestaneTalen.includes(taal)
     );
 
@@ -93,16 +96,27 @@ function MijnProfiel() {
       alert(`De volgende talen zijn niet toegestaan: ${ongeldigeTalen.join(', ')}`);
       return;
     }
+
+    // Maak een object aan om naar de backend te sturen
+    const dataToSend = {
+      voornaam: editableProfiel.voornaam,
+      achternaam: editableProfiel.achternaam,
+      email: editableProfiel.email, // Kan disabled zijn in UI, maar hier wel meenemen
+      gsm: editableProfiel.gsm,
+      opleiding: editableProfiel.opleiding,
+      specialisatie: editableProfiel.specialisatie,
+      talen: editableProfiel.talen, // Stuur de array van talen
+      // Voeg hier andere velden toe die naar de backend moeten
+    };
+
     try {
-      const res = await fetch(`http://localhost:4000/api/student/mijnprofiel/${studentId}`, {
+      // AANGEPAST: Correcte route met '/api/students'
+      const res = await fetch(`http://localhost:4000/api/students/mijnprofiel/${studentId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...editableProfiel,
-          talenInput: undefined,
-        }),
+        body: JSON.stringify(dataToSend), // Stuur het gefilterde object
       });
 
       const data = await res.json();
@@ -112,7 +126,7 @@ function MijnProfiel() {
       }
 
       alert(data.message);
-      setProfiel(data.profile);
+      setProfiel(data.profile); // Backend stuurt waarschijnlijk het bijgewerkte profiel terug
       setWijzig(false);
     } catch (err) {
       console.error("Fout bij opslaan van profiel:", err);
@@ -212,13 +226,14 @@ function MijnProfiel() {
                   onChange={handleEditChange}
                   className={inputStyle}
                 />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Talen:</label>
+                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Talen (komma-gescheiden: Nederlands, Frans, Engels):</label>
                 <input
                   type="text"
                   name="talenInput"
                   value={editableProfiel.talenInput}
                   onChange={handleEditChange}
                   className={inputStyle}
+                  placeholder="bv. Nederlands, Engels"
                 />
               </>
             ) : (

@@ -31,7 +31,8 @@ function BedrijfSignup() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:4000/api/bedrijf/register", {
+      // **** BELANGRIJKE AANPASSING HIER: Correcte API URL ****
+      const res = await fetch("http://localhost:4000/api/bedrijven/register", { // <-- AANGEPAST VAN /api/bedrijf/register
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -39,7 +40,7 @@ function BedrijfSignup() {
 
       const data = await res.json();
       if (res.ok) {
-        alert("Registratie gelukt! Je wordt doorgestuurd naar login.");
+        alert(data.message || "Registratie gelukt! Je wordt doorgestuurd naar login.");
         setFormData({
           name: "",
           adres: "",
