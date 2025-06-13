@@ -11,7 +11,7 @@ function StudentenZoeken() {
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
-        setLoading(true); // Zet loading op true bij start van fetch
+        setLoading(true);
         const res = await fetch("http://localhost:4000/api/student/studenten", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`,
@@ -29,84 +29,57 @@ function StudentenZoeken() {
         console.error(err);
         setError("Kan studenten niet ophalen.");
       } finally {
-        setLoading(false); // Zet loading op false ongeacht succes of fout
+        setLoading(false);
       }
     };
 
     fetchStudenten();
   }, []);
 
-  //Filter
+  // Filter
 
-  // Gebruik useMemo om unieke opleidingen te cachen. Dit voorkomt onnodige herberekeningen.
   const uniekeOpleidingen = useMemo(() => {
     const opleidingen = studenten.map((s) => s.opleiding);
-    // Filter lege/null waarden en sorteer alfabetisch
     return [...new Set(opleidingen)].filter(Boolean).sort();
   }, [studenten]);
 
-  // Gebruik useMemo om unieke specialisaties te cachen.
   const uniekeSpecialisaties = useMemo(() => {
     const specialisaties = studenten.map((s) => s.specialisatie);
-    // Filter lege/null waarden en sorteer alfabetisch
     return [...new Set(specialisaties)].filter(Boolean).sort();
   }, [studenten]);
 
-  // Haal alle unieke talen op uit de studenten data
-  const uniekeTalen = useMemo(() => {
-    const talenVerzameling = new Set();
-    studenten.forEach((s) => {
-      // Ga ervan uit dat s.talen een komma-gescheiden string is of een array.
-      // Als het een string is, splits deze dan.
-      if (typeof s.talen === 'string' && s.talen) {
-        s.talen.split(',').map(t => t.trim()).filter(Boolean).forEach(taal => talenVerzameling.add(taal));
-      } else if (Array.isArray(s.talen)) {
-        s.talen.filter(Boolean).forEach(taal => talenVerzameling.add(taal.trim()));
-      }
-    });
-    return [...talenVerzameling].sort();
-  }, [studenten]);
+  // Gebruik vaste talenlijst
+  const vasteTalen = ["Nederlands", "Frans", "Engels"];
 
-  // Functie om geselecteerde talen bij te werken bij checkbox klik
   const handleTaalChange = (event) => {
     const taal = event.target.value;
     if (selectedTalen.includes(taal)) {
-      // Als de taal al geselecteerd is, verwijder deze
       setSelectedTalen(selectedTalen.filter((t) => t !== taal));
     } else {
-      // Anders, voeg de taal toe
       setSelectedTalen([...selectedTalen, taal]);
     }
   };
 
-  // Filter de studentenlijst op basis van de geselecteerde filters
   const filteredStudenten = useMemo(() => {
     return studenten.filter((s) => {
-      const matchOpleiding = selectedOpleiding
-        ? s.opleiding === selectedOpleiding
-        : true;
-      const matchSpecialisatie = selectedSpecialisatie
-        ? s.specialisatie === selectedSpecialisatie
-        : true;
+      const matchOpleiding = selectedOpleiding ? s.opleiding === selectedOpleiding : true;
+      const matchSpecialisatie = selectedSpecialisatie ? s.specialisatie === selectedSpecialisatie : true;
 
-      // Filter voor talen:
-      // Als geen talen zijn geselecteerd OF
-      // als de student ten minste één van de geselecteerde talen spreekt
+      // Verzamel talen van de student
       const studentTalen = [];
       if (typeof s.talen === 'string' && s.talen) {
-        studentTalen.push(...s.talen.split(',').map(t => t.trim()).filter(Boolean));
+        studentTalen.push(...s.talen.split(',').map(t => t.trim().toLowerCase()).filter(Boolean));
       } else if (Array.isArray(s.talen)) {
-        studentTalen.push(...s.talen.map(t => t.trim()).filter(Boolean));
+        studentTalen.push(...s.talen.map(t => t.trim().toLowerCase()).filter(Boolean));
       }
 
+      // Filter talen: hoofdletterongevoelig
       const matchTalen = selectedTalen.length === 0 ||
-        selectedTalen.some(selectedTaal => studentTalen.includes(selectedTaal));
+        selectedTalen.some(selectedTaal => studentTalen.includes(selectedTaal.toLowerCase()));
 
       return matchOpleiding && matchSpecialisatie && matchTalen;
     });
-  }, [studenten, selectedOpleiding, selectedSpecialisatie, selectedTalen]); // selectedTalen toevoegen aan dependencies
-
-  //Weergeven op scherm
+  }, [studenten, selectedOpleiding, selectedSpecialisatie, selectedTalen]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
@@ -127,7 +100,6 @@ function StudentenZoeken() {
           </p>
         ) : (
           <>
-            {/* Filter Controls */}
             <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label
@@ -173,13 +145,13 @@ function StudentenZoeken() {
                 </select>
               </div>
 
-              {/*filter voor Talen --> Checkboxes */}
+              {/* Filter voor Talen met Checkboxes */}
               <div className="col-span-1 md:col-span-1">
                 <span className="block text-sm font-medium text-gray-700 mb-2">
                   Filter op Talen:
                 </span>
                 <div className="mt-1 grid grid-cols-2 gap-2 text-sm">
-                  {uniekeTalen.map((taal) => (
+                  {vasteTalen.map((taal) => (
                     <div key={taal} className="flex items-center">
                       <input
                         id={`taal-${taal}`}
@@ -196,7 +168,6 @@ function StudentenZoeken() {
                     </div>
                   ))}
                 </div>
-                {/* Knop om alle talen te deselecteren */}
                 {selectedTalen.length > 0 && (
                   <button
                     onClick={() => setSelectedTalen([])}
@@ -230,8 +201,7 @@ function StudentenZoeken() {
                       <strong>Opleiding:</strong> {s.opleiding}
                     </p>
                     <p className="text-gray-700">
-                      <strong>Specialisatie:</strong>{" "}
-                      {s.specialisatie || "—"}
+                      <strong>Specialisatie:</strong> {s.specialisatie || "—"}
                     </p>
                     <p className="text-gray-700">
                       <strong>Talen:</strong> {s.talen || "—"}
