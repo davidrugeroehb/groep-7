@@ -477,3 +477,25 @@
     background-color: white; /* Maak een volle cirkel */
     border-radius: 50%;
 }
+
+
+
+/*Admin verwijder knop*/
+.delete-btn {
+  background-color: #dc2626; /* Mooie rode kleur */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #b91c1c; /* Donkerder rood bij hover */
+}
+
+.delete-btn i {
+  margin-right: 5px; /* Ruimte tussen icoon en tekst */
+}
