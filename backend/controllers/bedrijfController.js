@@ -1,5 +1,28 @@
 import Speeddate from '../models/speeddateModel.js';
-import Bedrijf from '../models/bedrijfModel.js'; // Importeer het bedrijfModel
+import Bedrijf from '../models/bedrijfModel.js';
+
+// Functie om alle bedrijven op te halen
+const getAllBedrijven = async (req, res) => {
+  try {
+    const bedrijven = await Bedrijf.find().select('-password'); // Haal alle bedrijven op, zonder wachtwoorden
+    res.status(200).json(bedrijven);
+  } catch (error) {
+    console.error('Fout bij het ophalen van alle bedrijven:', error);
+    res.status(500).json({ message: 'Er ging iets mis bij het ophalen van bedrijven.', error: error.message });
+  }
+};
+
+
+// NIEUWE FUNCTIE: Tellen van alle bedrijven (deze is al correct)
+const countAllBedrijven = async (req, res) => {
+  try {
+    const count = await Bedrijf.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error('Fout bij het tellen van bedrijven:', error);
+    res.status(500).json({ message: 'Er ging iets mis bij het tellen van bedrijven.', error: error.message });
+  }
+};
 
 // Functie om een nieuwe speeddate aan te maken (bestaat al)
 const createSpeeddate = async (req, res) => {
@@ -74,7 +97,7 @@ const getCompanySpeeddates = async (req, res) => {
   }
 };
 
-// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf ophalen
+// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf ophalen (bestaat al)
 const getCompanyProfile = async (req, res) => {
   try {
     const { bedrijfId } = req.params; // ID komt uit de URL
@@ -102,7 +125,7 @@ const getCompanyProfile = async (req, res) => {
   }
 };
 
-// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf bijwerken
+// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf bijwerken (bestaat al)
 const updateCompanyProfile = async (req, res) => {
   try {
     const { bedrijfId } = req.params;
@@ -135,4 +158,11 @@ const updateCompanyProfile = async (req, res) => {
   }
 };
 
-export { createSpeeddate, getCompanySpeeddates, getCompanyProfile, updateCompanyProfile };
+export {
+  createSpeeddate,
+  getCompanySpeeddates,
+  getCompanyProfile,
+  updateCompanyProfile,
+  countAllBedrijven,
+  getAllBedrijven // Export de nieuwe functie
+};

@@ -6,18 +6,27 @@ import {
   updateAanvraagStatus,
   deleteAanvraag,
   getStudentAfspraken,
+  countPendingAanvragen,
+  getAllPendingAanvragen,
 } from '../controllers/aanvraagController.js';
 
 const router = express.Router();
 
 // Routes voor studenten
-router.post('/aanvragen', createAanvraag); // Student dient een aanvraag in
-router.get('/aanvragen/student/:studentId', getStudentAanvragen); // Haal alle aanvragen van een specifieke student op
-router.delete('/aanvragen/:aanvraagId', deleteAanvraag); // Student annuleert een aanvraag
-router.get('/afspraken/student/:studentId', getStudentAfspraken); // Haal alle bevestigde afspraken van een student op
+router.post('/', createAanvraag);
+router.get('/student/:studentId', getStudentAanvragen); 
+router.delete('/:aanvraagId', deleteAanvraag); 
+router.get('/afspraken/student/:studentId', getStudentAfspraken); 
 
 // Routes voor bedrijven
-router.get('/aanvragen/bedrijf/:bedrijfId', getBedrijfAanvragen); // Haal alle aanvragen voor een specifiek bedrijf op
-router.patch('/aanvragen/:aanvraagId', updateAanvraagStatus); // Bedrijf werkt de status van een aanvraag bij
+router.get('/bedrijf/:bedrijfId', getBedrijfAanvragen); 
+router.patch('/:aanvraagId', updateAanvraagStatus); 
+
+// NIEUWE ROUTES VOOR ADMIN (CORRIGÉES)
+// Route voor aantal aanvragen in afwachting
+router.get('/pending/count', countPendingAanvragen); 
+
+// Route om alle aanvragen in afwachting op te halen
+router.get('/pending', getAllPendingAanvragen); 
 
 export default router;

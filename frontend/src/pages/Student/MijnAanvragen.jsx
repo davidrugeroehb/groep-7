@@ -17,7 +17,6 @@ function MijnAanvragen() {
       setLoading(true);
       setError(null);
       try {
-        // Gebruik het nieuwe endpoint voor student specifieke aanvragen
         const res = await fetch(`http://localhost:4000/api/aanvragen/student/${studentId}`);
 
         if (!res.ok) {
@@ -35,7 +34,7 @@ function MijnAanvragen() {
     };
 
     fetchAanvragen();
-  }, [studentId]); // Herlaad bij wijziging van studentId
+  }, [studentId]);
 
   const annuleerAanvraag = async (id) => {
     if (!window.confirm("Weet u zeker dat u deze aanvraag wilt annuleren?")) {
@@ -43,7 +42,6 @@ function MijnAanvragen() {
     }
 
     try {
-      // Gebruik het DELETE endpoint voor aanvragen
       const res = await fetch(`http://localhost:4000/api/aanvragen/${id}`, {
         method: "DELETE",
       });
@@ -101,8 +99,12 @@ function MijnAanvragen() {
                 <p className="text-gray-700 mb-2">
                   <strong>Vakgebied:</strong> {aanvraag.vakgebied || "N/B"}
                 </p>
+                {/* AANGEPAST: Toon de specifieke slot tijd en lokaal */}
                 <p className="text-gray-700 mb-2">
-                  <strong>Tijden:</strong> {aanvraag.starttijd} - {aanvraag.eindtijd}
+                  <strong>Aangevraagde Tijd:</strong> {aanvraag.afspraakDetails?.tijd || 'N/B'}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <strong>Lokaal:</strong> {aanvraag.afspraakDetails?.lokaal || 'N/B'}
                 </p>
 
 

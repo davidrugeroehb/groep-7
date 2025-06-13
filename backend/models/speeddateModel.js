@@ -1,17 +1,46 @@
+// backend/models/speeddateModel.js
 import mongoose from 'mongoose';
 
+// Define the sub-schema for individual speeddate slots
+const slotSchema = new mongoose.Schema({
+  startTime: {
+    type: String, // e.g., "13:00"
+    required: true,
+  },
+  endTime: {
+    type: String, // e.g., "13:15"
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['open', 'aangevraagd', 'bevestigd', 'afgekeurd'],
+    default: 'open',
+    required: true,
+  },
+  student: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'student', // Link to the student who booked/requested this specific slot
+    default: null,
+  },
+});
+
 const speeddateSchema = new mongoose.Schema({
-  starttijd: {
+  bedrijf: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'bedrijf',
+    required: true,
+  },
+  starttijd: { // This is the overall period start time
     type: String,
     required: true,
   },
-  eindtijd: {
+  eindtijd: { // This is the overall period end time
     type: String,
     required: true,
   },
-  lokaal: { // NIEUW: Lokaal veld
+  lokaal: {
     type: String,
-    required: true, // Maak dit verplicht als het altijd ingevuld moet worden
+    required: true,
   },
   vakgebied: {
     type: String,
@@ -33,25 +62,14 @@ const speeddateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  bedrijf: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'bedrijf', // Klein letter 'b' conform eerdere fix
-    required: true,
-  },
-  aangevraagdDoor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'student', // Klein letter 's' conform eerdere fix
-    default: null,
-  },
-  status: {
-    type: String,
-    enum: ['open', 'aangevraagd', 'bevestigd'],
-    default: 'open',
-    required: true,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  // Array of sub-speeddate slots
+  slots: {
+    type: [slotSchema],
+    default: [],
   },
 });
 
