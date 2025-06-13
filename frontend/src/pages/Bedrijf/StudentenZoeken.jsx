@@ -173,7 +173,7 @@ function StudentenZoeken() {
                 </select>
               </div>
 
-              {/* Nieuw filter voor Talen - Checkboxes */}
+              {/*filter voor Talen --> Checkboxes */}
               <div className="col-span-1 md:col-span-1">
                 <span className="block text-sm font-medium text-gray-700 mb-2">
                   Filter op Talen:
