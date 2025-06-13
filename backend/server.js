@@ -30,6 +30,7 @@ connectCloudinary();
 // api endpoints
 app.use('/api/auth', authRoutes);
 
+
 // Gebruik van de routes met hun logische voorvoegsels
 app.use('/api/about', aboutRoutes);
 app.use('/api/bedrijven', bedrijfRoutes);
@@ -37,6 +38,7 @@ app.use('/api/students', studentRoutes);
 app.use('/api/aanvragen', aanvraagRoutes);
 app.use('/api/speeddates', speeddateRoutes);
 app.use('/api/admin', adminRoutes); // <-- Zorg dat deze regel correct is
+
 
 
 app.get('/', (req, res) => {

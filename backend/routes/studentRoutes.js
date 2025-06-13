@@ -9,9 +9,11 @@ import {
 
 const router = express.Router();
 
+
 // Haal alle studenten op
 // De prefix in server.js is /api/students, dus deze route wordt /api/students/
 router.get('/', getAllStudenten); // <-- Aangepast van '/api/studenten' naar '/'
+
 
 // Route om totaal aantal studenten op te halen
 // Wordt /api/students/count
