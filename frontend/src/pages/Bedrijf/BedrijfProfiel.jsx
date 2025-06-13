@@ -31,7 +31,8 @@ function BedrijfProfiel() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:4000/api/bedrijf/profiel/${bedrijfId}`); // Let op de route /profiel
+        // AANGEPAST: Correcte route met '/api/bedrijven'
+        const res = await fetch(`http://localhost:4000/api/bedrijven/profiel/${bedrijfId}`);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -77,7 +78,8 @@ function BedrijfProfiel() {
     return;
     } //checkt als de telefoonnummer alleen bestaat uit cijfer
     try {
-      const res = await fetch(`http://localhost:4000/api/bedrijf/profiel/${bedrijfId}`, {
+      // AANGEPAST: Correcte route met '/api/bedrijven'
+      const res = await fetch(`http://localhost:4000/api/bedrijven/profiel/${bedrijfId}`, {
         method: "PUT", // Gebruik PUT om het hele profiel te vervangen
         headers: {
           "Content-Type": "application/json",

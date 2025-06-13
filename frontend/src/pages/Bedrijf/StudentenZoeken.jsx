@@ -12,7 +12,8 @@ function StudentenZoeken() {
     const fetchStudenten = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:4000/api/student/studenten", {
+        // AANGEPAST: Correcte route met '/api/students' en zonder extra '/studenten'
+        const res = await fetch("http://localhost:4000/api/students", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`,
           },
@@ -23,7 +24,7 @@ function StudentenZoeken() {
         }
 
         const data = await res.json();
-        setStudenten(data);
+        setStudenten(data); // De backend stuurt nu direct de array van studenten terug, niet in een 'data' object
         setError(null);
       } catch (err) {
         console.error(err);
