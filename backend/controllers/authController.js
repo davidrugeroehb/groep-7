@@ -1,7 +1,7 @@
-import studentModel from '../models/studentModel.js'; // Import the Student model
-import bedrijfModel from '../models/bedrijfModel.js'; // Import the Bedrijf (Company) model - Use 'bedrijfModel' if that's your export name
-import bcrypt from 'bcryptjs'; // For password comparison
-import jwt from 'jsonwebtoken'; // For generating tokens
+import studentModel from '../models/studentModel.js';
+import bedrijfModel from '../models/bedrijfModel.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import adminModel from '../models/adminModel.js';
 
 
@@ -18,7 +18,7 @@ export const loginUser = async (req, res) => {
     let role = null;
 
     // 1. Probeer de gebruiker te vinden als een Admin
-    user = await adminModel.findOne({ email }); // Zoek in de admin collectie
+    user = await adminModel.findOne({ email });
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
@@ -29,7 +29,7 @@ export const loginUser = async (req, res) => {
     }
 
     // 2. Als admin niet gevonden, probeer dan als Student
-    if (!user) { // Alleen proberen als er nog geen gebruiker is gevonden
+    if (!user) {
       user = await studentModel.findOne({ email });
       if (user) {
         const isMatch = await bcrypt.compare(password, user.password);
@@ -42,31 +42,34 @@ export const loginUser = async (req, res) => {
     }
 
     // 3. Als student niet gevonden, probeer dan als Bedrijf
-    if (!user) { // Alleen proberen als er nog geen gebruiker is gevonden
+    if (!user) {
       user = await bedrijfModel.findOne({ email });
       if (user) {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
-          role = 'bedrijf';
+          // NIEUW: Controleer de status van het bedrijf, inclusief oudere bedrijven zonder status
+          if (user.status === 'pending') {
+            return res.status(403).json({ message: 'Je account is nog in afwachting van goedkeuring door de beheerder.' });
+          }
+          if (user.status === 'rejected') {
+            return res.status(403).json({ message: 'Sorry, je bedrijfsregistratie is niet goedgekeurd door de beheerder.' });
+          }
+          // Als status 'approved' is OF als het status veld niet bestaat (oudere bedrijven) OF null is
+          if (user.status === 'approved' || user.status === undefined || user.status === null) {
+              role = 'bedrijf';
+          } else {
+              // Onverwachte status, of een status die geen login toestaat
+              return res.status(403).json({ message: 'Onbekende status voor je account. Neem contact op met de beheerder.' });
+          }
         } else {
           return res.status(401).json({ message: 'Verkeerd wachtwoord voor bedrijf.' });
         }
       }
     }
 
-//<<<<<<< HEAD
-    // 3. vinden van admin
-//=======
-    // 4. Als gebruiker niet gevonden in welke rol dan ook
-//>>>>>>> 9d6255dd790f3f6f6bb672e901c0485fd5e7e3a4
+    // Als gebruiker niet gevonden in welke rol dan ook
     if (!user) {
-      user = await adminModel.findOne({ email })
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        role = 'admin'
-      }else{
-        return res.status(401).json({message : 'Verkeerd wachtwoord voor admin.'})
-      }
+      return res.status(404).json({ message: 'Gebruiker niet gevonden. Controleer je e-mailadres.' });
     }
 
     // Genereer JWT token (aannemende dat JWT_SECRET is ingesteld in je .env)
@@ -80,9 +83,10 @@ export const loginUser = async (req, res) => {
     res.json({
       token,
       userId: user._id,
-      name: user.name || 'Onbekend', // Zorg ervoor dat 'name' bestaat voor alle user types
+      name: user.name || (user.voornaam ? `${user.voornaam} ${user.achternaam}` : 'Onbekend'), // Gebruik voornaam/achternaam voor studenten
       role: role,
-      message: `${role === 'student' ? 'Student' : (role === 'bedrijf' ? 'Bedrijf' : 'Beheerder')} succesvol ingelogd!`
+      message: `${role === 'student' ? 'Student' : (role === 'bedrijf' ? 'Bedrijf' : 'Beheerder')} succesvol ingelogd!`,
+      status: user.status // Stuur de status van het bedrijf mee
     });
 
   } catch (err) {

@@ -1,14 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Zorg dat deze imports correct zijn
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom'; // Importeer useLocation
 import './Bedrijvenbeheer.css';
 
-const API_BASE_URL = 'http://localhost:4000/api'; // JOUW API-URL - PAS AAN INDIEN NODIG
+const API_BASE_URL = 'http://localhost:4000/api';
 
 const Bedrijvenbeheer = () => {
-    const [bedrijven, setBedrijven] = useState([]); // Deze wordt nu dynamisch geladen
-    const [aanvragen, setAanvragen] = useState([]);
+    const [geregistreerdeBedrijven, setGeregistreerdeBedrijven] = useState([]); // Nieuwe naam voor duidelijkheid
+    const [registratieAanvragen, setRegistratieAanvragen] = useState([]); // Nieuwe naam voor duidelijkheid
     const [zoekTerm, setZoekTerm] = useState('');
     const [actieveTab, setActieveTab] = useState('geregistreerd');
     const [bewerkModal, setBewerkModal] = useState(null);
+
+    const location = useLocation(); // Haal de huidige URL locatie op
+
+    // Effect om de actieve tab in te stellen op basis van URL query parameter
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const tab = queryParams.get('tab');
+        if (tab === 'aanvragen') {
+            setActieveTab('aanvragen');
+        } else {
+            setActieveTab('geregistreerd'); // Standaard
+        }
+    }, [location.search]); // Herlaad wanneer de URL verandert
+
 
     // Hulpfunctie om API-requests te doen met authenticatie
     const authenticatedFetch = useCallback(async (url, options = {}) => {
@@ -18,43 +33,65 @@ const Bedrijvenbeheer = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         };
-        const response = await fetch(url, { ...options, headers });
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Netwerk- of serverfout.' }));
-            console.error(`API Fout (${url}):`, response.status, errorData);
-            if (response.status === 401 || response.status === 403) {
-                alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
-                // Overweeg hier een useNavigate om de gebruiker naar de loginpagina te sturen
+        try {
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                let errorData = { message: 'Onbekende fout' };
+                try {
+                    errorData = await response.json();
+                } catch (jsonErr) {
+                    console.warn(`Geen JSON response bij fout ${response.status} van ${url}`);
+                    errorData.message = `Netwerk- of serverfout: Status ${response.status}.`;
+                }
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            return response.json();
+        } catch (err) {
+            console.error("Fout in authenticatedFetch:", err);
+            throw err;
         }
-        return response.json();
     }, []);
 
-    // Functie om data te laden (bedrijven en aanvragen)
+    // Functie om data te laden
     const loadData = useCallback(async () => {
         try {
-            // Laad geregistreerde bedrijven vanuit de database
-            const loadedBedrijven = await authenticatedFetch(`${API_BASE_URL}/bedrijven`); // Gebruik de nieuwe route
-            setBedrijven(loadedBedrijven.map(b => ({
-                id: b._id, // MongoDB _id als 'id' gebruiken
+            // Laad ALLE goedgekeurde bedrijven (status 'approved')
+            const loadedGeregistreerdeBedrijven = await authenticatedFetch(`${API_BASE_URL}/bedrijven`); // Deze route geeft nu 'approved' bedrijven
+            setGeregistreerdeBedrijven(loadedGeregistreerdeBedrijven.map(b => ({
+                id: b._id,
                 naam: b.name,
                 sector: b.sector,
-                // Taal en Type zijn niet in BedrijfModel, dus simuleren of toevoegen indien nodig
-                taal: 'N/B', // Aanpassen als je taal toevoegt aan BedrijfModel
-                type: 'N/B', // Aanpassen als je type toevoegt aan BedrijfModel
-                beschrijving: b.beschrijving || 'Geen beschrijving beschikbaar.', // Voeg beschrijving toe aan BedrijfModel indien van toepassing
-                status: b.status || 'actief' // Voeg status toe aan BedrijfModel indien van toepassing
+                adres: b.adres, // Voeg relevante velden toe uit BedrijfModel
+                website: b.website,
+                contactpersoon: b.contactpersoon,
+                email: b.email,
+                phone: b.phone,
+                status: b.status, // Dit zal 'approved' zijn
+                // 'type' en 'taal' zijn niet in BedrijfModel, indien nodig uitbreiden
+                type: 'N/B',
+                taal: 'N/B',
+                beschrijving: 'Geen beschrijving beschikbaar.' // Voeg beschrijving toe aan BedrijfModel indien van toepassing
             })));
 
 
-            // Pending aanvragen laden
-            const pendingAanvragen = await authenticatedFetch(`${API_BASE_URL}/aanvragen/pending`);
-            setAanvragen(pendingAanvragen);
+            // Laad ALLE afwachtende bedrijfsregistraties (status 'pending')
+            const loadedRegistratieAanvragen = await authenticatedFetch(`${API_BASE_URL}/bedrijven/pending-registrations`);
+            setRegistratieAanvragen(loadedRegistratieAanvragen.map(b => ({
+                id: b._id,
+                naam: b.name,
+                sector: b.sector,
+                adres: b.adres,
+                website: b.website,
+                contactpersoon: b.contactpersoon,
+                email: b.email,
+                phone: b.phone,
+                status: b.status, // Dit zal 'pending' zijn
+                // Hier kunnen we ook studentNaam, studentOpleiding etc weglaten, want dit zijn bedrijfsaanvragen, geen speeddate aanvragen
+            })));
+
 
         } catch (error) {
-            console.error("Fout bij het laden van bedrijfsdata of aanvragen:", error);
-            // Toon een foutmelding aan de gebruiker
+            console.error("Fout bij het laden van bedrijfsdata of registratieaanvragen:", error);
             alert(`Fout bij het laden van data: ${error.message}`);
         }
     }, [authenticatedFetch]);
@@ -65,51 +102,51 @@ const Bedrijvenbeheer = () => {
     }, [loadData]);
 
 
-    // filterItems functie heeft nu toegang tot de dynamische data
+    // filterItems functie past zich aan de data aan
     const filterItems = (items) =>
         items.filter(item =>
             item.naam.toLowerCase().includes(zoekTerm.toLowerCase()) ||
             item.sector.toLowerCase().includes(zoekTerm.toLowerCase()) ||
-            (item.studentNaam && item.studentNaam.toLowerCase().includes(zoekTerm.toLowerCase())) // Voor aanvragen
+            (item.contactpersoon && item.contactpersoon.toLowerCase().includes(zoekTerm.toLowerCase())) ||
+            (item.email && item.email.toLowerCase().includes(zoekTerm.toLowerCase()))
         );
 
-    // Aanvraag goedkeuren of weigeren (bestaand)
-    const handleAanvraag = async (aanvraagId, accept = false) => {
+    // Bedrijfsregistratie aanvraag goedkeuren of afwijzen
+    const handleRegistratieAanvraag = async (bedrijfId, accept = false) => {
         try {
-            const status = accept ? 'goedgekeurd' : 'afgekeurd';
-            await authenticatedFetch(`${API_BASE_URL}/aanvragen/${aanvraagId}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ status: status })
-            });
-            alert(`Aanvraag ${accept ? 'goedgekeurd' : 'afgekeurd'}!`);
+            const url = accept
+                ? `${API_BASE_URL}/bedrijven/approve-registration/${bedrijfId}`
+                : `${API_BASE_URL}/bedrijven/reject-registration/${bedrijfId}`;
+            
+            await authenticatedFetch(url, { method: 'PATCH' });
+
+            alert(`Bedrijfsregistratie ${accept ? 'goedgekeurd' : 'afgewezen'}!`);
             loadData(); // Herlaad de data om de lijsten te updaten
         } catch (error) {
-            console.error("Fout bij het verwerken van de aanvraag:", error);
+            console.error("Fout bij het verwerken van de bedrijfsregistratieaanvraag:", error);
             alert(`Fout bij het verwerken van de aanvraag: ${error.message}`);
         }
     };
 
-    // Status van een geregistreerd bedrijf wijzigen (nog steeds alert, zie commentaar)
+    // Status van een geregistreerd bedrijf wijzigen (deze functie is nog niet operationeel zonder backend support)
     const toggleStatus = async (id) => {
-        alert("De functie om bedrijven te (de)activeren is nog niet geïmplementeerd in de backend (geen 'status' veld op Bedrijf Model).");
-        // Indien je dit wel implementeert:
-        // const currentBedrijf = bedrijven.find(b => b.id === id);
-        // const newStatus = currentBedrijf.status === 'actief' ? 'inactief' : 'actief';
-        // await authenticatedFetch(`${API_BASE_URL}/bedrijven/${id}/status`, { // Voorbeeldroute
-        //     method: 'PATCH',
-        //     body: JSON.stringify({ status: newStatus })
-        // });
-        // loadData();
+        alert("De functie om bedrijven te (de)activeren is nog niet volledig geïmplementeerd in de backend (vereist een specifieke route voor statuswijziging).");
     };
 
     const saveEdit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const updatedBedrijfData = { // Data die naar de backend gaat
-            name: formData.get('naam'), // Komt overeen met `name` in BedrijfModel
-            sector: formData.get('sector'), // Komt overeen met `sector` in BedrijfModel
+        const updatedBedrijfData = {
+            name: formData.get('naam'),
+            sector: formData.get('sector'),
             // Voeg hier ook andere BedrijfModel velden toe die je wilt bijwerken
-            // bijv. adres: formData.get('adres'), website: formData.get('website'), etc.
+            adres: formData.get('adres'),
+            btwNummer: formData.get('btwNummer'),
+            website: formData.get('website'),
+            contactpersoon: formData.get('contactpersoon'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            // 'type', 'taal', 'beschrijving' zijn geen standaard BedrijfModel velden, dus deze worden hier niet meegestuurd naar de DB.
         };
 
         try {
@@ -127,36 +164,44 @@ const Bedrijvenbeheer = () => {
     };
 
     // Component rendering
-    const renderBedrijfCard = (item, isAanvraag = false) => (
-        <div key={item.id} className={`${isAanvraag ? 'aanvraag' : 'bedrijf'}-card`}>
+    const renderBedrijfCard = (item, isRegistratieAanvraag = false) => ( // Naam aangepast
+        <div key={item.id} className={`${isRegistratieAanvraag ? 'aanvraag' : 'bedrijf'}-card`}>
             <div className="bedrijf-header">
                 <h3>{item.naam}</h3>
                 <span className="sector-tag">{item.sector}</span>
             </div>
             <div className="bedrijf-meta">
-                {isAanvraag ? (
+                {isRegistratieAanvraag ? ( // Toon details voor registratieaanvraag
                     <>
-                        <span>Student: {item.studentNaam} ({item.studentOpleiding})</span>
-                        <span>Email: {item.studentEmail}</span>
-                        <span>Talen student: {item.studentTalen}</span>
+                        <span>Contact: {item.contactpersoon || 'N/B'}</span>
+                        <span>Email: {item.email || 'N/B'}</span>
+                        <span>Tel: {item.phone || 'N/B'}</span>
+                        <span>Adres: {item.adres || 'N/B'}</span>
+                        <span>Website: {item.website || 'N/B'}</span>
                     </>
-                ) : (
+                ) : ( // Toon details voor goedgekeurd bedrijf
                     <>
+                        <span>Contact: {item.contactpersoon || 'N/B'}</span>
+                        <span>Email: {item.email || 'N/B'}</span>
+                        <span>Tel: {item.phone || 'N/B'}</span>
+                        <span>Adres: {item.adres || 'N/B'}</span>
+                        <span>Website: {item.website || 'N/B'}</span>
                         {/* 'Type' en 'Taal' zijn momenteel niet in BedrijfModel, dus deze zijn placeholder */}
-                        <span>{item.type || 'N/B'}</span>
-                        <span>{item.taal || 'N/B'}</span>
+                        <span>Type: {item.type || 'N/B'}</span>
+                        <span>Talen: {item.taal || 'N/B'}</span>
                         <span>Status: {item.status || 'N/B'}</span>
                     </>
                 )}
             </div>
-            <p>{item.beschrijving}</p> {/* Beschrijving is ook niet in BedrijfModel */}
-            <div className={`${isAanvraag ? 'aanvraag' : 'bedrijf'}-acties`}>
-                {isAanvraag ? (
+            {/* Beschrijving is niet in BedrijfModel, toon alleen voor aanvragen als dat relevant is */}
+            {isRegistratieAanvraag && item.beschrijving && <p>{item.beschrijving}</p>} 
+            <div className={`${isRegistratieAanvraag ? 'aanvraag' : 'bedrijf'}-acties`}>
+                {isRegistratieAanvraag ? (
                     <>
-                        <button className="accepteer-btn" onClick={() => handleAanvraag(item.id, true)}>
+                        <button className="accepteer-btn" onClick={() => handleRegistratieAanvraag(item.id, true)}>
                             <i className="fas fa-check-circle"></i> Goedkeuren
                         </button>
-                        <button className="weiger-btn" onClick={() => handleAanvraag(item.id, false)}>
+                        <button className="weiger-btn" onClick={() => handleRegistratieAanvraag(item.id, false)}>
                             <i className="fas fa-times-circle"></i> Weigeren
                         </button>
                     </>
@@ -184,7 +229,7 @@ const Bedrijvenbeheer = () => {
             <div className="zoekbalk">
                 <input
                     type="text"
-                    placeholder="Zoek bedrijf, sector of student..."
+                    placeholder="Zoek bedrijf, sector, contactpersoon of e-mail..."
                     value={zoekTerm}
                     onChange={(e) => setZoekTerm(e.target.value)}
                 />
@@ -195,21 +240,21 @@ const Bedrijvenbeheer = () => {
                     className={actieveTab === 'geregistreerd' ? 'actief' : ''}
                     onClick={() => setActieveTab('geregistreerd')}
                 >
-                    Geregistreerde bedrijven ({filterItems(bedrijven).length})
+                    Geregistreerde bedrijven ({filterItems(geregistreerdeBedrijven).length})
                 </button>
                 <button
                     className={actieveTab === 'aanvragen' ? 'actief' : ''}
                     onClick={() => setActieveTab('aanvragen')}
                 >
-                    Registratieaanvragen ({filterItems(aanvragen).length})
+                    Registratieaanvragen ({filterItems(registratieAanvragen).length})
                 </button>
             </div>
 
             {actieveTab === 'geregistreerd' && (
                 <div className="bedrijven-lijst">
-                    <h2>Beschikbare bedrijven ({filterItems(bedrijven).length})</h2>
-                    {filterItems(bedrijven).length > 0 ? (
-                        filterItems(bedrijven).map(bedrijf => renderBedrijfCard(bedrijf))
+                    <h2>Beschikbare bedrijven ({filterItems(geregistreerdeBedrijven).length})</h2>
+                    {filterItems(geregistreerdeBedrijven).length > 0 ? (
+                        filterItems(geregistreerdeBedrijven).map(bedrijf => renderBedrijfCard(bedrijf, false)) // false voor geregistreerd bedrijf
                     ) : (
                         <p className="text-center text-gray-500 mt-5">Geen geregistreerde bedrijven gevonden.</p>
                     )}
@@ -218,9 +263,9 @@ const Bedrijvenbeheer = () => {
 
             {actieveTab === 'aanvragen' && (
                 <div className="aanvragen-lijst">
-                    <h2>Registratieaanvragen ({filterItems(aanvragen).length})</h2>
-                    {filterItems(aanvragen).length > 0 ? (
-                        filterItems(aanvragen).map(aanvraag => renderBedrijfCard(aanvraag, true))
+                    <h2>Registratieaanvragen ({filterItems(registratieAanvragen).length})</h2>
+                    {filterItems(registratieAanvragen).length > 0 ? (
+                        filterItems(registratieAanvragen).map(aanvraag => renderBedrijfCard(aanvraag, true)) // true voor registratieaanvraag
                     ) : (
                         <p className="text-center text-gray-500 mt-5">Geen registratieaanvragen gevonden.</p>
                     )}
@@ -233,54 +278,62 @@ const Bedrijvenbeheer = () => {
                     <div className="modal-inhoud">
                         <h2>Bewerk {bewerkModal.naam}</h2>
                         <form onSubmit={saveEdit}>
-                            {/* 'naam' komt overeen met 'name' in BedrijfModel */}
+                            {/* Velden die overeenkomen met BedrijfModel */}
                             <div className="form-groep">
                                 <label>Naam:</label>
-                                <input
-                                    type="text"
-                                    name="naam"
-                                    defaultValue={bewerkModal.naam}
-                                    required
-                                />
+                                <input type="text" name="naam" defaultValue={bewerkModal.naam} required />
                             </div>
-                            {/* 'sector' komt overeen met 'sector' in BedrijfModel */}
                             <div className="form-groep">
                                 <label>Sector:</label>
-                                <input
-                                    type="text"
-                                    name="sector"
-                                    defaultValue={bewerkModal.sector}
-                                    required
-                                />
+                                <input type="text" name="sector" defaultValue={bewerkModal.sector} required />
                             </div>
-                            {/* De volgende velden (Type, Taal, Beschrijving) bestaan NIET in uw BedrijfModel.
-                                  Ze zijn opgenomen in de initialBedrijven array voor demo doeleinden.
-                                  Als u deze in de DB wilt opslaan, moet u het BedrijfModel uitbreiden. */}
                             <div className="form-groep">
-                                <label>Type:</label>
+                                <label>Adres:</label>
+                                <input type="text" name="adres" defaultValue={bewerkModal.adres} />
+                            </div>
+                            <div className="form-groep">
+                                <label>BTW-nummer:</label>
+                                <input type="text" name="btwNummer" defaultValue={bewerkModal.btwNummer} />
+                            </div>
+                            <div className="form-groep">
+                                <label>Website:</label>
+                                <input type="text" name="website" defaultValue={bewerkModal.website} />
+                            </div>
+                            <div className="form-groep">
+                                <label>Contactpersoon:</label>
+                                <input type="text" name="contactpersoon" defaultValue={bewerkModal.contactpersoon} required />
+                            </div>
+                            <div className="form-groep">
+                                <label>Email:</label>
+                                <input type="email" name="email" defaultValue={bewerkModal.email} required />
+                            </div>
+                            <div className="form-groep">
+                                <label>Telefoon:</label>
+                                <input type="text" name="phone" defaultValue={bewerkModal.phone} required />
+                            </div>
+
+                            {/* Volgende velden ('Type', 'Talen', 'Beschrijving') bestaan NIET standaard in BedrijfModel.
+                                  Als u deze wilt opslaan, moet u uw BedrijfModel uitbreiden in de backend.
+                                  Voor nu zijn het demo-specifieke velden. */}
+                            <div className="form-groep">
+                                <label>Type (Demo):</label>
                                 <select name="type" defaultValue={bewerkModal.type}>
                                     {['Stage', 'Studentjob', 'Bachelorproef', 'N/B'].map(opt => (
                                         <option key={opt} value={opt}>{opt}</option>
                                     ))}
                                 </select>
                             </div>
-
                             <div className="form-groep">
-                                <label>Talen:</label>
+                                <label>Talen (Demo):</label>
                                 <select name="taal" defaultValue={bewerkModal.taal}>
                                     {['Nederlands', 'Engels', 'Frans', 'N/B'].map(taal => (
                                         <option key={taal} value={taal}>{taal}</option>
                                     ))}
                                 </select>
                             </div>
-
                             <div className="form-groep">
-                                <label>Beschrijving:</label>
-                                <textarea
-                                    name="beschrijving"
-                                    defaultValue={bewerkModal.beschrijving}
-                                    required
-                                />
+                                <label>Beschrijving (Demo):</label>
+                                <textarea name="beschrijving" defaultValue={bewerkModal.beschrijving} />
                             </div>
 
                             <div className="modal-acties">
