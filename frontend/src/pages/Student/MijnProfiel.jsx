@@ -74,14 +74,24 @@ function MijnProfiel() {
     }
   };
 
-  const OpslaanBewerk = async () => {
+  const OpslaanBewerk = async () => { //checkt als de telefoonnummer alleen bestaat uit cijfer
     if (!studentId) {
       alert("Student ID ontbreekt. Kan profiel niet opslaan.");
       return;
-    } //checkt als de telefoonnummer alleen bestaat uit cijfer
+    } 
     if (!/^\d*$/.test(editableProfiel.gsm)) {
     alert("GSM-nummer mag alleen uit cijfers bestaan.");
     return;
+    }
+
+    const goedetalen=['Nederlands', "Frans", "Engels"];
+    const slechtetalen=editableProfiel.talen.filter(
+      taal => !toegestaneTalen.includes(taal)
+    );
+
+    if (ongeldigeTalen.length > 0) {
+      alert(`De volgende talen zijn niet toegestaan: ${ongeldigeTalen.join(', ')}`);
+      return;
     }
     try {
       const res = await fetch(`http://localhost:4000/api/student/mijnprofiel/${studentId}`, {

@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getAllSpeeddates,
+  // Verwijder 'getAllSpeeddates' uit de import, want deze route hoort niet hier.
   getStudentProfile,
   updateStudentProfile,
   getAllStudenten,
@@ -10,14 +10,15 @@ import {
 const router = express.Router();
 
 
-router.get('/api/studenten', getAllStudenten);
+router.get('/studenten', getAllStudenten);
 
 
 // Route om totaal aantal studenten op te halen
 router.get('/count', countAllStudents);
 
-// Route voor alle speeddates (bestaat al)
-router.get('/speeddates', getAllSpeeddates);
+// Verwijder deze regel:
+// router.get('/speeddates', getAllSpeeddates); // <-- DEZE REGEL WORDT VERWIJDERD
+
 
 // Route voor studentenprofiel ophalen
 router.get('/mijnprofiel/:studentId', getStudentProfile);
