@@ -31,7 +31,7 @@ app.use('/api/auth', authRoutes);
 
 app.use('/api/about', aboutRoutes); // Voor de about-routes
 app.use('/api/bedrijven', bedrijfRoutes); // Voor de bedrijfsroutes (inclusief tellers)
-app.use('/api/students', studentRoutes); // Voor de studentenroutes (inclusief tellers)
+app.use('/api/student', studentRoutes); // Voor de studentenroutes (inclusief tellers)
 app.use('/api/aanvragen', aanvraagRoutes); // Voor de aanvraagroutes (inclusief tellers en de pending-lijst)
 app.use('/api/speeddates', speeddateRoutes); // Voor de speeddate-routes (inclusief tellers)
 
