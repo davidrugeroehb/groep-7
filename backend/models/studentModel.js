@@ -12,7 +12,7 @@ const studentSchema = new mongoose.Schema(
     password: { type: String, required: true },
     opleiding: { type: String, required: true },
     // taal: { type: String, required: true }, // Als dit een enkele taal is
-    talen: { type: [String], default: [] }, // NIEUW: Aanbevolen als array voor meerdere talen
+    talen: { type: [String],enum: ["Nederlands","Frans","Engels"] , default: [] }, // NIEUW: Aanbevolen als array voor meerdere talen
 
     gsm: { type: String }, // NIEUW: GSM nummer
     specialisatie: { type: String }, // NIEUW: Specialisatie (bijv. "Web Development")
