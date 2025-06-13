@@ -24,7 +24,9 @@ const HomeBedrijf = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:4000/api/speeddates/bedrijf/${bedrijfId}`); // Endpoint bijgewerkt
+        // AANGEPAST: Correcte route met '/api/speeddates/bedrijf'
+        // Let op: 'bedrijf' hier is deel van de route zelf, niet de algemene prefix
+        const res = await fetch(`http://localhost:4000/api/speeddates/bedrijf/${bedrijfId}`);
         if (!res.ok) {
           throw new Error("Kon speeddates niet ophalen.");
         }
@@ -47,7 +49,9 @@ const HomeBedrijf = () => {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:4000/api/speeddates/${id}`, { // Endpoint bijgewerkt
+      // AANGEPAST: Correcte route voor verwijderen speeddate
+      // Let op: Geen '/bedrijf' in de delete route, want die zit direct onder /api/speeddates
+      const res = await fetch(`http://localhost:4000/api/speeddates/${id}`, {
         method: "DELETE",
       });
 
@@ -96,7 +100,7 @@ const HomeBedrijf = () => {
     return (
       (filters.vakgebied.length === 0 || filters.vakgebied.includes(date.vakgebied)) &&
       (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
-      (filters.talen.length === 0 || date.talen.some(t => filters.talen.includes(t))) // Corrected filter logic for languages
+      (filters.talen.length === 0 || date.talen.some(t => filters.talen.includes(t)))
     );
   });
 
@@ -159,7 +163,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
               <div className="checkbox-grid">
-                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => (
+                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => ( // Updated: consistent with Aanmaken.jsx and Speeddates.jsx
                   <label key={type} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -176,7 +180,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Taal</h3>
               <div className="checkbox-grid">
-                {["Nederlands", "Engels", "Frans"].map((taal) => ( // Adjust languages as per your data
+                {["Nederlands", "Engels", "Frans"].map((taal) => ( // Updated: consistent with Aanmaken.jsx and Speeddates.jsx
                   <label key={taal} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -210,7 +214,7 @@ const HomeBedrijf = () => {
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
-                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p> {/* Lokaal added */}
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p>
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
                     <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
                     <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
@@ -239,11 +243,11 @@ const HomeBedrijf = () => {
                                 {slot.startTime} - {slot.endTime}
                               </span>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getSlotStatusClass(slot.status)}`}>
-                                {slot.status === 'aangevraagd' && slot.student ? `Aangevraagd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` : // Assuming student object is populated
+                                {slot.status === 'aangevraagd' && slot.student ? `Aangevraagd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
                                  slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
                                  slot.status === 'open' ? 'Open' :
                                  slot.status === 'afgekeurd' ? 'Afgekeurd' :
-                                 slot.status // Fallback to raw status if unknown
+                                 slot.status
                                 }
                               </span>
                             </li>

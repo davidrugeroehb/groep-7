@@ -1,20 +1,25 @@
+// backend/routes/studentRoutes.js
 import express from "express";
 import {
   getStudentProfile,
   updateStudentProfile,
-  getAllStudenten,
-  countAllStudents,
-  // getAllSpeeddates // Let op: deze is al verplaatst naar speeddateRoutes.js
+
+  getAllStudenten, // Deze functie is voor /api/students
+  countAllStudents
+
 } from '../controllers/studentController.js';
 
 const router = express.Router();
 
-
-// Haal alle studenten op
-// De prefix in server.js is /api/students, dus deze route wordt /api/students/
-router.get('/', getAllStudenten); // <-- Aangepast van '/api/studenten' naar '/'
+// Verander dit:
+// router.get('/api/studenten', getAllStudenten);
 
 
+// Naar dit (omdat server.js al /api/students toevoegt):
+router.get('/', getAllStudenten); // Ophalen van alle studenten
+
+
+// ... (rest van de routes blijven hetzelfde, ze zijn al relatief aan de prefix)
 // Route om totaal aantal studenten op te halen
 // Wordt /api/students/count
 router.get('/count', countAllStudents);
