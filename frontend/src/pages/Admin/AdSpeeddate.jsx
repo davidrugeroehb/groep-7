@@ -1,6 +1,6 @@
 // AdminSpeedDates.jsx
 import React, { useState, useEffect } from 'react';
-import '../Student/SpeedDates.css';
+import '../Student/SpeedDates.css'; // Zorg ervoor dat dit CSS-bestand correct is
 
 const AdminSpeedDates = () => {
   const [speedDates, setSpeedDates] = useState([]);
@@ -16,6 +16,27 @@ const AdminSpeedDates = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Hulpfunctie om API-requests te doen met authenticatie
+  const authenticatedFetch = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    const response = await fetch(url, { ...options, headers });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Netwerk- of serverfout.' }));
+      console.error(`API Fout (${url}):`, response.status, errorData);
+      if (response.status === 401 || response.status === 403) {
+        alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
+        // window.location.href = '/login'; // Of gebruik useNavigate voor React Router
+      }
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  };
+
   useEffect(() => {
     fetchSpeeddates();
   }, []);
@@ -24,12 +45,12 @@ const AdminSpeedDates = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:4000/api/student/speeddates");
-      if (!res.ok) {
-        throw new Error("Kon speeddates niet ophalen.");
-      }
-      const data = await res.json();
-      setSpeedDates(data.speeddates);
+      // **** AANPASSING HIER: Roep de algemene speeddates route aan ****
+      const data = await authenticatedFetch("http://localhost:4000/api/speeddates"); // Roep de nieuwe route aan
+
+      // De data structuur van getAllSpeeddates in studentController.js
+      // retourneert { message: ..., speeddates: [] }. We hebben de array nodig.
+      setSpeedDates(data.speeddates); // Zorg ervoor dat 'speeddates' de array is
 
       // Unieke waarden ophalen voor filters
       const sectors = new Set();
@@ -43,7 +64,7 @@ const AdminSpeedDates = () => {
 
     } catch (err) {
       console.error("Fout bij ophalen speeddates:", err);
-      setError("Fout bij het laden van speeddates.");
+      setError("Fout bij het laden van speeddates: " + err.message); // Toon de specifieke foutmelding
     } finally {
       setLoading(false);
     }
@@ -82,15 +103,10 @@ const AdminSpeedDates = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:4000/api/admin/speeddates/${id}`, {
+      // Gebruik hier ook authenticatedFetch
+      await authenticatedFetch(`http://localhost:4000/api/speeddates/${id}`, { // Zorg dat je een DELETE route hebt voor speeddates in speeddateRoutes.js
         method: 'DELETE',
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Verwijderen mislukt.');
-      }
 
       setSpeedDates(prev => prev.filter(date => date._id !== id));
       alert('Speeddate succesvol verwijderd.');
@@ -105,13 +121,15 @@ const AdminSpeedDates = () => {
     .filter(date => {
       return (
         (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
-        (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
-        (filters.taal.length === 0 || date.talen.some(t => filters.taal.includes(t)))
+        (filters.opportuniteit.length === 0 || (date.opportuniteit && filters.opportuniteit.some(o => date.opportuniteit.includes(o)))) && // Null check toegevoegd
+        (filters.taal.length === 0 || (date.talen && date.talen.some(t => filters.taal.includes(t)))) // Null check toegevoegd
       );
     })
     .sort((a, b) => {
-      const timeA = new Date(`2000-01-01T${a.starttijd}:00`);
-      const timeB = new Date(`2000-01-01T${b.starttijd}:00`);
+      // Voeg een check toe voor geldige tijdwaarden
+      const timeA = a.starttijd ? new Date(`2000-01-01T${a.starttijd}:00`) : new Date(0); // Fallback naar epoch
+      const timeB = b.starttijd ? new Date(`2000-01-01T${b.starttijd}:00`) : new Date(0); // Fallback naar epoch
+
 
       if (sortOrder === 'earliest') {
         return timeA - timeB;
@@ -129,6 +147,7 @@ const AdminSpeedDates = () => {
   }
 
   const getSectorClassName = (sector) => {
+    if (!sector) return ''; // Handel null/undefined sector af
     return sector.replace(/[^a-zA-Z0-9]/g, '');
   };
 
@@ -244,15 +263,16 @@ const AdminSpeedDates = () => {
               {filteredAndSortedDates.map((date) => (
                 <div key={date._id} className="speeddate-card">
                   <div className="card-header">
-                    <h3>{date.bedrijf?.name || 'Laden...'}</h3>
+                    {/* Zorg ervoor dat date.bedrijf en date.bedrijf.name bestaan voordat je ze gebruikt */}
+                    <h3>{date.bedrijf?.name || 'Onbekend Bedrijf'}</h3>
                     <span className={`sector-tag ${getSectorClassName(date.vakgebied)}`}>{date.vakgebied}</span>
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
                     <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p>
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
-                    <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
-                    <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
+                    <p><i className="fas fa-handshake"></i> {date.opportuniteit?.join(', ') || 'N/B'}</p> {/* Null check toegevoegd */}
+                    <p><i className="fas fa-language"></i> {date.talen?.join(', ') || 'N/B'}</p> {/* Null check toegevoegd */}
                     <p className="description">{date.beschrijving}</p>
                   </div>
                   <div className="card-footer">
