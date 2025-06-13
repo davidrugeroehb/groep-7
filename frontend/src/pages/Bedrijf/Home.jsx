@@ -24,7 +24,7 @@ const HomeBedrijf = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:4000/api/bedrijf/speeddates/${bedrijfId}`);
+        const res = await fetch(`http://localhost:4000/api/speeddates/bedrijf/${bedrijfId}`); // Endpoint bijgewerkt
         if (!res.ok) {
           throw new Error("Kon speeddates niet ophalen.");
         }
@@ -43,14 +43,12 @@ const HomeBedrijf = () => {
 
 
   const verwijderSpeeddate = async (id) => {
-    if (!window.confirm("Weet u zeker dat u de speeddate wilt verwijderen?")) {
+    if (!window.confirm("Weet u zeker dat u de speeddate en alle gekoppelde aanvragen wilt verwijderen?")) {
       return;
     }
     try {
-      // Voeg een API call toe om de speeddate uit de database te verwijderen
-      const res = await fetch(`http://localhost:4000/api/bedrijf/speeddates/${id}`, {
+      const res = await fetch(`http://localhost:4000/api/speeddates/${id}`, { // Endpoint bijgewerkt
         method: "DELETE",
-        // Voeg hier eventueel authenticatie headers toe indien nodig
       });
 
       const data = await res.json();
@@ -98,11 +96,22 @@ const HomeBedrijf = () => {
     return (
       (filters.vakgebied.length === 0 || filters.vakgebied.includes(date.vakgebied)) &&
       (filters.opportuniteit.length === 0 || filters.opportuniteit.some(o => date.opportuniteit.includes(o))) &&
-      (filters.talen.length === 0 || filters.talen.some(t => date.talen.includes(t)))
+      (filters.talen.length === 0 || date.talen.some(t => filters.talen.includes(t))) // Corrected filter logic for languages
     );
   });
+
   const toggleDetails = (id) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  const getSlotStatusClass = (status) => {
+    switch (status) {
+      case 'open': return 'bg-green-100 text-green-800';
+      case 'aangevraagd': return 'bg-yellow-100 text-yellow-800';
+      case 'bevestigd': return 'bg-blue-100 text-blue-800';
+      case 'afgekeurd': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
 
@@ -150,7 +159,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
               <div className="checkbox-grid">
-                {["Stage", "Afstudeerproject", "Bijbaan / Werkstudent"].map((type) => (
+                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => (
                   <label key={type} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -167,7 +176,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Taal</h3>
               <div className="checkbox-grid">
-                {["Nederlands", "Engels", "Spaans", "Portugees", "Arabisch"].map((taal) => (
+                {["Nederlands", "Engels", "Frans"].map((taal) => ( // Adjust languages as per your data
                   <label key={taal} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -196,31 +205,16 @@ const HomeBedrijf = () => {
               {filteredDates.map((date) => (
                 <div key={date._id} className="speeddate-card">
                   <div className="card-header">
-                    <h3>{date.bedrijf?.name || 'Jouw Bedrijf'}</h3> {/* Bedrijfsnaam populaten indien nodig */}
+                    <h3>{date.bedrijf?.name || 'Jouw Bedrijf'}</h3>
                     <span className={`sector-tag ${date.vakgebied.replace(/[^a-zA-Z]/g, '')}`}>{date.vakgebied}</span>
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p> {/* Lokaal added */}
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
                     <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
                     <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
                     <p className="description">{date.beschrijving}</p>
-                    <p className="status-indicator">
-                      <strong>Status: </strong>
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                        date.status === 'open' ? 'bg-green-100 text-green-800' :
-                        date.status === 'aangevraagd' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800' // Bevestigd
-                      }`}>
-                        {date.status}
-                      </span>
-                      {date.aangevraagdDoor && date.status === 'aangevraagd' && (
-                        <span className="ml-2 text-sm text-gray-600">(Aangevraagd door student)</span>
-                      )}
-                      {date.aangevraagdDoor && date.status === 'bevestigd' && (
-                        <span className="ml-2 text-sm text-gray-600">(Bevestigd met student)</span>
-                      )}
-                    </p>
                   </div>
                   <div className="card-footer">
                     <button
@@ -235,13 +229,29 @@ const HomeBedrijf = () => {
                   </div>
 
                   {expandedId === date._id && (
-                    <div className="expanded-details">
-                      <h4>Meer informatie</h4>
-                      <p>
-                        Dit is een speeddate over {date.focus} binnen {date.vakgebied}.<br />
-                        Beschikbare talen: {date.talen.join(', ')}.<br />
-                        Gezochte opportuniteiten: {date.opportuniteit.join(', ')}.
-                      </p>
+                    <div className="expanded-details mt-4 p-3 border-t border-gray-200">
+                      <h4 className="font-semibold text-lg mb-2">Individuele Slots:</h4>
+                      {date.slots && date.slots.length > 0 ? (
+                        <ul className="space-y-2">
+                          {date.slots.map(slot => (
+                            <li key={slot._id} className="flex justify-between items-center p-2 border rounded-md bg-gray-50">
+                              <span>
+                                {slot.startTime} - {slot.endTime}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getSlotStatusClass(slot.status)}`}>
+                                {slot.status === 'aangevraagd' && slot.student ? `Aangevraagd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` : // Assuming student object is populated
+                                 slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
+                                 slot.status === 'open' ? 'Open' :
+                                 slot.status === 'afgekeurd' ? 'Afgekeurd' :
+                                 slot.status // Fallback to raw status if unknown
+                                }
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-gray-500 text-sm">Geen individuele slots gedefinieerd.</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -260,6 +270,4 @@ const HomeBedrijf = () => {
   );
 };
 
-
 export default HomeBedrijf;
-

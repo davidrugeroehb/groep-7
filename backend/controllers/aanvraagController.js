@@ -20,7 +20,7 @@ const getAllPendingAanvragen = async (req, res) => {
     const aanvragen = await Aanvraag.find({ status: 'in behandeling' })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf',
+        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf lokaal slots', // Include 'slots' and 'lokaal'
         populate: {
           path: 'bedrijf',
           select: 'name sector',
@@ -28,24 +28,32 @@ const getAllPendingAanvragen = async (req, res) => {
       })
       .populate({
         path: 'student',
-        select: 'voornaam achternaam opleiding email talen', // Toegevoegd voornaam, achternaam, talen
+        select: 'voornaam achternaam opleiding email talen',
       })
       .sort({ createdAt: -1 });
 
-    const formattedAanvragen = aanvragen.map(aanvraag => ({
-      id: aanvraag._id, // Gebruik 'id' in plaats van '_id' voor consistentie frontend
-      naam: aanvraag.speeddate.bedrijf?.name || 'Onbekend Bedrijf', // Bedrijfsnaam
-      sector: aanvraag.speeddate.bedrijf?.sector || 'N/B', // Sector van bedrijf
-      taal: aanvraag.speeddate.talen.join(', ') || 'N/B', // Talen van de speeddate
-      type: aanvraag.speeddate.vakgebied || 'N/B', // Vakgebied als 'type'
-      beschrijving: aanvraag.speeddate.beschrijving || 'N/B',
-      status: aanvraag.status,
-      studentNaam: `${aanvraag.student?.voornaam || ''} ${aanvraag.student?.achternaam || ''}`.trim() || 'Onbekend',
-      studentOpleiding: aanvraag.student?.opleiding || 'N/B',
-      studentEmail: aanvraag.student?.email || 'N/B',
-      studentTalen: aanvraag.student?.talen.join(', ') || 'N/B',
-      // Voeg hier andere relevante velden toe die de admin nodig heeft
-    }));
+    const formattedAanvragen = aanvragen.map(aanvraag => {
+      const selectedSlot = aanvraag.speeddate?.slots.id(aanvraag.slot); // Find the specific slot
+      const slotTijd = selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : 'N/B';
+      const slotLokaal = aanvraag.speeddate?.lokaal || 'N/B'; // Lokaal is op hoofd speeddate niveau
+
+      return {
+        id: aanvraag._id,
+        naam: aanvraag.speeddate?.bedrijf?.name || 'Onbekend Bedrijf',
+        sector: aanvraag.speeddate?.bedrijf?.sector || 'N/B',
+        taal: aanvraag.speeddate?.talen.join(', ') || 'N/B',
+        type: aanvraag.speeddate?.vakgebied || 'N/B',
+        beschrijving: aanvraag.speeddate?.beschrijving || 'N/B',
+        status: aanvraag.status,
+        studentNaam: `${aanvraag.student?.voornaam || ''} ${aanvraag.student?.achternaam || ''}`.trim() || 'Onbekend',
+        studentOpleiding: aanvraag.student?.opleiding || 'N/B',
+        studentEmail: aanvraag.student?.email || 'N/B',
+        studentTalen: aanvraag.student?.talen.join(', ') || 'N/B',
+        speeddateTijd: slotTijd, // Use specific slot time
+        speeddateLokaal: slotLokaal, // Use main speeddate lokaal
+        // Add more relevant fields if needed for admin view
+      };
+    });
 
     res.status(200).json(formattedAanvragen);
   } catch (error) {
@@ -57,45 +65,63 @@ const getAllPendingAanvragen = async (req, res) => {
   }
 };
 
-// 1. Functie om een aanvraag voor een speeddate te creëren (door student)
+// 1. Functie om een aanvraag voor een speeddate slot te creëren (door student)
 const createAanvraag = async (req, res) => {
   try {
-    const { speeddateId, studentId } = req.body;
+    const { speeddateId, slotId, studentId } = req.body;
 
-    if (!speeddateId || !studentId) {
-      return res.status(400).json({ message: 'Speeddate ID en Student ID zijn vereist.' });
+    if (!speeddateId || !slotId || !studentId) {
+      return res.status(400).json({ message: 'Speeddate ID, Slot ID en Student ID zijn vereist.' });
     }
 
     const speeddate = await Speeddate.findById(speeddateId);
     if (!speeddate) {
-      return res.status(404).json({ message: 'Speeddate niet gevonden.' });
-    }
-    if (speeddate.status !== 'open') {
-      return res.status(400).json({ message: 'Deze speeddate is niet beschikbaar voor aanvragen.' });
+      return res.status(404).json({ message: 'Hoofd Speeddate niet gevonden.' });
     }
 
-    const existingAanvraag = await Aanvraag.findOne({ speeddate: speeddateId, student: studentId });
-    if (existingAanvraag) {
-      return res.status(409).json({ message: 'Je hebt al een aanvraag voor deze speeddate ingediend.' });
+    const slot = speeddate.slots.id(slotId); // Find the specific slot by its _id
+    if (!slot) {
+      return res.status(404).json({ message: 'Specifieke tijdslot niet gevonden binnen deze speeddate.' });
     }
+
+    if (slot.status !== 'open') {
+      return res.status(400).json({ message: 'Dit tijdslot is niet beschikbaar voor aanvragen of reeds geboekt.' });
+    }
+
+    // Cruciale validatie: Controleer of de student al een aanvraag heeft ingediend voor ENIG slot binnen deze HOOFD speeddate
+    const existingApplicationForMainSpeeddate = await Aanvraag.findOne({
+      speeddate: speeddateId,
+      student: studentId,
+      status: { $in: ['in behandeling', 'goedgekeurd'] } // Already applied or approved for any slot in this main speeddate
+    });
+
+    if (existingApplicationForMainSpeeddate) {
+      return res.status(409).json({ message: 'Je hebt al een aanvraag voor een slot binnen deze speeddate ingediend. Eén aanvraag per speeddate toegestaan.' });
+    }
+
+    // Update the status of the specific slot
+    slot.status = 'aangevraagd';
+    slot.student = studentId;
 
     const bedrijfId = speeddate.bedrijf;
 
     const newAanvraag = new Aanvraag({
       speeddate: speeddateId,
+      slot: slotId, // Store the slot ID
       student: studentId,
       bedrijf: bedrijfId,
       status: 'in behandeling',
+      afspraakDetails: { // Populate with slot details
+        tijd: `${slot.startTime} - ${slot.endTime}`,
+        lokaal: speeddate.lokaal, // Lokaal comes from the main speeddate
+      }
     });
 
     const savedAanvraag = await newAanvraag.save();
-
-    speeddate.status = 'aangevraagd';
-    speeddate.aangevraagdDoor = studentId;
-    await speeddate.save();
+    await speeddate.save(); // Save the parent speeddate to persist slot changes
 
     res.status(201).json({
-      message: 'Aanvraag succesvol ingediend.',
+      message: 'Aanvraag voor tijdslot succesvol ingediend.',
       aanvraag: savedAanvraag,
     });
   } catch (error) {
@@ -119,7 +145,7 @@ const getStudentAanvragen = async (req, res) => {
     const aanvragen = await Aanvraag.find({ student: studentId })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf',
+        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf lokaal slots', // Include slots and lokaal
         populate: {
           path: 'bedrijf',
           select: 'name sector',
@@ -127,25 +153,36 @@ const getStudentAanvragen = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    const formattedAanvragen = aanvragen.map(aanvraag => ({
-      _id: aanvraag._id,
-      speeddateId: aanvraag.speeddate._id,
-      bedrijfNaam: aanvraag.speeddate.bedrijf?.name || 'Onbekend Bedrijf',
-      sector: aanvraag.speeddate.bedrijf?.sector || 'N/B',
-      starttijd: aanvraag.speeddate.starttijd,
-      eindtijd: aanvraag.speeddate.eindtijd,
-      vakgebied: aanvraag.speeddate.vakgebied,
-      focus: aanvraag.speeddate.focus,
-      opportuniteit: aanvraag.speeddate.opportuniteit,
-      talen: aanvraag.speeddate.talen,
-      beschrijving: aanvraag.speeddate.beschrijving,
-      status: aanvraag.status,
-      afspraakDetails: {
-        tijd: `${aanvraag.speeddate.starttijd} - ${aanvraag.speeddate.eindtijd}`,
-        lokaal: aanvraag.afspraakDetails?.lokaal || 'Nader te bepalen',
-      },
-      createdAt: aanvraag.createdAt,
-    }));
+    const formattedAanvragen = aanvragen.map(aanvraag => {
+      const selectedSlot = aanvraag.speeddate?.slots.id(aanvraag.slot); // Find the specific slot
+      const slotStartTime = selectedSlot ? selectedSlot.startTime : 'N/B';
+      const slotEndTime = selectedSlot ? selectedSlot.endTime : 'N/B';
+      const slotLokaal = aanvraag.speeddate?.lokaal || 'N/B';
+
+      return {
+        _id: aanvraag._id,
+        speeddateId: aanvraag.speeddate?._id,
+        slotId: aanvraag.slot,
+        bedrijfNaam: aanvraag.speeddate?.bedrijf?.name || 'Onbekend Bedrijf',
+        sector: aanvraag.speeddate?.bedrijf?.sector || 'N/B',
+        // Use slot specific times
+        starttijd: slotStartTime,
+        eindtijd: slotEndTime,
+        lokaal: slotLokaal, // Use main speeddate lokaal
+        vakgebied: aanvraag.speeddate?.vakgebied,
+        focus: aanvraag.speeddate?.focus,
+        opportuniteit: aanvraag.speeddate?.opportuniteit,
+        talen: aanvraag.speeddate?.talen,
+        beschrijving: aanvraag.speeddate?.beschrijving,
+        status: aanvraag.status,
+        // afspraakDetails is now primarily derived from the slot for display
+        afspraakDetails: {
+          tijd: `${slotStartTime} - ${slotEndTime}`,
+          lokaal: slotLokaal,
+        },
+        createdAt: aanvraag.createdAt,
+      };
+    });
 
     res.status(200).json(formattedAanvragen);
   } catch (error) {
@@ -173,24 +210,32 @@ const getBedrijfAanvragen = async (req, res) => {
       })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus',
+        select: 'starttijd eindtijd vakgebied focus lokaal slots', // Include slots and lokaal
       })
       .sort({ createdAt: -1 });
 
-    const formattedAanvragen = aanvragen.map(aanvraag => ({
-      _id: aanvraag._id,
-      speeddateId: aanvraag.speeddate._id,
-      studentId: aanvraag.student._id,
-      studentNaam: aanvraag.student?.name || 'Onbekend',
-      studentOpleiding: aanvraag.student?.opleiding || 'N/B',
-      studentEmail: aanvraag.student?.email || 'N/B',
-      studentTaal: aanvraag.student?.taal || 'N/B',
-      speeddateTijd: `${aanvraag.speeddate.starttijd} - ${aanvraag.speeddate.eindtijd}`,
-      speeddateFocus: aanvraag.speeddate.focus,
-      status: aanvraag.status,
-      afspraakDetails: aanvraag.afspraakDetails,
-      createdAt: aanvraag.createdAt,
-    }));
+    const formattedAanvragen = aanvragen.map(aanvraag => {
+      const selectedSlot = aanvraag.speeddate?.slots.id(aanvraag.slot); // Find the specific slot
+      const slotTijd = selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : 'N/B';
+      const slotLokaal = aanvraag.speeddate?.lokaal || 'N/B';
+
+      return {
+        _id: aanvraag._id,
+        speeddateId: aanvraag.speeddate?._id,
+        slotId: aanvraag.slot,
+        studentId: aanvraag.student?._id,
+        studentNaam: aanvraag.student?.name || 'Onbekend',
+        studentOpleiding: aanvraag.student?.opleiding || 'N/B',
+        studentEmail: aanvraag.student?.email || 'N/B',
+        studentTaal: aanvraag.student?.taal || 'N/B',
+        speeddateTijd: slotTijd, // Use specific slot time
+        speeddateFocus: aanvraag.speeddate?.focus,
+        speeddateLokaal: slotLokaal,
+        status: aanvraag.status,
+        afspraakDetails: aanvraag.afspraakDetails,
+        createdAt: aanvraag.createdAt,
+      };
+    });
 
     res.status(200).json(formattedAanvragen);
   } catch (error) {
@@ -207,43 +252,51 @@ const getBedrijfAanvragen = async (req, res) => {
 const updateAanvraagStatus = async (req, res) => {
   try {
     const { aanvraagId } = req.params;
-    const { status, afspraakDetails = {} } = req.body;
+    const { status } = req.body; // afspraakDetails now derived from slot
 
     if (!aanvraagId || !status) {
       return res.status(400).json({ message: 'Aanvraag ID en status zijn vereist.' });
     }
 
-    const aanvraag = await Aanvraag.findById(aanvraagId).populate('speeddate');
+    const aanvraag = await Aanvraag.findById(aanvraagId);
     if (!aanvraag) {
       return res.status(404).json({ message: 'Aanvraag niet gevonden.' });
     }
-    if (!aanvraag.speeddate) {
-        return res.status(404).json({ message: 'Gekoppelde speeddate niet gevonden.' });
+
+    const speeddate = await Speeddate.findById(aanvraag.speeddate);
+    if (!speeddate) {
+      return res.status(404).json({ message: 'Gekoppelde speeddate niet gevonden.' });
     }
 
-    const oldStatus = aanvraag.status;
+    const slot = speeddate.slots.id(aanvraag.slot);
+    if (!slot) {
+      return res.status(404).json({ message: 'Gekoppelde tijdslot niet gevonden.' });
+    }
+
+    const oldAanvraagStatus = aanvraag.status;
     aanvraag.status = status;
 
     if (status === 'goedgekeurd') {
-      aanvraag.afspraakDetails.tijd = `${aanvraag.speeddate.starttijd} - ${aanvraag.speeddate.eindtijd}`;
-      aanvraag.afspraakDetails.lokaal = afspraakDetails.lokaal || aanvraag.speeddate.lokaal;
-
-      aanvraag.speeddate.status = 'bevestigd';
-      await aanvraag.speeddate.save();
+      if (slot.status !== 'open' && slot.status !== 'aangevraagd') {
+        return res.status(400).json({ message: 'Dit slot is al bezet of niet beschikbaar.' });
+      }
+      slot.status = 'bevestigd';
+      slot.student = aanvraag.student; // Confirm the student for this slot
+      aanvraag.afspraakDetails.tijd = `${slot.startTime} - ${slot.endTime}`;
+      aanvraag.afspraakDetails.lokaal = speeddate.lokaal; // Lokaal van de hoofd-speeddate
 
     } else if (status === 'afgekeurd') {
-      aanvraag.speeddate.status = 'open';
-      aanvraag.speeddate.aangevraagdDoor = null;
-      await aanvraag.speeddate.save();
-      aanvraag.afspraakDetails = {};
-
-    } else if (status === 'in behandeling' && oldStatus !== 'in behandeling') {
-      aanvraag.speeddate.status = 'aangevraagd';
-      await aanvraag.speeddate.save();
-      aanvraag.afspraakDetails = {};
+      // If a slot was previously 'aangevraagd' by this student, reset it to 'open'
+      if (slot.student?.toString() === aanvraag.student.toString() && slot.status === 'aangevraagd') {
+        slot.status = 'open';
+        slot.student = null;
+      }
+      aanvraag.afspraakDetails = {}; // Clear details
     }
+    // No change for 'in behandeling' status from this endpoint
 
     const updatedAanvraag = await aanvraag.save();
+    await speeddate.save(); // Save the parent speeddate to persist slot changes
 
     res.status(200).json({
       message: 'Aanvraag status succesvol bijgewerkt.',
@@ -264,17 +317,25 @@ const deleteAanvraag = async (req, res) => {
   try {
     const { aanvraagId } = req.params;
 
-    const aanvraag = await Aanvraag.findById(aanvraagId).populate('speeddate');
+    const aanvraag = await Aanvraag.findById(aanvraagId);
     if (!aanvraag) {
       return res.status(404).json({ message: 'Aanvraag niet gevonden.' });
     }
 
-    if (aanvraag.speeddate && aanvraag.speeddate.status === 'aangevraagd') {
-      aanvraag.speeddate.status = 'open';
-      aanvraag.speeddate.aangevraagdDoor = null;
-      await aanvraag.speeddate.save();
-    } else if (aanvraag.speeddate && aanvraag.speeddate.status === 'bevestigd') {
-        return res.status(400).json({ message: 'Bevestigde afspraken kunnen niet geannuleerd worden via deze weg. Neem contact op met het bedrijf.' });
+    const speeddate = await Speeddate.findById(aanvraag.speeddate);
+    // If speeddate or slot no longer exists, just delete the aanvraag
+    if (speeddate) {
+        const slot = speeddate.slots.id(aanvraag.slot);
+        if (slot) {
+            // Only reset slot if it was requested by this student and not yet confirmed by company
+            if (slot.student?.toString() === aanvraag.student.toString() && (slot.status === 'aangevraagd' || slot.status === 'in behandeling')) {
+                slot.status = 'open';
+                slot.student = null;
+                await speeddate.save(); // Save speeddate changes
+            } else if (slot.status === 'bevestigd') {
+                return res.status(400).json({ message: 'Bevestigde afspraken kunnen niet geannuleerd worden via deze weg. Neem contact op met het bedrijf.' });
+            }
+        }
     }
 
     await Aanvraag.findByIdAndDelete(aanvraagId);
@@ -301,7 +362,7 @@ const getStudentAfspraken = async (req, res) => {
     const afspraken = await Aanvraag.find({ student: studentId, status: 'goedgekeurd' })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus bedrijf lokaal',
+        select: 'starttijd eindtijd vakgebied focus bedrijf lokaal slots', // Include slots and lokaal
         populate: {
           path: 'bedrijf',
           select: 'name sector',
@@ -309,15 +370,22 @@ const getStudentAfspraken = async (req, res) => {
       })
       .sort({ createdAt: 1 });
 
-    const formattedAfspraken = afspraken.map(afspraak => ({
-      _id: afspraak._id,
-      speeddateId: afspraak.speeddate._id,
-      bedrijfNaam: afspraak.speeddate.bedrijf?.name || 'Onbekend Bedrijf',
-      sector: afspraak.speeddate.bedrijf?.sector || 'N/B',
-      focus: afspraak.speeddate.focus,
-      tijd: `${afspraak.speeddate.starttijd} - ${afspraak.speeddate.eindtijd}`,
-      lokaal: afspraak.speeddate.lokaal || 'Nader te bepalen',
-    }));
+    const formattedAfspraken = afspraken.map(afspraak => {
+      const selectedSlot = afspraak.speeddate?.slots.id(afspraak.slot); // Find the specific slot
+      const slotTime = selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : 'N/B';
+      const slotLokaal = afspraak.speeddate?.lokaal || 'N/B';
+
+      return {
+        _id: afspraak._id,
+        speeddateId: afspraak.speeddate?._id,
+        slotId: afspraak.slot,
+        bedrijfNaam: afspraak.speeddate?.bedrijf?.name || 'Onbekend Bedrijf',
+        sector: afspraak.speeddate?.bedrijf?.sector || 'N/B',
+        focus: afspraak.speeddate?.focus,
+        tijd: slotTime, // Use specific slot time
+        lokaal: slotLokaal, // Use main speeddate lokaal
+      };
+    });
 
     res.status(200).json(formattedAfspraken);
   } catch (error) {
@@ -336,6 +404,6 @@ export {
   updateAanvraagStatus,
   deleteAanvraag,
   getStudentAfspraken,
-  countPendingAanvragen, // Exporteren de nieuwe functie
-  getAllPendingAanvragen, // Exporteren de nieuwe functie
+  countPendingAanvragen,
+  getAllPendingAanvragen,
 };
