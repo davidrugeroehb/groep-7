@@ -31,8 +31,10 @@ function BedrijfProfiel() {
       setLoading(true);
       setError(null);
       try {
+
         // AANGEPAST: Correcte route met '/api/bedrijven'
         const res = await fetch(`http://localhost:4000/api/bedrijven/profiel/${bedrijfId}`);
+
 
         if (!res.ok) {
           const errorData = await res.json();

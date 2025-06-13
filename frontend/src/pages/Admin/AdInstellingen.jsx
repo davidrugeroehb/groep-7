@@ -9,61 +9,107 @@ function About() {
   );
   const [isEditing, setIsEditing] = useState(false);
 
+  // Hulpfunctie voor geauthenticeerde fetches
+  const authenticatedFetch = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+    try {
+        const response = await fetch(url, { ...options, headers });
+        if (!response.ok) {
+            let errorData = { message: 'Onbekende fout' };
+            try {
+                errorData = await response.json();
+            } catch (jsonErr) {
+                console.warn(`Geen JSON response bij fout ${response.status} van ${url}`);
+                errorData.message = `Netwerk- of serverfout: Status ${response.status}.`;
+            }
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    } catch (err) {
+        console.error("Fout in authenticatedFetch:", err);
+        throw err;
+    }
+  };
+
+
   /* 1️⃣ ABOUT maar één keer ophalen  */
   useEffect(() => {
     const fetchAbout = async () => {
       try {
-        const res  = await fetch("http://localhost:4000/api/about");
-        const data = await res.json();
-        setTekst(data.tekst_about);
-      } catch {
-        console.error("Fout bij ophalen About");
+        setError(null);
+        const data = await authenticatedFetch("http://localhost:4000/api/about");
+        
+        if (data && data.tekst_about !== undefined) {
+            setTekst(data.tekst_about);
+        } else {
+            throw new Error("Ongeldig formaat voor 'About' data ontvangen van server.");
+        }
+      } catch (err) {
+        console.error("Fout bij ophalen About:", err);
+        setError("Fout bij het laden van de Over-pagina: " + err.message);
+        setTekst("Career Match is een platform ontworpen ...");
       }
     };
     fetchAbout();
-  }, []);                       //  ← dependency-array toegevoegd
+  }, []);
+
 
   /* 2️⃣ Profiel ophalen — check rol */
   useEffect(() => {
     const fetchProfiel = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/admin/mijnprofiel", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProfiel(data);       // ➜ { role: "admin", ... }
+        const adminId = localStorage.getItem('userId'); // Haal de userId op die is opgeslagen na login
+        const role = localStorage.getItem('role');
+        
+        if (!adminId || role !== 'admin') {
+            setError("Geen admin ID of rol gevonden. Log opnieuw in als admin.");
+            setProfiel({ role: 'guest' });
+            return;
+        }
+
+        // **** CRUCIALE CHECK: Zorg dat de URL van de fetch correct is ****
+        // http://localhost:4000/api/admin/mijnprofiel/DE_ADMIN_ID
+        const data = await authenticatedFetch(`http://localhost:4000/api/admin/mijnprofiel/${adminId}`);
+        
+        if (data && data.profile) {
+            setProfiel(data.profile);
+        } else {
+            throw new Error("Ongeldig profiel data van server.");
+        }
+
       } catch (err) {
-        console.error(err);
-        // fallback zodat de pagina tóch werkt
+        console.error("Fout bij ophalen profiel:", err);
         setProfiel({ role: localStorage.getItem("role") || "guest" });
-        setError("Fout bij ophalen van je profiel.");
+        setError(`Fout bij ophalen van je profiel: ${err.message}`);
       }
     };
     fetchProfiel();
   }, []);
 
+
   /* 3️⃣ Bij opslaan PUT naar /api/about */
   const handleSave = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/about", {
+      const data = await authenticatedFetch("http://localhost:4000/api/about", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tekst }),
       });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
       setTekst(data.tekst_about);
       setIsEditing(false);
+      setError(null);
     } catch (err) {
-      console.error("Fout bij opslaan");
+      console.error("Fout bij opslaan:", err);
+      setError("Fout bij opslaan van de tekst.");
     }
   };
 
   /* --------- UI --------- */
-  if (!profiel)
+  if (!profiel && !error)
     return <p className="text-center mt-10">Bezig met laden…</p>;
 
   return (
@@ -72,7 +118,7 @@ function About() {
         <h1 className="text-3xl font-bold text-center mb-6">Over Career Match</h1>
 
         {/* Admin kan bewerken */}
-        {profiel.role === "admin" && !isEditing && (
+        {profiel && profiel.role === "admin" && !isEditing && (
           <div className="flex justify-end mb-4">
             <button
               onClick={() => setIsEditing(true)}
@@ -104,6 +150,9 @@ function About() {
         ) : (
           <p className="mb-6 leading-relaxed">{tekst}</p>
         )}
+
+        {/* Foutmelding weergeven */}
+        {error && <p className="text-center text-red-600 mb-6">{error}</p>}
 
         {/* Team-afbeelding */}
         <div className="text-center mb-8">

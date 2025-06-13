@@ -13,20 +13,20 @@ import {
 const router = express.Router();
 
 // Routes voor studenten
-router.post('/', createAanvraag); // Devient /api/aanvragen
-router.get('/student/:studentId', getStudentAanvragen); // Devient /api/aanvragen/student/:studentId
-router.delete('/:aanvraagId', deleteAanvraag); // Devient /api/aanvragen/:aanvraagId
-router.get('/afspraken/student/:studentId', getStudentAfspraken); // Devient /api/aanvragen/afspraken/student/:studentId
+router.post('/', createAanvraag);
+router.get('/student/:studentId', getStudentAanvragen); 
+router.delete('/:aanvraagId', deleteAanvraag); 
+router.get('/afspraken/student/:studentId', getStudentAfspraken); 
 
 // Routes voor bedrijven
-router.get('/bedrijf/:bedrijfId', getBedrijfAanvragen); // Devient /api/aanvragen/bedrijf/:bedrijfId
-router.patch('/:aanvraagId', updateAanvraagStatus); // Devient /api/aanvragen/:aanvraagId
+router.get('/bedrijf/:bedrijfId', getBedrijfAanvragen); 
+router.patch('/:aanvraagId', updateAanvraagStatus); 
 
 // NIEUWE ROUTES VOOR ADMIN (CORRIGÉES)
 // Route voor aantal aanvragen in afwachting
-router.get('/pending/count', countPendingAanvragen); // Devient /api/aanvragen/pending/count
+router.get('/pending/count', countPendingAanvragen); 
 
 // Route om alle aanvragen in afwachting op te halen
-router.get('/pending', getAllPendingAanvragen); // Devient /api/aanvragen/pending
+router.get('/pending', getAllPendingAanvragen); 
 
 export default router;
