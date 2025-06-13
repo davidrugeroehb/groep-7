@@ -3,33 +3,22 @@ import express from "express";
 import {
   getStudentProfile,
   updateStudentProfile,
-
-  getAllStudenten, // Deze functie is voor /api/students
+  getAllStudenten,
   countAllStudents
-
-} from '../controllers/studentController.js';
+} from '../controllers/studentController.js'; // Let op: getAllSpeeddates is hier niet langer nodig
 
 const router = express.Router();
 
-// Verander dit:
-// router.get('/api/studenten', getAllStudenten);
+// Ophalen van alle studenten (wordt /api/students)
+router.get('/', getAllStudenten);
 
-
-// Naar dit (omdat server.js al /api/students toevoegt):
-router.get('/', getAllStudenten); // Ophalen van alle studenten
-
-
-// ... (rest van de routes blijven hetzelfde, ze zijn al relatief aan de prefix)
-// Route om totaal aantal studenten op te halen
-// Wordt /api/students/count
+// Route om totaal aantal studenten op te halen (wordt /api/students/count)
 router.get('/count', countAllStudents);
 
-// Route voor studentenprofiel ophalen
-// Wordt /api/students/mijnprofiel/:studentId
+// Route voor studentenprofiel ophalen (wordt /api/students/mijnprofiel/:studentId)
 router.get('/mijnprofiel/:studentId', getStudentProfile);
 
-// Route om profiel student up te daten
-// Wordt /api/students/mijnprofiel/:studentId
+// Route om profiel student up te daten (wordt /api/students/mijnprofiel/:studentId)
 router.put('/mijnprofiel/:studentId', updateStudentProfile);
 
 export default router;
