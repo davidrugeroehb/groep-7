@@ -1,28 +1,24 @@
-// backend/controllers/adminController.js
-import Admin from '../models/adminModel.js'; // Zorg dat je adminModel import
+import Admin from '../models/adminModel.js';
 
-// Functie om admin profiel op te halen
 const getAdminProfile = async (req, res) => {
     try {
-        // De admin ID zou normaal uit de token moeten komen, niet uit de URL als '1'
-        // Voor nu, aangenomen dat de admin ID uit de req.user (na auth middleware) komt,
-        // of dat we een specifieke admin ID gebruiken voor demo.
-        // Als u authenticatie gebruikt, haalt u de ID op via req.user.id
-        const adminId = req.user?.id; // Aangenomen dat req.user.id beschikbaar is na authenticatie middleware
+        const { adminId } = req.params; // Haalt de ID op uit de URL (e.g. '/mijnprofiel/123')
+
         if (!adminId) {
             return res.status(400).json({ message: 'Admin ID is vereist om profiel op te halen.' });
         }
 
-        const admin = await Admin.findById(adminId).select('-password'); // Haal admin op zonder wachtwoord
+        const admin = await Admin.findById(adminId).select('-password');
 
         if (!admin) {
-            return res.status(404).json({ message: 'Admin niet gevonden.' });
+            // Retourneer 404 als de admin niet gevonden is met de opgegeven ID
+            return res.status(404).json({ message: 'Admin niet gevonden met de opgegeven ID.' });
         }
 
         res.status(200).json({
             message: 'Admin profiel succesvol opgehaald.',
             profile: admin,
-            role: 'admin' // Zorg dat de rol ook meegestuurd wordt
+            role: 'admin'
         });
     } catch (error) {
         console.error('Fout bij het ophalen van admin profiel:', error);
@@ -30,17 +26,16 @@ const getAdminProfile = async (req, res) => {
     }
 };
 
-// Functie om admin profiel bij te werken (optioneel)
 const updateAdminProfile = async (req, res) => {
     try {
-        const adminId = req.user?.id; // Haal admin ID op via authenticatie
+        const { adminId } = req.params;
         const updateData = req.body;
 
         if (!adminId) {
             return res.status(400).json({ message: 'Admin ID is vereist om profiel bij te werken.' });
         }
 
-        delete updateData.password; // Voorkom direct wachtwoord bijwerken
+        delete updateData.password;
 
         const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true, runValidators: true }).select('-password');
 
