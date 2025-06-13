@@ -75,7 +75,7 @@ function BedrijfProfiel() {
       if (!/^\d*$/.test(editableProfiel.phone)) {
     alert("Telefoonnummer mag alleen uit cijfers bestaan.");
     return;
-    }
+    } //checkt als de telefoonnummer alleen bestaat uit cijfer
     try {
       const res = await fetch(`http://localhost:4000/api/bedrijf/profiel/${bedrijfId}`, {
         method: "PUT", // Gebruik PUT om het hele profiel te vervangen
