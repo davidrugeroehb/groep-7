@@ -1,18 +1,26 @@
 import express from "express";
 import { registerBedrijf } from "../controllers/bedrijfAuthController.js";
-import { createSpeeddate, getCompanySpeeddates, getCompanyProfile, updateCompanyProfile } from '../controllers/bedrijfController.js'; // Importeer de nieuwe functies
+import {
+  createSpeeddate,
+  getCompanySpeeddates,
+  getCompanyProfile,
+  updateCompanyProfile,
+  countAllBedrijven // Nieuwe functie importeren
+} from '../controllers/bedrijfController.js';
 
 const router = express.Router();
 
-router.post("/register", registerBedrijf); // Bestaande registratie route
+router.post("/register", registerBedrijf);
 
-router.post("/speeddates", createSpeeddate); // Bestaande speeddate aanmaak route
-router.get("/speeddates/:bedrijfId", getCompanySpeeddates); // Bestaande route voor bedrijf-specifieke speeddates
+router.post("/speeddates", createSpeeddate);
+router.get("/speeddates/:bedrijfId", getCompanySpeeddates);
 
-// NIEUWE ROUTE: Profiel van een specifiek bedrijf ophalen
+// Route om het aantal bedrijven te tellen
+router.get('/count', countAllBedrijven);
+
 router.get('/profiel/:bedrijfId', getCompanyProfile);
 
-// NIEUWE ROUTE: Profiel van een specifiek bedrijf bijwerken
+// Route om de profiel van een bedrijf up te daten
 router.put('/profiel/:bedrijfId', updateCompanyProfile);
 
 export default router;

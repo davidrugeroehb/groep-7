@@ -1,5 +1,5 @@
 import Speeddate from '../models/speeddateModel.js';
-import Student from '../models/studentModel.js'; // Importeer het studentModel
+import Student from '../models/studentModel.js';
 
 const getAllStudenten= async(req,res)=>{
   try{
@@ -9,6 +9,17 @@ const getAllStudenten= async(req,res)=>{
     res.status(500).json({message:'Fout bij het ophalen van studenten',error: err.message})
   }
 }
+
+// NIEUWE FUNCTIE: Tellen van alle studenten
+const countAllStudents = async (req, res) => {
+  try {
+    const count = await Student.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error('Fout bij het tellen van studenten:', error);
+    res.status(500).json({ message: 'Er ging iets mis bij het tellen van studenten.', error: error.message });
+  }
+};
 
 // Functie om alle speeddates voor studenten op te halen (bestaat al)
 const getAllSpeeddates = async (req, res) => {
@@ -94,4 +105,10 @@ const updateStudentProfile = async (req, res) => {
 };
 
 
-export { getAllSpeeddates, getStudentProfile, updateStudentProfile, getAllStudenten };
+export {
+  getAllSpeeddates,
+  getStudentProfile,
+  updateStudentProfile,
+  getAllStudenten,
+  countAllStudents // Exporteren van de nieuwe functie
+};
