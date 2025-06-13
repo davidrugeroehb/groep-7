@@ -9,56 +9,81 @@ function About() {
   );
   const [isEditing, setIsEditing] = useState(false);
 
+  // Hulpfunctie voor geauthenticeerde fetches
+  const authenticatedFetch = async (url, options = {}) => {
+    const token = localStorage.getItem('token'); // Gebruik 'token', niet 'adminToken'
+    const headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}` // Voeg de token toe
+    };
+    const response = await fetch(url, { ...options, headers });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Netwerk- of serverfout.' }));
+      console.error(`API Fout (${url}):`, response.status, errorData);
+      if (response.status === 401 || response.status === 403) {
+        alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
+        // window.location.href = '/login'; // Of useNavigate
+      }
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  };
+
+
   /* 1️⃣ ABOUT maar één keer ophalen  */
   useEffect(() => {
     const fetchAbout = async () => {
       try {
-        const res  = await fetch("http://localhost:4000/api/about");
-        const data = await res.json();
+        const res  = await authenticatedFetch("http://localhost:4000/api/about"); // Gebruik authenticatedFetch
+        const data = await res.json(); // Dit is al gebeurd in authenticatedFetch, dus dit is overbodig
         setTekst(data.tekst_about);
-      } catch {
-        console.error("Fout bij ophalen About");
+      } catch (err) { // Vang de fout correct op
+        console.error("Fout bij ophalen About:", err);
+        setError("Fout bij het laden van de Over-pagina."); // Zet een foutmelding
       }
     };
     fetchAbout();
-  }, []);                       //  ← dependency-array toegevoegd
+  }, []);
 
   /* 2️⃣ Profiel ophalen — check rol */
   useEffect(() => {
     const fetchProfiel = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/admin/mijnprofiel", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProfiel(data);       // ➜ { role: "admin", ... }
+        // Haal de admin ID op uit localStorage (ingelogde gebruiker)
+        const adminId = localStorage.getItem('userId');
+        if (!adminId) {
+            setError("Geen admin ID gevonden. Log opnieuw in.");
+            setProfiel({ role: localStorage.getItem("role") || "guest" });
+            return;
+        }
+
+        // **** AANPASSING HIER: Correcte route en ID ****
+        const data = await authenticatedFetch(`http://localhost:4000/api/admin/mijnprofiel/${adminId}`); // Gebruik de correcte route met ID
+
+        setProfiel(data.profile);       // De API retourneert { profile: {...}, role: "admin" }
       } catch (err) {
-        console.error(err);
-        // fallback zodat de pagina tóch werkt
+        console.error("Fout bij ophalen profiel:", err);
         setProfiel({ role: localStorage.getItem("role") || "guest" });
         setError("Fout bij ophalen van je profiel.");
       }
     };
     fetchProfiel();
-  }, []);
+  }, []); // [] betekent eenmalig laden
 
   /* 3️⃣ Bij opslaan PUT naar /api/about */
   const handleSave = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/about", {
+      // Gebruik authenticatedFetch voor PUT
+      const data = await authenticatedFetch("http://localhost:4000/api/about", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tekst }),
       });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
       setTekst(data.tekst_about);
       setIsEditing(false);
     } catch (err) {
-      console.error("Fout bij opslaan");
+      console.error("Fout bij opslaan:", err); // Log de fout
+      setError("Fout bij opslaan van de tekst."); // Zet een foutmelding
     }
   };
 
@@ -104,6 +129,9 @@ function About() {
         ) : (
           <p className="mb-6 leading-relaxed">{tekst}</p>
         )}
+
+        {/* Foutmelding weergeven */}
+        {error && <p className="text-center text-red-600 mb-6">{error}</p>}
 
         {/* Team-afbeelding */}
         <div className="text-center mb-8">

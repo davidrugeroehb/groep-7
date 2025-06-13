@@ -1,30 +1,28 @@
 import express from "express";
 import {
-  // Verwijder 'getAllSpeeddates' uit de import, want deze route hoort niet hier.
   getStudentProfile,
   updateStudentProfile,
   getAllStudenten,
-  countAllStudents // Nieuwe functie importeren
+  countAllStudents,
+  // getAllSpeeddates // Let op: deze is al verplaatst naar speeddateRoutes.js
 } from '../controllers/studentController.js';
 
 const router = express.Router();
 
-
-router.get('/api/studenten', getAllStudenten);
-
+// Haal alle studenten op
+// De prefix in server.js is /api/students, dus deze route wordt /api/students/
+router.get('/', getAllStudenten); // <-- Aangepast van '/api/studenten' naar '/'
 
 // Route om totaal aantal studenten op te halen
+// Wordt /api/students/count
 router.get('/count', countAllStudents);
 
-// Verwijder deze regel:
-// router.get('/speeddates', getAllSpeeddates); // <-- DEZE REGEL WORDT VERWIJDERD
-
-
 // Route voor studentenprofiel ophalen
+// Wordt /api/students/mijnprofiel/:studentId
 router.get('/mijnprofiel/:studentId', getStudentProfile);
 
 // Route om profiel student up te daten
+// Wordt /api/students/mijnprofiel/:studentId
 router.put('/mijnprofiel/:studentId', updateStudentProfile);
-
 
 export default router;

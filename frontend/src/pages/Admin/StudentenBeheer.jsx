@@ -5,17 +5,50 @@ function StudentenBeheer() {
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
 
+  // Hulpfunctie voor geauthenticeerde fetches
+  const authenticatedFetch = async (url, options = {}) => {
+    const token = localStorage.getItem('token'); // Haal de token op
+    const headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}` // Voeg de token toe
+    };
+    const response = await fetch(url, { ...options, headers });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Netwerk- of serverfout.' }));
+      console.error(`API Fout (${url}):`, response.status, errorData);
+      if (response.status === 401 || response.status === 403) {
+        alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
+        // window.location.href = '/login'; // Of useNavigate
+      }
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  };
+
+
   const verwijderStudent = (id) => {
-    setStudenten((prev) => prev.filter((s) => s._id !== id));
+    // Implementeer hier de API call om student te verwijderen
+    // Voorbeeld:
+    // try {
+    //   await authenticatedFetch(`http://localhost:4000/api/students/${id}`, { method: 'DELETE' });
+    //   setStudenten((prev) => prev.filter((s) => s._id !== id));
+    //   alert("Student succesvol verwijderd!");
+    // } catch (err) {
+    //   console.error("Fout bij verwijderen student:", err);
+    //   alert("Fout bij verwijderen student.");
+    // }
+    setStudenten((prev) => prev.filter((s) => s._id !== id)); // Tijdelijk: verwijdert alleen uit de UI
+    alert("Verwijderen van student (functionaliteit in backend nog toe te voegen).");
+
   };
 
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/studenten");
+        // **** AANPASSING HIER: Gebruik de correcte route /api/students ****
+        const data = await authenticatedFetch("http://localhost:4000/api/students"); // Haal alle studenten op
 
-        if (!res.ok) throw new Error("Fout bij ophalen van studenten.");
-        const data = await res.json();
         setStudenten(data);
       } catch (err) {
         console.error(err);
@@ -44,12 +77,18 @@ function StudentenBeheer() {
                 <Info label="Email" value={s.email} />
                 <Info label="Opleiding" value={s.opleiding} />
                 <Info label="Specialisatie" value={s.specialisatie || "—"} />
-                <Info label="Talen" value={s.talen || "—"} />
+                <Info label="Talen" value={s.talen?.join(', ') || "—"} /> {/* Join array for display */}
 
                 <div className="mt-4 flex gap-3">
                   <button
                     className="bg-blue-600 text-white px-3 py-1 rounded"
-                    onClick={() => setSelected(s)}
+                    onClick={() => {
+                        // Voorbeeld: Fetch speeddates van specifieke student
+                        // Voor dit te laten werken, moet de backend een route hebben zoals /api/students/:studentId/speeddates
+                        // En de speeddateModel moet ook een link naar student hebben als "geboekt door"
+                        alert("Geplande speeddates functionaliteit nog niet geïmplementeerd (backend route ontbreekt).");
+                        setSelected(s); // Toon de modal, zelfs zonder echte data
+                    }}
                   >
                     Geplande speeddates
                   </button>
@@ -73,8 +112,9 @@ function StudentenBeheer() {
               Speeddates van {selected.voornaam}
             </h3>
 
+            {/* Hier zou je de speeddates van de geselecteerde student moeten laden */}
             {!selected.speeddates || selected.speeddates.length === 0 ? (
-              <p className="text-gray-600">Geen speeddates geboekt.</p>
+              <p className="text-gray-600">Geen speeddates geboekt voor deze student.</p>
             ) : (
               <ul className="space-y-2">
                 {selected.speeddates.map((sd) => (
