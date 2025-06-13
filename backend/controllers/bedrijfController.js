@@ -1,5 +1,16 @@
 import Speeddate from '../models/speeddateModel.js';
-import Bedrijf from '../models/bedrijfModel.js'; // Importeer het bedrijfModel
+import Bedrijf from '../models/bedrijfModel.js';
+
+// NIEUWE FUNCTIE: Tellen van alle bedrijven
+const countAllBedrijven = async (req, res) => {
+  try {
+    const count = await Bedrijf.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error('Fout bij het tellen van bedrijven:', error);
+    res.status(500).json({ message: 'Er ging iets mis bij het tellen van bedrijven.', error: error.message });
+  }
+};
 
 // Functie om een nieuwe speeddate aan te maken (bestaat al)
 const createSpeeddate = async (req, res) => {
@@ -135,4 +146,10 @@ const updateCompanyProfile = async (req, res) => {
   }
 };
 
-export { createSpeeddate, getCompanySpeeddates, getCompanyProfile, updateCompanyProfile };
+export {
+  createSpeeddate,
+  getCompanySpeeddates,
+  getCompanyProfile,
+  updateCompanyProfile,
+  countAllBedrijven // Exporteren van de nieuwe functie
+};

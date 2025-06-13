@@ -3,6 +3,60 @@ import Speeddate from '../models/speeddateModel.js';
 import Student from '../models/studentModel.js';
 import Bedrijf from '../models/bedrijfModel.js';
 
+// NIEUWE FUNCTIE: Tellen van alle aanvragen met status 'in behandeling' (voor alerts)
+const countPendingAanvragen = async (req, res) => {
+  try {
+    const count = await Aanvraag.countDocuments({ status: 'in behandeling' });
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error('Fout bij het tellen van in behandeling zijnde aanvragen:', error);
+    res.status(500).json({ message: 'Er ging iets mis bij het tellen van aanvragen.', error: error.message });
+  }
+};
+
+// NIEUWE FUNCTIE: Alle aanvragen met status 'in behandeling' ophalen (voor admin)
+const getAllPendingAanvragen = async (req, res) => {
+  try {
+    const aanvragen = await Aanvraag.find({ status: 'in behandeling' })
+      .populate({
+        path: 'speeddate',
+        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf',
+        populate: {
+          path: 'bedrijf',
+          select: 'name sector',
+        }
+      })
+      .populate({
+        path: 'student',
+        select: 'voornaam achternaam opleiding email talen', // Toegevoegd voornaam, achternaam, talen
+      })
+      .sort({ createdAt: -1 });
+
+    const formattedAanvragen = aanvragen.map(aanvraag => ({
+      id: aanvraag._id, // Gebruik 'id' in plaats van '_id' voor consistentie frontend
+      naam: aanvraag.speeddate.bedrijf?.name || 'Onbekend Bedrijf', // Bedrijfsnaam
+      sector: aanvraag.speeddate.bedrijf?.sector || 'N/B', // Sector van bedrijf
+      taal: aanvraag.speeddate.talen.join(', ') || 'N/B', // Talen van de speeddate
+      type: aanvraag.speeddate.vakgebied || 'N/B', // Vakgebied als 'type'
+      beschrijving: aanvraag.speeddate.beschrijving || 'N/B',
+      status: aanvraag.status,
+      studentNaam: `${aanvraag.student?.voornaam || ''} ${aanvraag.student?.achternaam || ''}`.trim() || 'Onbekend',
+      studentOpleiding: aanvraag.student?.opleiding || 'N/B',
+      studentEmail: aanvraag.student?.email || 'N/B',
+      studentTalen: aanvraag.student?.talen.join(', ') || 'N/B',
+      // Voeg hier andere relevante velden toe die de admin nodig heeft
+    }));
+
+    res.status(200).json(formattedAanvragen);
+  } catch (error) {
+    console.error('Fout bij het ophalen van alle in behandeling zijnde aanvragen:', error);
+    res.status(500).json({
+      message: 'Er ging iets mis bij het ophalen van de aanvragen.',
+      error: error.message,
+    });
+  }
+};
+
 // 1. Functie om een aanvraag voor een speeddate te creëren (door student)
 const createAanvraag = async (req, res) => {
   try {
@@ -282,4 +336,6 @@ export {
   updateAanvraagStatus,
   deleteAanvraag,
   getStudentAfspraken,
+  countPendingAanvragen, // Exporteren de nieuwe functie
+  getAllPendingAanvragen, // Exporteren de nieuwe functie
 };
