@@ -10,12 +10,11 @@ function Dashboard() {
   const [speeddatesCount, setSpeeddatesCount] = useState(0);
   const [studentsCount, setStudentsCount] = useState(0);
   const [bedrijvenCount, setBedrijvenCount] = useState(0);
-  const [alertsCount, setAlertsCount] = useState(0);
+  const [alertsCount, setAlertsCount] = useState(0); // Deze state zal nu de bedrijfsaanvragen tellen
 
-  // **** CORRECTIE HIER: Gebruik van de juiste poort 4000 ****
-  const API_BASE_URL = 'http://localhost:4000/api'; // <--- ZORG DAT DIT DE JUISTE POORT IS !
+  const API_BASE_URL = 'http://localhost:4000/api';
 
-  // Hulpfunctie om data op te halen met authenticatie
+  // Hulpfunctie om API-requests te doen met authenticatie
   const fetchData = async (url) => {
     const token = localStorage.getItem('token');
     try {
@@ -26,17 +25,19 @@ function Dashboard() {
         }
       });
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Netwerk- of serverfout zonder JSON response.' }));
+        console.error(`API Fout (${url}):`, response.status, errorData);
         if (response.status === 401 || response.status === 403) {
-          console.error('Authenticatie mislukt of niet toegestaan. Doorverwijzen naar login.');
-          // window.location.href = '/login'; // Haal commentaar weg als je automatische redirect wil
+          alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
+          // window.location.href = '/login';
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      return data.count;
+      return data.count; // Uw API's retourneren een object { count: X }
     } catch (error) {
-      console.error(`Fout bij het ophalen van data van ${url}:`, error);
-      return 0;
+      console.error(`Fout bij het ophalen van gegevens van ${url}:`, error);
+      return 0; // Retourneer 0 in geval van fout
     }
   };
 
@@ -45,13 +46,14 @@ function Dashboard() {
       const sdCount = await fetchData(`${API_BASE_URL}/speeddates/count`);
       setSpeeddatesCount(sdCount);
 
-      const stCount = await fetchData(`${API_BASE_URL}/students/count`); // Oud: /api/student
+      const stCount = await fetchData(`${API_BASE_URL}/students/count`);
       setStudentsCount(stCount);
 
-      const bdCount = await fetchData(`${API_BASE_URL}/bedrijven/count`); // Oud: /api/bedrijf
+      const bdCount = await fetchData(`${API_BASE_URL}/bedrijven/count`); // Telt nu goedgekeurde bedrijven
       setBedrijvenCount(bdCount);
 
-      const alCount = await fetchData(`${API_BASE_URL}/aanvragen/pending/count`); // Oud: /api/aanvragen/pending/count
+      // **** AANPASSING HIER: Nieuwe route voor het tellen van PENDING BEDRIJFSREGISTRATIES ****
+      const alCount = await fetchData(`${API_BASE_URL}/bedrijven/pending-registrations/count`);
       setAlertsCount(alCount);
     };
 
@@ -99,6 +101,7 @@ function Dashboard() {
       </div>
 
       <div className="charts">
+        {/* Hier plaatsen we eventuele charts-componenten, geen prioriteit */}
       </div>
     </main>
   );
