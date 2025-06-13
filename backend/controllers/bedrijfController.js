@@ -1,7 +1,19 @@
 import Speeddate from '../models/speeddateModel.js';
 import Bedrijf from '../models/bedrijfModel.js';
 
-// NIEUWE FUNCTIE: Tellen van alle bedrijven
+// Functie om alle bedrijven op te halen
+const getAllBedrijven = async (req, res) => {
+  try {
+    const bedrijven = await Bedrijf.find().select('-password'); // Haal alle bedrijven op, zonder wachtwoorden
+    res.status(200).json(bedrijven);
+  } catch (error) {
+    console.error('Fout bij het ophalen van alle bedrijven:', error);
+    res.status(500).json({ message: 'Er ging iets mis bij het ophalen van bedrijven.', error: error.message });
+  }
+};
+
+
+// NIEUWE FUNCTIE: Tellen van alle bedrijven (deze is al correct)
 const countAllBedrijven = async (req, res) => {
   try {
     const count = await Bedrijf.countDocuments();
@@ -85,7 +97,7 @@ const getCompanySpeeddates = async (req, res) => {
   }
 };
 
-// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf ophalen
+// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf ophalen (bestaat al)
 const getCompanyProfile = async (req, res) => {
   try {
     const { bedrijfId } = req.params; // ID komt uit de URL
@@ -113,7 +125,7 @@ const getCompanyProfile = async (req, res) => {
   }
 };
 
-// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf bijwerken
+// NIEUWE FUNCTIE: Profiel van een specifiek bedrijf bijwerken (bestaat al)
 const updateCompanyProfile = async (req, res) => {
   try {
     const { bedrijfId } = req.params;
@@ -151,5 +163,6 @@ export {
   getCompanySpeeddates,
   getCompanyProfile,
   updateCompanyProfile,
-  countAllBedrijven // Exporteren van de nieuwe functie
+  countAllBedrijven,
+  getAllBedrijven // Export de nieuwe functie
 };
