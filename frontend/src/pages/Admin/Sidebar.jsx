@@ -5,7 +5,7 @@ import {
   BsLightningChargeFill,
   BsPeopleFill,
   BsMenuButtonWideFill,
-  BsFillGearFill
+  BsInfoCircleFill
 } from 'react-icons/bs'
 import { Link } from 'react-router-dom'
 
@@ -63,7 +63,7 @@ function Sidebar(props) {
             to="/admin/instellingen"
             className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 hover:text-white transition"
           >
-            <BsFillGearFill /> Instellingen
+            <BsInfoCircleFill /> About
           </Link>
         </li>
       </ul>

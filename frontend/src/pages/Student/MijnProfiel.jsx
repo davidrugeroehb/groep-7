@@ -4,10 +4,9 @@ function MijnProfiel() {
   const [profiel, setProfiel] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [wijzig, setWijzig] = useState(false); // State om bewerk-modus te togglen
-  const studentId = localStorage.getItem("userId"); // Haal student ID op
+  const [wijzig, setWijzig] = useState(false);
+  const studentId = localStorage.getItem("userId");
 
-  // State voor bewerkbare velden
   const [editableProfiel, setEditableProfiel] = useState({
     voornaam: '',
     achternaam: '',
@@ -15,7 +14,8 @@ function MijnProfiel() {
     gsm: '',
     opleiding: '',
     specialisatie: '',
-    taal: '', // of talen: [] als het een array is
+    talen: [],
+    talenInput: '',
   });
 
   useEffect(() => {
@@ -39,7 +39,6 @@ function MijnProfiel() {
 
         const data = await res.json();
         setProfiel(data.profile);
-        // Initialiseer editableProfiel met de opgehaalde data
         setEditableProfiel({
           voornaam: data.profile.voornaam || '',
           achternaam: data.profile.achternaam || '',
@@ -47,7 +46,8 @@ function MijnProfiel() {
           gsm: data.profile.gsm || '',
           opleiding: data.profile.opleiding || '',
           specialisatie: data.profile.specialisatie || '',
-          taal: data.profile.taal || '',
+          talen: Array.isArray(data.profile.talen) ? data.profile.talen : [],
+          talenInput: Array.isArray(data.profile.talen) ? data.profile.talen.join(', ') : '',
         });
       } catch (err) {
         console.error("Fout bij ophalen van je profiel:", err);
@@ -58,16 +58,39 @@ function MijnProfiel() {
     };
 
     fetchProfiel();
-  }, [studentId]); // Herlaad bij wijziging van studentId
+  }, [studentId]);
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditableProfiel((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "talenInput") {
+      setEditableProfiel((prev) => ({
+        ...prev,
+        talenInput: value,
+        talen: value.split(',').map(t => t.trim()).filter(t => t !== '')
+      }));
+    } else {
+      setEditableProfiel((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const OpslaanBewerk = async () => {
+  const OpslaanBewerk = async () => { //checkt als de telefoonnummer alleen bestaat uit cijfer
     if (!studentId) {
       alert("Student ID ontbreekt. Kan profiel niet opslaan.");
+      return;
+    } 
+    if (!/^\d*$/.test(editableProfiel.gsm)) {
+    alert("GSM-nummer mag alleen uit cijfers bestaan.");
+    return;
+    }
+
+    const goedetalen=['Nederlands', "Frans", "Engels"];
+    const slechtetalen=editableProfiel.talen.filter(
+      taal => !toegestaneTalen.includes(taal)
+    );
+
+    if (ongeldigeTalen.length > 0) {
+      alert(`De volgende talen zijn niet toegestaan: ${ongeldigeTalen.join(', ')}`);
       return;
     }
     try {
@@ -76,7 +99,10 @@ function MijnProfiel() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(editableProfiel), // Stuur de bewerkbare data
+        body: JSON.stringify({
+          ...editableProfiel,
+          talenInput: undefined,
+        }),
       });
 
       const data = await res.json();
@@ -85,9 +111,9 @@ function MijnProfiel() {
         throw new Error(data.message || "Opslaan mislukt");
       }
 
-      alert(data.message); // Toon succesbericht
-      setProfiel(data.profile); // Update hoofdprofiel state met de bijgewerkte data
-      setWijzig(false); // Verlaat de bewerk-modus
+      alert(data.message);
+      setProfiel(data.profile);
+      setWijzig(false);
     } catch (err) {
       console.error("Fout bij opslaan van profiel:", err);
       alert(`Fout bij opslaan van profiel: ${err.message || "Onbekende fout"}`);
@@ -118,7 +144,6 @@ function MijnProfiel() {
         <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Mijn Profiel</h1>
 
         <div className="space-y-6 text-gray-700">
-          {/* Accountgegevens */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Accountgegevens:</h2>
             {wijzig ? (
@@ -146,7 +171,7 @@ function MijnProfiel() {
                   value={editableProfiel.email}
                   onChange={handleEditChange}
                   className={inputStyle}
-                  disabled // E-mail vaak niet direct bewerkbaar zonder extra verificatie
+                  disabled
                 />
                 <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">GSM nr:</label>
                 <input
@@ -167,7 +192,6 @@ function MijnProfiel() {
             )}
           </div>
 
-          {/* Academiegegevens */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Academiegegevens:</h2>
             {wijzig ? (
@@ -188,26 +212,24 @@ function MijnProfiel() {
                   onChange={handleEditChange}
                   className={inputStyle}
                 />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Taal:</label>
+                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Talen:</label>
                 <input
                   type="text"
-                  name="taal"
-                  value={editableProfiel.taal}
+                  name="talenInput"
+                  value={editableProfiel.talenInput}
                   onChange={handleEditChange}
                   className={inputStyle}
                 />
-                {/* Als 'talen' een array is, moet je hier een checkbox/multi-select implementeren */}
               </>
             ) : (
               <>
                 <p><strong>Opleiding:</strong> {profiel.opleiding}</p>
                 <p><strong>Specialisatie:</strong> {profiel.specialisatie || 'N.v.t.'}</p>
-                <p><strong>Taal:</strong> {profiel.taal || 'N.v.t.'}</p>
+                <p><strong>Talen:</strong> {(profiel.talen && profiel.talen.length > 0) ? profiel.talen.join(', ') : 'N.v.t.'}</p>
               </>
             )}
           </div>
 
-          {/* Bewerken/Opslaan/Annuleren knoppen */}
           <div className="text-right mt-4">
             {wijzig ? (
               <div className="flex justify-end gap-2">

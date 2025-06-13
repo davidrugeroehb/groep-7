@@ -1,20 +1,28 @@
 import express from "express";
-// Importeer de nieuwe functies voor het profielbeheer
-import { getAllSpeeddates, getStudentProfile, updateStudentProfile, getAllStudenten } from '../controllers/studentController.js';
+import {
+  getAllSpeeddates,
+  getStudentProfile,
+  updateStudentProfile,
+  getAllStudenten,
+  countAllStudents // Nieuwe functie importeren
+} from '../controllers/studentController.js';
 
 const router = express.Router();
 
-router.get('/api/studenten', getAllStudenten); //api/studenten moet die getten
 
-// Route om alle speeddates op te halen voor studenten
+router.get('/api/studenten', getAllStudenten);
+
+
+// Route om totaal aantal studenten op te halen
+router.get('/count', countAllStudents);
+
+// Route voor alle speeddates (bestaat al)
 router.get('/speeddates', getAllSpeeddates);
 
-// NIEUWE ROUTE: Profiel van een specifieke student ophalen
-// studentId komt uit de URL parameter (e.g., /api/student/mijnprofiel/654321abcd)
+// Route voor studentenprofiel ophalen
 router.get('/mijnprofiel/:studentId', getStudentProfile);
 
-// NIEUWE ROUTE: Profiel van een specifieke student bijwerken
-// Gebruik PUT voor volledige vervanging, of PATCH voor gedeeltelijke update
+// Route om profiel student up te daten
 router.put('/mijnprofiel/:studentId', updateStudentProfile);
 
 

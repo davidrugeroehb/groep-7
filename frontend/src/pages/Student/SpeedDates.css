@@ -444,3 +444,58 @@
   text-align: center;
   color: var(--primary-color); /* Gebruik je primaire kleur */
 }
+
+/* Voeg deze toe aan je bestaande sector-tag stijlen in SpeedDates.css */
+.sector-tag.NieuweSector1 { /* Bijv. als 'Nieuwe Sector 1' wordt toegevoegd */
+  background-color: #ff5733; /* Een nieuwe kleur */
+}
+
+.sector-tag.NieuweSector2 {
+  background-color: #33ff57;
+}
+/* Enzovoort voor elke nieuwe sector die je wilt stylen */
+
+/* Voeg dit toe aan je SpeedDates.css */
+
+.radio-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Kan hetzelfde grid gebruiken als checkboxes */
+    gap: 0.8rem;
+}
+
+/* Aanpassingen voor radio buttons om op checkboxes te lijken */
+.checkbox-label input[type="radio"] + .checkmark {
+    border-radius: 50%; /* Maak de checkmark rond voor radio */
+}
+
+.checkbox-label input[type="radio"]:checked ~ .checkmark:after {
+    left: 5.5px; /* Pas positie van het vinkje aan voor ronde vorm */
+    top: 5.5px;
+    width: 7px;
+    height: 7px;
+    border: none; /* Verwijder de border */
+    background-color: white; /* Maak een volle cirkel */
+    border-radius: 50%;
+}
+
+
+
+/*Admin verwijder knop*/
+.delete-btn {
+  background-color: #dc2626; /* Mooie rode kleur */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #b91c1c; /* Donkerder rood bij hover */
+}
+
+.delete-btn i {
+  margin-right: 5px; /* Ruimte tussen icoon en tekst */
+}
