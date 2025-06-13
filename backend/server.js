@@ -6,7 +6,7 @@ import connectCloudinary from './config/cloudinary.js';
 
 //voor aboutbeheer
 import aboutRoutes from './routes/aboutRoutes.js';
-app.use('/api/about', aboutRoutes);
+
 
 // Import bestaande routes
 import bedrijfRoutes from './routes/bedrijfRoutes.js';
@@ -18,6 +18,7 @@ import aanvraagRoutes from './routes/aanvraagRoutes.js';
 // app config
 dotenv.config();
 const app = express();
+app.use('/api/about', aboutRoutes);
 const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
