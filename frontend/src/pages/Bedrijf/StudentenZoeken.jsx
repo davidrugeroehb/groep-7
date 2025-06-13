@@ -5,7 +5,7 @@ function StudentenZoeken() {
   const [error, setError] = useState(null);
   const [selectedOpleiding, setSelectedOpleiding] = useState("");
   const [selectedSpecialisatie, setSelectedSpecialisatie] = useState("");
-  const [selectedTalen, setSelectedTalen] = useState([]); // Aangepast: nu een array voor meerdere talen
+  const [selectedTalen, setSelectedTalen] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,8 +36,7 @@ function StudentenZoeken() {
     fetchStudenten();
   }, []);
 
-  // Filter
-
+  // Filters
   const uniekeOpleidingen = useMemo(() => {
     const opleidingen = studenten.map((s) => s.opleiding);
     return [...new Set(opleidingen)].filter(Boolean).sort();
@@ -48,7 +47,7 @@ function StudentenZoeken() {
     return [...new Set(specialisaties)].filter(Boolean).sort();
   }, [studenten]);
 
-  // Gebruik vaste talenlijst
+  // Vaste talen
   const vasteTalen = ["Nederlands", "Frans", "Engels"];
 
   const handleTaalChange = (event) => {
@@ -65,7 +64,6 @@ function StudentenZoeken() {
       const matchOpleiding = selectedOpleiding ? s.opleiding === selectedOpleiding : true;
       const matchSpecialisatie = selectedSpecialisatie ? s.specialisatie === selectedSpecialisatie : true;
 
-      // Verzamel talen van de student
       const studentTalen = [];
       if (typeof s.talen === 'string' && s.talen) {
         studentTalen.push(...s.talen.split(',').map(t => t.trim().toLowerCase()).filter(Boolean));
@@ -73,7 +71,6 @@ function StudentenZoeken() {
         studentTalen.push(...s.talen.map(t => t.trim().toLowerCase()).filter(Boolean));
       }
 
-      // Filter talen: hoofdletterongevoelig
       const matchTalen = selectedTalen.length === 0 ||
         selectedTalen.some(selectedTaal => studentTalen.includes(selectedTaal.toLowerCase()));
 
@@ -145,7 +142,7 @@ function StudentenZoeken() {
                 </select>
               </div>
 
-              {/* Filter voor Talen met Checkboxes */}
+              {/* Talen filter */}
               <div className="col-span-1 md:col-span-1">
                 <span className="block text-sm font-medium text-gray-700 mb-2">
                   Filter op Talen:
@@ -194,7 +191,7 @@ function StudentenZoeken() {
                     <h2 className="text-lg font-semibold text-gray-800 mb-1">
                       {s.voornaam} {s.achternaam}
                     </h2>
-                    <p className="text-gray-700">
+                    <p className="text-blue-500">
                       <strong>Email:</strong> {s.email}
                     </p>
                     <p className="text-gray-700">
