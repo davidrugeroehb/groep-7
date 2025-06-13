@@ -31,7 +31,7 @@ function BedrijfProfiel() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:4000/api/bedrijf/profiel/${bedrijfId}`); // Let op de route /profiel
+        const res = await fetch(`http://localhost:4000/api/bedrijven/profiel/${bedrijfId}`); // Let op de route /profiel
 
         if (!res.ok) {
           const errorData = await res.json();
