@@ -136,7 +136,7 @@ const AdminSpeedDates = () => {
     <div className="speeddates-container">
       <header className="header">
         <h1 className="speeddates__title">Beheer Speeddates</h1>
-        <p className="speeddates__subtitle">Hier kan u de speeddates beheren indien nodig</p>
+        <p className="speeddates__subtitle">Hier kan u de speeddates verwijderen indien nodig</p>
       </header>
 
       <div className="main-content">
