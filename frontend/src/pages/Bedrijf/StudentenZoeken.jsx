@@ -5,14 +5,13 @@ function StudentenZoeken() {
   const [error, setError] = useState(null);
   const [selectedOpleiding, setSelectedOpleiding] = useState("");
   const [selectedSpecialisatie, setSelectedSpecialisatie] = useState("");
-  const [selectedTalen, setSelectedTalen] = useState([]); // Aangepast: nu een array voor meerdere talen
+  const [selectedTalen, setSelectedTalen] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
         setLoading(true);
-        // AANGEPAST: Correcte route met '/api/students' en zonder extra '/studenten'
         const res = await fetch("http://localhost:4000/api/students", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`,
@@ -24,7 +23,7 @@ function StudentenZoeken() {
         }
 
         const data = await res.json();
-        setStudenten(data); // De backend stuurt nu direct de array van studenten terug, niet in een 'data' object
+        setStudenten(data);
         setError(null);
       } catch (err) {
         console.error(err);
@@ -37,7 +36,20 @@ function StudentenZoeken() {
     fetchStudenten();
   }, []);
 
-  // Filter
+  // functie om talen mooi weer te geven
+  const formatTalen = (talen) => {
+    if (!talen || talen.length === 0) return "—";
+
+    if (Array.isArray(talen)) {
+      return talen.join(", ");
+    }
+
+    return talen
+      .split(",")
+      .map(t => t.trim())
+      .filter(t => t)
+      .join(", ");
+  };
 
   const uniekeOpleidingen = useMemo(() => {
     const opleidingen = studenten.map((s) => s.opleiding);
@@ -49,7 +61,6 @@ function StudentenZoeken() {
     return [...new Set(specialisaties)].filter(Boolean).sort();
   }, [studenten]);
 
-  // Gebruik vaste talenlijst
   const vasteTalen = ["Nederlands", "Frans", "Engels"];
 
   const handleTaalChange = (event) => {
@@ -66,7 +77,6 @@ function StudentenZoeken() {
       const matchOpleiding = selectedOpleiding ? s.opleiding === selectedOpleiding : true;
       const matchSpecialisatie = selectedSpecialisatie ? s.specialisatie === selectedSpecialisatie : true;
 
-      // Verzamel talen van de student
       const studentTalen = [];
       if (typeof s.talen === 'string' && s.talen) {
         studentTalen.push(...s.talen.split(',').map(t => t.trim().toLowerCase()).filter(Boolean));
@@ -74,7 +84,6 @@ function StudentenZoeken() {
         studentTalen.push(...s.talen.map(t => t.trim().toLowerCase()).filter(Boolean));
       }
 
-      // Filter talen: hoofdletterongevoelig
       const matchTalen = selectedTalen.length === 0 ||
         selectedTalen.some(selectedTaal => studentTalen.includes(selectedTaal.toLowerCase()));
 
@@ -146,7 +155,6 @@ function StudentenZoeken() {
                 </select>
               </div>
 
-              {/* Filter voor Talen met Checkboxes */}
               <div className="col-span-1 md:col-span-1">
                 <span className="block text-sm font-medium text-gray-700 mb-2">
                   Filter op Talen:
@@ -205,7 +213,7 @@ function StudentenZoeken() {
                       <strong>Specialisatie:</strong> {s.specialisatie || "—"}
                     </p>
                     <p className="text-gray-700">
-                      <strong>Talen:</strong> {s.talen || "—"}
+                      <strong>Talen:</strong> {formatTalen(s.talen)}
                     </p>
                   </div>
                 ))}
