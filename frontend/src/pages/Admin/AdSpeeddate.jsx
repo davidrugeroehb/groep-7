@@ -9,6 +9,7 @@ const AdminSpeedDates = () => {
     opportuniteit: [],
     taal: []
   });
+  const [searchTerm, setSearchTerm] = React.useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [sortOrder, setSortOrder] = useState('earliest');
   const [uniqueSectors, setUniqueSectors] = useState([]);
@@ -118,13 +119,20 @@ const AdminSpeedDates = () => {
   };
 
   const filteredAndSortedDates = speedDates
-    .filter(date => {
-      return (
-        (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
-        (filters.opportuniteit.length === 0 || (date.opportuniteit && filters.opportuniteit.some(o => date.opportuniteit.includes(o)))) && // Null check toegevoegd
-        (filters.taal.length === 0 || (date.talen && date.talen.some(t => filters.taal.includes(t)))) // Null check toegevoegd
-      );
-    })
+  .filter(date => {
+    const term = searchTerm.toLowerCase();
+
+    const matchesSearch = 
+      date.bedrijf?.name?.toLowerCase().includes(term) ||
+      date.vakgebied?.toLowerCase().includes(term);
+
+    const matchesFilters = 
+      (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
+      (filters.opportuniteit.length === 0 || (date.opportuniteit && filters.opportuniteit.some(o => date.opportuniteit.includes(o)))) &&
+      (filters.taal.length === 0 || (date.talen && date.talen.some(t => filters.taal.includes(t))));
+
+    return matchesSearch && matchesFilters;
+  })
     .sort((a, b) => {
       // Voeg een check toe voor geldige tijdwaarden
       const timeA = a.starttijd ? new Date(`2000-01-01T${a.starttijd}:00`) : new Date(0); // Fallback naar epoch
@@ -154,9 +162,18 @@ const AdminSpeedDates = () => {
   return (
     <div className="speeddates-container">
       <header className="header">
-        <h1 className="speeddates__title">Beheer Speeddates</h1>
+        <h1 className="speeddates__title">Speeddates beheer</h1>
         <p className="speeddates__subtitle">Hier kan u de speeddates verwijderen indien nodig</p>
       </header>
+
+      <div className="zoekbalk">
+              <input
+               type="text"
+               placeholder="Zoek op sector of bedrijfsnaam..."
+               value={searchTerm}
+               onChange={e => setSearchTerm(e.target.value)}
+               />
+               </div>
 
       <div className="main-content">
         <button
@@ -169,22 +186,9 @@ const AdminSpeedDates = () => {
 
         {showFilters && (
           <div className="filter-section">
-            <div className="filter-group">
-              <h3>Sector / Focus</h3>
-              <div className="checkbox-grid">
-                {uniqueSectors.map((sector) => (
-                  <label key={sector} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={filters.sector.includes(sector)}
-                      onChange={() => handleFilterChange('sector', sector)}
-                    />
-                    <span className="checkmark"></span>
-                    {sector}
-                  </label>
-                ))}
-              </div>
-            </div>
+            
+
+          
 
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
@@ -204,21 +208,21 @@ const AdminSpeedDates = () => {
             </div>
 
             <div className="filter-group">
-              <h3>Taal</h3>
-              <div className="checkbox-grid">
-                {uniqueLanguages.map((taal) => (
-                  <label key={taal} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={filters.taal.includes(taal)}
-                      onChange={() => handleFilterChange('taal', taal)}
-                    />
-                    <span className="checkmark"></span>
-                    {taal}
-                  </label>
-                ))}
-              </div>
-            </div>
+  <h3>Taal</h3>
+  <div className="checkbox-grid">
+    {["Nederlands", "Engels", "Frans"].map((taal) => (
+      <label key={taal} className="checkbox-label">
+        <input
+          type="checkbox"
+          checked={filters.taal.includes(taal)}
+          onChange={() => handleFilterChange('taal', taal)}
+        />
+        <span className="checkmark"></span>
+        {taal}
+      </label>
+    ))}
+  </div>
+</div>
 
             <div className="filter-group">
               <h3>Sorteren op Tijd</h3>
