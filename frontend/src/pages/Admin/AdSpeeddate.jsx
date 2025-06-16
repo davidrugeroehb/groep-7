@@ -166,8 +166,7 @@ const AdminSpeedDates = () => {
         <p className="speeddates__subtitle">Hier kan u de speeddates verwijderen indien nodig</p>
       </header>
 
-      <div className="filter-group">
-              <h3>Zoeken</h3>
+      <div className="zoekbalk">
               <input
                type="text"
                placeholder="Zoek op sector of bedrijfsnaam..."
