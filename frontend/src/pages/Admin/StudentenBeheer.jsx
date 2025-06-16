@@ -71,7 +71,7 @@ function StudentenBeheer() {
   return (
     <div className="studentenbeheer-container">
       <div className="header">
-        <h1>Studenten beheren</h1>
+        <h1>Studenten beheer</h1>
       </div>
 
       <div className="zoekbalk">
