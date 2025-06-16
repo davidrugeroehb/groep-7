@@ -69,36 +69,43 @@ function Header({onMenuClick}) {
   };
 
   return (
-      <header className='flex justify-between items-center bg-white p-4 shadow-md'>
-        <div className='cursor-pointer' onClick={onMenuClick}>
-          <BsJustify className='text-xl' />
+    <header className='relative flex justify-between items-center bg-white p-4 shadow-md'>
+      <div className='cursor-pointer' onClick={onMenuClick}>
+        <BsJustify className='text-2xl' />
+      </div>
+  
+      {/* Logo exact gecentreerd */}
+      <div className="absolute left-1/2 transform -translate-x-1/2">
+        <img 
+          src={logo} 
+          alt="School Logo" 
+          className="h-16 object-contain" 
+          style={{ maxWidth: '200px' }} 
+        />
+      </div>
+  
+      <div className='header-right flex items-center space-x-4'>
+        <div className="relative cursor-pointer" onClick={handleBellClick}>
+          <BsFillBellFill className='text-2xl' />
+          {pendingRegistrationsCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              {pendingRegistrationsCount}
+            </span>
+          )}
         </div>
-        <div className="flex justify-center flex-1">
-          <img src={logo} alt="Logo" className="h-10 object-contain" />
-        </div>
-        <div className='header-right flex items-center space-x-4'>
-          {/* Bel icoon met optionele teller */}
-          <div className="relative cursor-pointer" onClick={handleBellClick}>
-            <BsFillBellFill className='text-xl' />
-            {pendingRegistrationsCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                {pendingRegistrationsCount}
-              </span>
-            )}
-          </div>
 
-          <BsFillEnvelopeFill className='text-xl cursor-pointer'/>
-          <button
-            onClick={handleLogout}
-            className="flex items-center text-red-600 hover:text-red-800 font-semibold py-1 px-3 rounded transition-colors duration-200"
-            title="Déconnexion"
-          >
-            <IoLogOutOutline className="text-2xl mr-1" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </header>
+        <button
+          onClick={handleLogout}
+          className="flex items-center text-red-600 hover:text-red-800 font-semibold py-2 px-4 rounded transition-colors duration-200"
+          title="Uitloggen"
+        >
+          <IoLogOutOutline className="text-2xl mr-2" />
+          <span className="text-base">Logout</span>
+        </button>
+      </div>
+    </header>
   );
+  
 }
 
 export default Header;
