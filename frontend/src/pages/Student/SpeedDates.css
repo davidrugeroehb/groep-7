@@ -61,8 +61,12 @@
   
   .speeddates__title {
     font-size: 2.5rem;
-    color: #2c3e50;
+    color: var(--dark-color);
     margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    padding-top: 1rem;
   }
   
   .speeddates__subtitle {
