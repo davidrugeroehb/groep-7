@@ -240,7 +240,7 @@ const SpeedDates = () => {
         {showFilters && (
           <div className="filter-section">
             <div className="filter-group">
-              <h3>Sector / Focus</h3>
+              <h3>Vakgebied</h3>
               <div className="checkbox-grid">
                 {uniqueSectors.map((sector) => (
                   <label key={sector} className="checkbox-label">
