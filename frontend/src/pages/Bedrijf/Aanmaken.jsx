@@ -167,7 +167,10 @@ function Aanmaken() {
       alert("Kan speeddate niet aanmaken: Bedrijf ID is niet beschikbaar. Log opnieuw in.");
       return;
     }
-
+      if (form.talen.length === 0) {
+      alert("Gelieve minstens één taal aan te duiden.");
+      return
+    }
     // Filter out break slots before sending to backend, as backend only cares about bookable slots
     const bookableSpeeddateSlots = speeddateSlots.filter(slot => slot.type === 'slot');
 
