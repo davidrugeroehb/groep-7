@@ -93,8 +93,7 @@ function Header({onMenuClick}) {
             </span>
           )}
         </div>
-  
-        <BsFillEnvelopeFill className='text-2xl cursor-pointer' />
+
         <button
           onClick={handleLogout}
           className="flex items-center text-red-600 hover:text-red-800 font-semibold py-2 px-4 rounded transition-colors duration-200"
