@@ -84,7 +84,7 @@ function StudentenBeheer() {
                     <span><i className="fas fa-graduation-cap"></i> {s.opleiding}</span>
                     {s.specialisatie && <span><i className="fas fa-certificate"></i> {s.specialisatie}</span>}
                     {s.talen && s.talen.length > 0 && <span><i className="fas fa-language"></i> {s.talen.join(', ')}</span>}
-                  </div>
+                    </div>
 
                   <div className="student-acties">
                     <button
