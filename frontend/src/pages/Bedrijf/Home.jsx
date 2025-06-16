@@ -12,6 +12,8 @@ const HomeBedrijf = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const bedrijfId = localStorage.getItem('userId'); // Haal bedrijf ID op uit localStorage
+  // Bepaal unieke vakgebieden op basis van de speedDates
+  const uniekeVakgebieden = Array.from(new Set(speedDates.map(date => date.vakgebied))).filter(Boolean);
 
   // Functie om speeddates van DIT bedrijf op te halen
   useEffect(() => {
@@ -147,7 +149,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Vakgebied</h3>
               <div className="checkbox-grid">
-                {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
+                {uniekeVakgebieden.length > 0 ? uniekeVakgebieden.map((sector) => (
                   <label key={sector} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -157,7 +159,7 @@ const HomeBedrijf = () => {
                     <span className="checkmark"></span>
                     {sector}
                   </label>
-                ))}
+                )) : <p>Geen vakgebieden gevonden.</p>}
               </div>
             </div>
             <div className="filter-group">
@@ -244,10 +246,10 @@ const HomeBedrijf = () => {
                               </span>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getSlotStatusClass(slot.status)}`}>
                                 {slot.status === 'aangevraagd' && slot.student ? `Aangevraagd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
-                                 slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
-                                 slot.status === 'open' ? 'Open' :
-                                 slot.status === 'afgekeurd' ? 'Afgekeurd' :
-                                 slot.status
+                                  slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
+                                    slot.status === 'open' ? 'Open' :
+                                      slot.status === 'afgekeurd' ? 'Afgekeurd' :
+                                        slot.status
                                 }
                               </span>
                             </li>
