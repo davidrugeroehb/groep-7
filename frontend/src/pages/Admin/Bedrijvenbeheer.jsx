@@ -274,73 +274,71 @@ const Bedrijvenbeheer = () => {
 
 
             {bewerkModal && (
-                <div className="modal">
-                    <div className="modal-inhoud">
-                        <h2>Bewerk {bewerkModal.naam}</h2>
-                        <form onSubmit={saveEdit}>
-                            {/* Velden die overeenkomen met BedrijfModel */}
-                            <div className="form-groep">
-                                <label>Naam:</label>
-                                <input type="text" name="naam" defaultValue={bewerkModal.naam} required />
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setBewerkModal(null)}>
+                    <div className="bg-white rounded-lg p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-2xl font-bold mb-4">Bewerk {bewerkModal.naam}</h2>
+                        <form onSubmit={saveEdit} className="space-y-4">
+                            {/* de inform velden om te veranderen*/}
+                            <div>
+                                <label className="block font-medium mb-1">Naam:</label>
+                                <input type="text" name="naam" defaultValue={bewerkModal.naam} required className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>Sector:</label>
-                                <input type="text" name="sector" defaultValue={bewerkModal.sector} required />
+                            <div>
+                                <label className="block font-medium mb-1">Sector:</label>
+                                <input type="text" name="sector" defaultValue={bewerkModal.sector} required className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>Adres:</label>
-                                <input type="text" name="adres" defaultValue={bewerkModal.adres} />
+                            <div>
+                                <label className="block font-medium mb-1">Adres:</label>
+                                <input type="text" name="adres" defaultValue={bewerkModal.adres} className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>BTW-nummer:</label>
-                                <input type="text" name="btwNummer" defaultValue={bewerkModal.btwNummer} />
+                            <div>
+                                <label className="block font-medium mb-1">BTW-nummer:</label>
+                                <input type="text" name="btwNummer" defaultValue={bewerkModal.btwNummer} className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>Website:</label>
-                                <input type="text" name="website" defaultValue={bewerkModal.website} />
+                            <div>
+                                <label className="block font-medium mb-1">Website:</label>
+                                <input type="text" name="website" defaultValue={bewerkModal.website} className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>Contactpersoon:</label>
-                                <input type="text" name="contactpersoon" defaultValue={bewerkModal.contactpersoon} required />
+                            <div>
+                                <label className="block font-medium mb-1">Contactpersoon:</label>
+                                <input type="text" name="contactpersoon" defaultValue={bewerkModal.contactpersoon} required className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>Email:</label>
-                                <input type="email" name="email" defaultValue={bewerkModal.email} required />
+                            <div>
+                                <label className="block font-medium mb-1">Email:</label>
+                                <input type="email" name="email" defaultValue={bewerkModal.email} required className="w-full border border-gray-300 rounded p-2" />
                             </div>
-                            <div className="form-groep">
-                                <label>Telefoon:</label>
-                                <input type="text" name="phone" defaultValue={bewerkModal.phone} required />
+                            <div>
+                                <label className="block font-medium mb-1">Telefoon:</label>
+                                <input type="text" name="phone" defaultValue={bewerkModal.phone} required className="w-full border border-gray-300 rounded p-2" />
                             </div>
 
-                            {/* Volgende velden ('Type', 'Talen', 'Beschrijving') bestaan NIET standaard in BedrijfModel.
-                                  Als u deze wilt opslaan, moet u uw BedrijfModel uitbreiden in de backend.
-                                  Voor nu zijn het demo-specifieke velden. */}
-                            <div className="form-groep">
-                                <label>Type (Demo):</label>
-                                <select name="type" defaultValue={bewerkModal.type}>
+                            <div>
+                                <label className="block font-medium mb-1">Type:</label>
+                                <select name="type" defaultValue={bewerkModal.type} className="w-full border border-gray-300 rounded p-2">
                                     {['Stage', 'Studentjob', 'Bachelorproef', 'N/B'].map(opt => (
-                                        <option key={opt} value={opt}>{opt}</option>
-                                    ))}
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                                 </select>
                             </div>
-                            <div className="form-groep">
-                                <label>Talen (Demo):</label>
-                                <select name="taal" defaultValue={bewerkModal.taal}>
+                            <div>
+                                <label className="block font-medium mb-1">Talen:</label>
+                                <select name="taal" defaultValue={bewerkModal.taal} className="w-full border border-gray-300 rounded p-2">
                                     {['Nederlands', 'Engels', 'Frans', 'N/B'].map(taal => (
-                                        <option key={taal} value={taal}>{taal}</option>
+                                    <option key={taal} value={taal}>{taal}</option>
                                     ))}
                                 </select>
                             </div>
-                            <div className="form-groep">
-                                <label>Beschrijving (Demo):</label>
-                                <textarea name="beschrijving" defaultValue={bewerkModal.beschrijving} />
+                            <div>
+                                <label className="block font-medium mb-1">Beschrijving:</label>
+                                <textarea name="beschrijving" defaultValue={bewerkModal.beschrijving} className="w-full border border-gray-300 rounded p-2" />
                             </div>
-
-                            <div className="modal-acties">
-                                <button type="button" onClick={() => setBewerkModal(null)} className="annuleer-btn">
+                            <div className="flex justify-end gap-4 mt-4">
+                                <button type="button" className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" onClick={() => setBewerkModal(null)}>
                                     Annuleren
                                 </button>
-                                <button type="submit" className="opslaan-btn">Opslaan</button>
+                                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                                    Opslaan
+                                </button>
                             </div>
                         </form>
                     </div>
