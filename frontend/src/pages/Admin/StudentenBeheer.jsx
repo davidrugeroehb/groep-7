@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import './StudentenBeheer.css';
 
 function StudentenBeheer() {
   const [studenten, setStudenten] = useState([]);
