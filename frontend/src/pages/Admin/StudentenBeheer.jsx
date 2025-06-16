@@ -5,6 +5,15 @@ function StudentenBeheer() {
   const [studenten, setStudenten] = useState([]);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const gefilterdeStudenten = studenten.filter((s) =>
+    s.voornaam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.achternaam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.opleiding.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+
 
   // Hulpfunctie voor geauthenticeerde fetches
   const authenticatedFetch = async (url, options = {}) => {
@@ -65,15 +74,25 @@ function StudentenBeheer() {
         <h1>Studenten beheren</h1>
       </div>
 
+      <div className="zoekbalk">
+        <input
+         type="text"
+         placeholder="Zoek op naam of opleiding..."
+         value={searchTerm}
+         onChange={e => setSearchTerm(e.target.value)}/>
+         </div>
+
+
       <div className="main-content">
         {error && <p className="error-message">{error}</p>}
 
-        {studenten.length === 0 && !error ? (
+        {gefilterdeStudenten.length === 0 && !error ? (
           <p className="geen-studenten">Er zijn momenteel geen studenten beschikbaar.</p>
         ) : (
           <div className="studenten-lijst">
             <div className="grid md:grid-cols-2 gap-6">
-              {studenten.map((s) => (
+
+              {gefilterdeStudenten.map((s) => (
                 <div key={s._id} className="student-card">
                   <div className="student-header">
                     <h3>{s.voornaam} {s.achternaam}</h3>
