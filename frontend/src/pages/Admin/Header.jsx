@@ -97,7 +97,7 @@ function Header({onMenuClick}) {
         <button
           onClick={handleLogout}
           className="flex items-center text-red-600 hover:text-red-800 font-semibold py-2 px-4 rounded transition-colors duration-200"
-          title="Déconnexion"
+          title="Uitloggen"
         >
           <IoLogOutOutline className="text-2xl mr-2" />
           <span className="text-base">Logout</span>
