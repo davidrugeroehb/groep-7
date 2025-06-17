@@ -1,10 +1,12 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import React from 'react';
+import React, {useState} from 'react';
 import logo from '../assets/ehb.jpg';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+
 
   const hiddenRoutes = ['/bedrijf/signup', '/login'];
   if (hiddenRoutes.includes(location.pathname)) return null;
@@ -29,9 +31,17 @@ const Navbar = () => {
         <img src={logo} alt="logo" className="h-10 w-auto" />
         <Link to="/speeddates" className="text-xl font-bold">Career Match</Link>
       </div>
+      {/* Hamburger button (alleen zichtbaar op mobiel) */}
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="md:hidden text-gray-700"
+        aria-label="Toggle menu"
+      >
+        ☰
+      </button>
 
       {/* Navigatielinks */}
-      <ul className="flex space-x-6 text-sm font-medium justify-center flex-1">
+      <ul className="hidden md:flex space-x-6 text-sm font-medium justify-center flex-1">
         <li><NavLink to="/speeddates" className={navLinkClass}>Speeddates</NavLink></li>
         <li><NavLink to="/mijnaanvragen" className={navLinkClass}>Mijn Aanvragen</NavLink></li>
         <li><NavLink to="/mijnafspraken" className={navLinkClass}>Mijn Afspraken</NavLink></li>
@@ -57,6 +67,18 @@ const Navbar = () => {
           </NavLink>
         )}
       </div>
+      {menuOpen && (
+  <div className="absolute top-16 left-0 w-full bg-white border-t z-50 shadow-md md:hidden">
+    <ul className="flex flex-col p-4 space-y-2 text-sm font-medium">
+      <li><NavLink to="/speeddates" className={navLinkClass}>Speeddates</NavLink></li>
+      <li><NavLink to="/mijnaanvragen" className={navLinkClass}>Mijn Aanvragen</NavLink></li>
+      <li><NavLink to="/mijnafspraken" className={navLinkClass}>Mijn Afspraken</NavLink></li>
+      <li><NavLink to="/mijnprofiel" className={navLinkClass}>Mijn Profiel</NavLink></li>
+      <li><NavLink to="/about" className={navLinkClass}>About</NavLink></li>
+      
+    </ul>
+  </div>
+)}
     </nav>
   );
 };
