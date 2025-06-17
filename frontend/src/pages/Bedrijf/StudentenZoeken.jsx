@@ -220,7 +220,7 @@ function StudentenZoeken() {
                         <h3>{s.voornaam} {s.achternaam}</h3>
                       </div>
                       <div className="card-body">
-                        <p><i className="fas fa-envelope"></i> {s.email}</p>
+                        <p><i className="fas fa-envelope"></i> <a href={`mailto:${s.email}`}> {s.email} </a> </p>
                         <p><i className="fas fa-graduation-cap"></i> {s.opleiding}</p>
                         <p><i className="fas fa-book"></i> {s.specialisatie || "—"}</p>
                         <p><i className="fas fa-language"></i> {formatTalen(s.talen)}</p>
