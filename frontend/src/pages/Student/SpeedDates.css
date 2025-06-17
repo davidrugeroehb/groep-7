@@ -61,8 +61,12 @@
   
   .speeddates__title {
     font-size: 2.5rem;
-    color: #2c3e50;
+    color: var(--dark-color);
     margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    padding-top: 1rem;
   }
   
   .speeddates__subtitle {
@@ -498,4 +502,20 @@
 
 .delete-btn i {
   margin-right: 5px; /* Ruimte tussen icoon en tekst */
+}
+.zoekbalk input {
+  width: 100%;
+  padding: 12px 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--light-color);
+  transition: all 0.3s ease;
+}
+
+
+.zoekbalk input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
 }

@@ -1,4 +1,4 @@
-# Career Match 🎯
+# Career Match
 ## groep-7
 
 Career Match is een webapplicatie ontworpen om studenten en bedrijven eenvoudig met elkaar te matchen via speeddates. Het platform werd ontwikkeld als onderdeel van het Programming Project aan de Erasmushogeschool Brussel.
@@ -104,6 +104,14 @@ Als je Windows gebruikt en je krijgt een foutmelding over scriptuitvoering (bijv
 ### Bedrijf
 -   **Email**: `ines.dumont@brightvision.be`
 -   **Wachtwoord**: `ines123`
+-   **Email**: `tom.vermeulen@codecrafters.be`
+-   **Wachtwoord**: `tom123`
+-   **Email**: `emma.claes@netsecure.be `
+-   **Wachtwoord**: `emma123`
+-   **Email**: `jonas.debruyn@quantumsoft.be  `
+-   **Wachtwoord**: `jonas123`
+-   **Email**: `sarah.michiels@cloudnova.be   `
+-   **Wachtwoord**: `sarah123`
 
 ### Admin
 -   **Email**: `admin@ehb.be`

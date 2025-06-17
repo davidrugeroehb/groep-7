@@ -19,10 +19,11 @@ function Sidebar(props) {
       {/* Titel */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xl font-bold">
-          <BsShieldLock /> ADMIN
-        </div>
-        
-      </div>
+        <div className="flex items-center gap-2 text-xl font-bold cursor-default">
+  <BsShieldLock /> ADMIN
+</div>
+ </div>
+  </div>
 
       {/* Navigatie */}
       <ul className="flex flex-col gap-2 text-[13px] font-medium tracking-wide">

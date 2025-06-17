@@ -13,6 +13,7 @@ function Aanmaken() {
     opportuniteit: [],
     talen: [],
     beschrijving: "",
+    naamVertegenwoordiger: "",
   });
 
   const [bedrijfId, setBedrijfId] = useState(null);
@@ -73,54 +74,54 @@ function Aanmaken() {
       if (parsedBreakStart && parsedBreakEnd) {
         // Case 1: Current slot starts before break and ends within break
         if (currentTime < parsedBreakStart && slotEndTime > parsedBreakStart && slotEndTime <= parsedBreakEnd) {
-            // Add the part before the break as a regular slot
-            if (currentTime < parsedBreakStart) {
-                slots.push({
-                    startTime: formatTime(currentTime),
-                    endTime: formatTime(parsedBreakStart),
-                    type: 'slot',
-                });
-            }
-            // Then add the break itself
+          // Add the part before the break as a regular slot
+          if (currentTime < parsedBreakStart) {
             slots.push({
-                startTime: formatTime(parsedBreakStart),
-                endTime: formatTime(parsedBreakEnd),
-                type: 'break',
+              startTime: formatTime(currentTime),
+              endTime: formatTime(parsedBreakStart),
+              type: 'slot',
             });
-            currentTime = new Date(parsedBreakEnd); // Jump past the break
-            continue;
+          }
+          // Then add the break itself
+          slots.push({
+            startTime: formatTime(parsedBreakStart),
+            endTime: formatTime(parsedBreakEnd),
+            type: 'break',
+          });
+          currentTime = new Date(parsedBreakEnd); // Jump past the break
+          continue;
         }
         // Case 2: Current slot starts within break
         if (currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
-            // Add the break itself, extending to its end if the slot duration would exceed it
-            const actualBreakEnd = slotEndTime > parsedBreakEnd ? parsedBreakEnd : slotEndTime;
-            slots.push({
-                startTime: formatTime(currentTime),
-                endTime: formatTime(actualBreakEnd),
-                type: 'break',
-            });
-            currentTime = new Date(actualBreakEnd); // Move past this portion of the break
-            if (currentTime < parsedBreakEnd) { // If still within the defined break, jump to its end
-                currentTime = new Date(parsedBreakEnd);
-            }
-            continue;
+          // Add the break itself, extending to its end if the slot duration would exceed it
+          const actualBreakEnd = slotEndTime > parsedBreakEnd ? parsedBreakEnd : slotEndTime;
+          slots.push({
+            startTime: formatTime(currentTime),
+            endTime: formatTime(actualBreakEnd),
+            type: 'break',
+          });
+          currentTime = new Date(actualBreakEnd); // Move past this portion of the break
+          if (currentTime < parsedBreakEnd) { // If still within the defined break, jump to its end
+            currentTime = new Date(parsedBreakEnd);
+          }
+          continue;
         }
         // Case 3: Current slot spans across the entire break (starts before, ends after)
         if (currentTime < parsedBreakStart && slotEndTime > parsedBreakEnd) {
-            // Add part before break
-            slots.push({
-                startTime: formatTime(currentTime),
-                endTime: formatTime(parsedBreakStart),
-                type: 'slot',
-            });
-            // Add the break itself
-            slots.push({
-                startTime: formatTime(parsedBreakStart),
-                endTime: formatTime(parsedBreakEnd),
-                type: 'break',
-            });
-            currentTime = new Date(parsedBreakEnd); // Jump past the break for the next slot
-            continue; // Re-evaluate the new currentTime
+          // Add part before break
+          slots.push({
+            startTime: formatTime(currentTime),
+            endTime: formatTime(parsedBreakStart),
+            type: 'slot',
+          });
+          // Add the break itself
+          slots.push({
+            startTime: formatTime(parsedBreakStart),
+            endTime: formatTime(parsedBreakEnd),
+            type: 'break',
+          });
+          currentTime = new Date(parsedBreakEnd); // Jump past the break for the next slot
+          continue; // Re-evaluate the new currentTime
         }
       }
 
@@ -167,7 +168,10 @@ function Aanmaken() {
       alert("Kan speeddate niet aanmaken: Bedrijf ID is niet beschikbaar. Log opnieuw in.");
       return;
     }
-
+      if (form.talen.length === 0) {
+      alert("Gelieve minstens één taal aan te duiden.");
+      return
+    }
     // Filter out break slots before sending to backend, as backend only cares about bookable slots
     const bookableSpeeddateSlots = speeddateSlots.filter(slot => slot.type === 'slot');
 
@@ -213,6 +217,7 @@ function Aanmaken() {
         opportuniteit: [],
         talen: [],
         beschrijving: "",
+        naamVertegenwoordiger: "",
       });
       setSpeeddateSlots([]); // Clear displayed slots after submission
     } catch (err) {
@@ -312,11 +317,10 @@ function Aanmaken() {
                     {speeddateSlots.map((slot, index) => (
                       <li
                         key={index}
-                        className={`py-1 px-2 rounded-md ${
-                          slot.type === 'break'
+                        className={`py-1 px-2 rounded-md ${slot.type === 'break'
                             ? 'bg-red-100 text-red-800' // Distinct color for break slots
                             : 'bg-green-100 text-green-800' // Default color for regular slots
-                        }`}
+                          }`}
                       >
                         {slot.startTime} - {slot.endTime} {slot.type === 'break' && "(Pauze)"}
                       </li>
@@ -341,6 +345,21 @@ function Aanmaken() {
                 className="w-full border p-2 rounded"
               />
             </div>
+
+              {/*Vertegenwoordiger invoerveld */}
+            <div className="mt-4">
+              <label className="block font-medium mb-1">Naam vertegenwoordiger</label>
+              <input
+                type="text"
+                name="naamVertegenwoordiger"
+                value={form.naamVertegenwoordiger}
+                onChange={handleChange}
+                placeholder="bv. Jan Jansen"
+                required
+                className="w-full border p-2 rounded"
+              />
+            </div>
+
           </div>
 
           {/* Focus */}

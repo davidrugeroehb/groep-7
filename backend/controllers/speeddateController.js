@@ -1,5 +1,6 @@
 import Speeddate from '../models/speeddateModel.js';
 import Bedrijf from '../models/bedrijfModel.js'; // Import Bedrijf model to populate company name
+import Aanvraag from '../models/aanvraagModel.js';
 
 // Functie om een nieuwe speeddate aan te maken met individuele slots
 const createSpeeddate = async (req, res) => {

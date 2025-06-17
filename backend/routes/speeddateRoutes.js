@@ -1,18 +1,22 @@
 import express from 'express';
 import {
+  createSpeeddate,
+  getAllSpeeddates, // Zorg dat deze van speeddateController komt
+  getCompanySpeeddates,
+  deleteSpeeddate,
   countAllSpeeddates
-} from '../controllers/speeddateController.js'; // Importeer de nieuwe functie
-import {
-  getAllSpeeddates
-} from '../controllers/studentController.js'; // Importeer getAllSpeeddates van studentController
-
+} from '../controllers/speeddateController.js'; // Importeer correct van speeddateController
 
 const router = express.Router();
 
-// Route voor het tellen van speeddates (voor dashboard)
-router.get('/count', countAllSpeeddates);
+// Public routes for speeddates
+router.get('/', getAllSpeeddates); // Get all speeddates (for students)
+router.get('/count', countAllSpeeddates); // For admin dashboard
 
-// NIEUWE/VERPLAATSTE ROUTE: Haal alle speeddates op voor de admin
-router.get('/', getAllSpeeddates); // Dit zal corresponderen met /api/speeddates op je server.js
+// Company specific routes for speeddates
+router.post('/', createSpeeddate); // Create a new speeddate
+router.get('/bedrijf/:bedrijfId', getCompanySpeeddates); // Get speeddates by company ID
+router.delete('/:speeddateId', deleteSpeeddate); // Delete a speeddate by ID
+
 
 export default router;

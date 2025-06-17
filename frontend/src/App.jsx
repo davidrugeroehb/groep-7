@@ -45,7 +45,7 @@ function App() {
   }
   // Als je een aparte AdminNavbar wilt, voeg hier toe:
   // else if (role === "admin") {
-  //   currentNavbar = <AdminNavbar />; // Zorg dat AdminNavbar is geïmporteerd en bestaat
+  //   currentNavbar = <AdminNavbar />; // Zorg dat AdminNavbar is geÃ¯mporteerd en bestaat
   // }
 
   return (

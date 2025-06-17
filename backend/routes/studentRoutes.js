@@ -1,35 +1,21 @@
-// backend/routes/studentRoutes.js
 import express from "express";
 import {
   getStudentProfile,
   updateStudentProfile,
-
-  getAllStudenten, // Deze functie is voor /api/students
-  countAllStudents
-
+  getAllStudenten,
+  countAllStudents,
+  deleteStudent // Importeer de nieuwe functie
 } from '../controllers/studentController.js';
 
 const router = express.Router();
 
-// Verander dit:
-// router.get('/api/studenten', getAllStudenten);
-
-
-// Naar dit (omdat server.js al /api/students toevoegt):
-router.get('/', getAllStudenten); // Ophalen van alle studenten
-
-
-// ... (rest van de routes blijven hetzelfde, ze zijn al relatief aan de prefix)
-// Route om totaal aantal studenten op te halen
-// Wordt /api/students/count
+router.get('/', getAllStudenten);
 router.get('/count', countAllStudents);
-
-// Route voor studentenprofiel ophalen
-// Wordt /api/students/mijnprofiel/:studentId
 router.get('/mijnprofiel/:studentId', getStudentProfile);
-
-// Route om profiel student up te daten
-// Wordt /api/students/mijnprofiel/:studentId
 router.put('/mijnprofiel/:studentId', updateStudentProfile);
+
+// NIEUWE ROUTE: Verwijderen van een student
+// Deze route is verantwoordelijk voor DELETE /api/students/:studentId
+router.delete('/:studentId', deleteStudent); // <-- Zorg dat deze regel correct is en een DELETE methode heeft!
 
 export default router;
