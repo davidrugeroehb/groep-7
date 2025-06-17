@@ -199,6 +199,7 @@ button {
   width: 90%;
   max-width: 500px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  position: relative; /* Belangrijk voor de sluitknop positionering */
 }
 
 .modal h2 {
@@ -215,15 +216,26 @@ button {
   margin-top: 1.5rem;
 }
 
+/* Aangepaste stijl voor de sluitknop in de modal */
 .sluit-btn {
-  background-color: #6c757d;
-  color: white;
+  position: absolute; /* Plaats de knop absoluut binnen modal-inhoud */
+  top: 1rem; /* Afstand van de bovenkant */
+  right: 1rem; /* Afstand van de rechterkant */
+  background: none; /* Geen achtergrondkleur */
+  border: none; /* Geen rand */
+  cursor: pointer;
+  font-size: 2rem; /* Grotere lettergrootte voor 'x' */
+  line-height: 1; /* Zorg dat het midden is */
+  color: #6c757d; /* Donkergrijze kleur */
+  padding: 0; /* Geen padding */
+  transition: color 0.3s ease;
 }
 
 .sluit-btn:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
+  color: var(--dark-color); /* Donkerder bij hover */
+  transform: none; /* Geen translateY transform bij hover */
 }
+
 
 /* Info component */
 .info-label {
