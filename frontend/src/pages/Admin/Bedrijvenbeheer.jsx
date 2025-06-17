@@ -311,23 +311,6 @@ const Bedrijvenbeheer = () => {
                                 <label className="block font-medium mb-1">Telefoon:</label>
                                 <input type="text" name="phone" defaultValue={bewerkModal.phone} required className="w-full border border-gray-300 rounded p-2" />
                             </div>
-
-                            <div>
-                                <label className="block font-medium mb-1">Type:</label>
-                                <select name="type" defaultValue={bewerkModal.type} className="w-full border border-gray-300 rounded p-2">
-                                    {['Stage', 'Studentjob', 'Bachelorproef', 'N/B'].map(opt => (
-                                    <option key={opt} value={opt}>{opt}</option>
-                                ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block font-medium mb-1">Talen:</label>
-                                <select name="taal" defaultValue={bewerkModal.taal} className="w-full border border-gray-300 rounded p-2">
-                                    {['Nederlands', 'Engels', 'Frans', 'N/B'].map(taal => (
-                                    <option key={taal} value={taal}>{taal}</option>
-                                    ))}
-                                </select>
-                            </div>
                             <div>
                                 <label className="block font-medium mb-1">Beschrijving:</label>
                                 <textarea name="beschrijving" defaultValue={bewerkModal.beschrijving} className="w-full border border-gray-300 rounded p-2" />

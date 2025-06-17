@@ -7,6 +7,8 @@ function StudentenBeheer() {
   const [selected, setSelected] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const API_BASE_URL = 'http://localhost:4000/api'; // Zorg dat dit overeenkomt met je backend URL
+
   const gefilterdeStudenten = studenten.filter((s) =>
     s.voornaam.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.achternaam.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -14,51 +16,55 @@ function StudentenBeheer() {
   );
   
 
-
-  // Hulpfunctie voor geauthenticeerde fetches
   const authenticatedFetch = async (url, options = {}) => {
-    const token = localStorage.getItem('token'); // Haal de token op
+    const token = localStorage.getItem('token');
     const headers = {
       ...options.headers,
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}` // Voeg de token toe
+      'Authorization': `Bearer ${token}`
     };
-    const response = await fetch(url, { ...options, headers });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Netwerk- of serverfout.' }));
-      console.error(`API Fout (${url}):`, response.status, errorData);
-      if (response.status === 401 || response.status === 403) {
-        alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
-        // window.location.href = '/login'; // Of useNavigate
-      }
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    try {
+        const response = await fetch(url, { ...options, headers });
+        if (!response.ok) {
+            let errorData = { message: 'Onbekende fout' };
+            try {
+                errorData = await response.json();
+            } catch (jsonErr) {
+                console.warn(`Geen JSON response bij fout ${response.status} van ${url}`);
+                errorData.message = `Netwerk- of serverfout: Status ${response.status}.`;
+            }
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    } catch (err) {
+        console.error("Fout in authenticatedFetch:", err);
+        throw err;
     }
-    return response.json();
   };
 
 
-  const verwijderStudent = (id) => {
-    // Implementeer hier de API call om student te verwijderen
-    // Voorbeeld:
-    // try {
-    //   await authenticatedFetch(`http://localhost:4000/api/students/${id}`, { method: 'DELETE' });
-    //   setStudenten((prev) => prev.filter((s) => s._id !== id));
-    //   alert("Student succesvol verwijderd!");
-    // } catch (err) {
-    //   console.error("Fout bij verwijderen student:", err);
-    //   alert("Fout bij verwijderen student.");
-    // }
-    setStudenten((prev) => prev.filter((s) => s._id !== id)); // Tijdelijk: verwijdert alleen uit de UI
-    alert("Verwijderen van student (functionaliteit in backend nog toe te voegen).");
-
+  const verwijderStudent = async (id) => {
+    if (!window.confirm("Weet je zeker dat je deze student wilt verwijderen?")) {
+      return;
+    }
+    try {
+      // **** CRUCIALE CHECK: Zorg dat de URL van de fetch correct is en de DELETE methode ****
+      // De URL moet zijn: http://localhost:4000/api/students/DE_STUDENT_ID
+      await authenticatedFetch(`${API_BASE_URL}/students/${id}`, { // <-- Zorg dat deze URL exact zo is
+        method: 'DELETE', // <-- Zorg dat de methode DELETE is
+      });
+      setStudenten((prev) => prev.filter((s) => s._id !== id));
+      alert("Student succesvol verwijderd!");
+    } catch (err) {
+      console.error("Fout bij verwijderen student:", err);
+      alert(`Fout bij verwijderen student: ${err.message || "Onbekende fout"}`);
+    }
   };
 
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
-        // **** AANPASSING HIER: Gebruik de correcte route /api/students ****
-        const data = await authenticatedFetch("http://localhost:4000/api/students"); // Haal alle studenten op
-
+        const data = await authenticatedFetch(`${API_BASE_URL}/students`);
         setStudenten(data);
       } catch (err) {
         console.error(err);
@@ -71,7 +77,7 @@ function StudentenBeheer() {
   return (
     <div className="studentenbeheer-container">
       <div className="header">
-        <h1>Studenten beheren</h1>
+        <h1>Studenten beheer</h1>
       </div>
 
       <div className="zoekbalk">
@@ -108,7 +114,10 @@ function StudentenBeheer() {
                   <div className="student-acties">
                     <button
                       className="speeddates-btn"
-                      onClick={() => setSelected(s)}
+                      onClick={() => {
+                          alert("Geplande speeddates functionaliteit voor studenten is nog niet geïmplementeerd. (Backend route voor student speeddates ontbreekt)");
+                          setSelected(s);
+                      }}
                     >
                       <i className="far fa-calendar-alt"></i> Geplande speeddates
                     </button>

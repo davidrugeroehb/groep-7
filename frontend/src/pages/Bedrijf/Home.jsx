@@ -12,6 +12,8 @@ const HomeBedrijf = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const bedrijfId = localStorage.getItem('userId'); // Haal bedrijf ID op uit localStorage
+  // Bepaal unieke vakgebieden op basis van de speedDates
+  const uniekeVakgebieden = Array.from(new Set(speedDates.map(date => date.vakgebied))).filter(Boolean);
 
   // Functie om speeddates van DIT bedrijf op te halen
   useEffect(() => {
@@ -130,7 +132,7 @@ const HomeBedrijf = () => {
   return (
     <div className="speeddates-container">
       <header className="header">
-        <h1 className="speeddates__title">Jouw Speeddates</h1>
+        <h1 className="speeddates__title">Jouw speeddates</h1>
         <p className="speeddates__subtitle">Beheer de speeddates die je hebt aangemaakt</p>
       </header>
 
@@ -147,7 +149,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Vakgebied</h3>
               <div className="checkbox-grid">
-                {["Web Development", "Cybersecurity", "AI / Machine Learning", "DevOps", "UX/UI"].map((sector) => (
+                {uniekeVakgebieden.length > 0 ? uniekeVakgebieden.map((sector) => (
                   <label key={sector} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -157,7 +159,7 @@ const HomeBedrijf = () => {
                     <span className="checkmark"></span>
                     {sector}
                   </label>
-                ))}
+                )) : <p>Geen vakgebieden gevonden.</p>}
               </div>
             </div>
             <div className="filter-group">
@@ -202,7 +204,7 @@ const HomeBedrijf = () => {
         )}
 
         <div className="results-section">
-          <h2>Jouw Aangemaakte SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
+          <h2>Jouw aangemaakte speeddates <span className="result-count">({filteredDates.length})</span></h2>
 
           {filteredDates.length > 0 ? (
             <div className="speeddates-grid">
@@ -227,9 +229,13 @@ const HomeBedrijf = () => {
                     >
                       {expandedId === date._id ? 'Minder details' : 'Bekijk meer'}
                     </button>
-                    <button onClick={() => verwijderSpeeddate(date._id)} className='bg-red-600 text-white w-full py-2 rounded-md text-base transition mt-2'>
-                      Verwijder SpeedDate
-                    </button>
+                    <button 
+  onClick={() => verwijderSpeeddate(date._id)} 
+  className="delete-btn"
+>
+  <i className="fas fa-trash-alt"></i>
+  Verwijder speeddate
+</button>
                   </div>
 
                   {expandedId === date._id && (
@@ -244,10 +250,10 @@ const HomeBedrijf = () => {
                               </span>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getSlotStatusClass(slot.status)}`}>
                                 {slot.status === 'aangevraagd' && slot.student ? `Aangevraagd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
-                                 slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
-                                 slot.status === 'open' ? 'Open' :
-                                 slot.status === 'afgekeurd' ? 'Afgekeurd' :
-                                 slot.status
+                                  slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
+                                    slot.status === 'open' ? 'Open' :
+                                      slot.status === 'afgekeurd' ? 'Afgekeurd' :
+                                        slot.status
                                 }
                               </span>
                             </li>

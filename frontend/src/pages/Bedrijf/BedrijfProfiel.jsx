@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import '../student/MijnProfiel.css';
+
 
 function BedrijfProfiel() {
   const [profiel, setProfiel] = useState(null);
@@ -123,34 +125,39 @@ function BedrijfProfiel() {
   const inputStyle = 'bg-white border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Bedrijfsprofiel</h1>
-
-        <div className="space-y-6 text-gray-700">
-          {/* Bedrijfsgegevens */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Bedrijfsgegevens:</h2>
+    <div className="profiel-container">
+      <div className="profiel-header">
+        <h1 className="speeddates__title">Bedrijfsprofiel</h1>
+        <p className="speeddates__subtitle">Beheer uw bedrijfsgegevens</p>
+      </div>
+  
+      <div className="profiel-main">
+        <div className="profiel-card">
+          <div className="profiel-card-header">
+            <h2>Bedrijfsgegevens</h2>
+          </div>
+          
+          <div className="profiel-info-list">
             {wijzig ? (
               <>
                 {[
-                  { label: "Naam:", name: "name", type: "text" },
-                  { label: "Adres:", name: "adres", type: "text" },
-                  { label: "BTW-nummer:", name: "btwNummer", type: "text" },
-                  { label: "Website:", name: "website", type: "text" },
-                  { label: "Sector:", name: "sector", type: "text" },
-                  { label: "Contactpersoon:", name: "contactpersoon", type: "text" },
-                  { label: "E-mail:", name: "email", type: "email", disabled: true }, // E-mail vaak niet direct bewerkbaar
-                  { label: "Telefoon:", name: "phone", type: "text" },
+                  { label: "Bedrijfsnaam", name: "name", type: "text" },
+                  { label: "Adres", name: "adres", type: "text" },
+                  { label: "BTW-nummer", name: "btwNummer", type: "text" },
+                  { label: "Website", name: "website", type: "text" },
+                  { label: "Sector", name: "sector", type: "text" },
+                  { label: "Contactpersoon", name: "contactpersoon", type: "text" },
+                  { label: "E-mail", name: "email", type: "email", disabled: true },
+                  { label: "Telefoon", name: "phone", type: "text" },
                 ].map((field) => (
-                  <div key={field.name} className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-1">{field.label}</label>
+                  <div key={field.name} className="profiel-info-item">
+                    <label>{field.label}</label>
                     <input
                       type={field.type}
                       name={field.name}
                       value={editableProfiel[field.name]}
                       onChange={handleEditChange}
-                      className={inputStyle}
+                      className="profiel-input"
                       disabled={field.disabled || false}
                     />
                   </div>
@@ -158,44 +165,74 @@ function BedrijfProfiel() {
               </>
             ) : (
               <>
-                <p><strong>Naam:</strong> {profiel.name}</p>
-                <p><strong>Adres:</strong> {profiel.adres || 'N.v.t.'}</p>
-                <p><strong>BTW-nummer:</strong> {profiel.btwNummer || 'N.v.t.'}</p>
-                <p><strong>Website:</strong> {profiel.website || 'N.v.t.'}</p>
-                <p><strong>Sector:</strong> {profiel.sector || 'N.v.t.'}</p>
-                <p><strong>Contactpersoon:</strong> {profiel.contactpersoon}</p>
-                <p><strong>E-mail:</strong> {profiel.email}</p>
-                <p><strong>Telefoon:</strong> {profiel.phone || 'N.v.t.'}</p>
+                <div className="profiel-info-item">
+                  <label>Bedrijfsnaam</label>
+                  <p>{profiel.name}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Adres</label>
+                  <p>{profiel.adres || 'N.v.t.'}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>BTW-nummer</label>
+                  <p>{profiel.btwNummer || 'N.v.t.'}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Website</label>
+                  <p>{profiel.website || 'N.v.t.'}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Sector</label>
+                  <p>{profiel.sector || 'N.v.t.'}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Contactpersoon</label>
+                  <p>{profiel.contactpersoon}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>E-mail</label>
+                  <p>{profiel.email}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Telefoon</label>
+                  <p>{profiel.phone || 'N.v.t.'}</p>
+                </div>
               </>
             )}
           </div>
-
-          {/* Bewerken/Opslaan/Annuleren knoppen */}
-          <div className="text-right mt-4">
-            {wijzig ? (
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={OpslaanBewerk}
-                  className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                >
-                  Opslaan
-                </button>
-                <button
-                  onClick={() => setWijzig(false)}
-                  className="bg-gray-400 text-white px-5 py-2 rounded hover:bg-gray-500 transition"
-                >
-                  Annuleren
-                </button>
-              </div>
-            ) : (
+        </div>
+  
+        <div className="profiel-actions">
+          {wijzig ? (
+            <>
               <button
-                onClick={() => setWijzig(true)}
-                className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+                onClick={OpslaanBewerk}
+                className="profiel-btn profiel-btn-success"
               >
-                Profiel Bewerken
+                <i className="fas fa-save mr-2"></i> Opslaan
               </button>
-            )}
-          </div>
+              <button
+                onClick={() => setWijzig(false)}
+                className="profiel-btn profiel-btn-secondary"
+              >
+                <i className="fas fa-times mr-2"></i> Annuleren
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setWijzig(true)}
+              className="profiel-btn profiel-btn-primary"
+            >
+              <i className="fas fa-edit mr-2"></i> Profiel Bewerken
+            </button>
+          )}
         </div>
       </div>
     </div>

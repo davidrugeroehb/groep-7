@@ -1,4 +1,4 @@
-# Career Match 🎯
+# Career Match
 ## groep-7
 
 Career Match is een webapplicatie ontworpen om studenten en bedrijven eenvoudig met elkaar te matchen via speeddates. Het platform werd ontwikkeld als onderdeel van het Programming Project aan de Erasmushogeschool Brussel.
