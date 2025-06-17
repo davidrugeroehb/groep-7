@@ -34,7 +34,7 @@ const Navbar = () => {
       {/* Hamburger button (alleen zichtbaar op mobiel) */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="md:hidden text-gray-700"
+        className="md:hidden text-gray-700 ml-auto"
         aria-label="Toggle menu"
       >
         ☰
@@ -54,7 +54,7 @@ const Navbar = () => {
         {isLoggedIn ? (
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full transition duration-200 shadow-sm"
+            className="hidden md:flex bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full transition duration-200 shadow-sm"
           >
             Logout
           </button>
@@ -75,7 +75,14 @@ const Navbar = () => {
       <li><NavLink to="/mijnafspraken" className={navLinkClass}>Mijn Afspraken</NavLink></li>
       <li><NavLink to="/mijnprofiel" className={navLinkClass}>Mijn Profiel</NavLink></li>
       <li><NavLink to="/about" className={navLinkClass}>About</NavLink></li>
-      
+      <li>
+        <button
+          onClick={handleLogout}
+          className="w-full text-left bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded transition"
+        >
+          Logout
+        </button>
+      </li>
     </ul>
   </div>
 )}
