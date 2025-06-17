@@ -175,8 +175,10 @@ function StudentenZoeken() {
             )}
 
             <div className="results-section">
-              <h2>Gevonden Studenten <span className="result-count">({filteredStudenten.length})</span></h2>
 
+              <h2>Gevonden studenten <span className="result-count">({filteredStudenten.length})</span></h2>
+  
+  
               {filteredStudenten.length === 0 ? (
                 <div className="no-results">
                   <i className="far fa-frown"></i>

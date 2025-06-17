@@ -141,8 +141,9 @@ const HomeBedrijf = () => {
           className={`filter-toggle ${showFilters ? 'active' : ''}`}
           onClick={() => setShowFilters(!showFilters)}
         >
-          {showFilters ? 'Filters verbergen' : 'Filters tonen'}
-        </button>
+           <i className={`fas fa-${showFilters ? 'times-circle' : 'filter'}`}></i>
+  {showFilters ? 'Filters verbergen' : 'Filters tonen'}
+</button>
 
         {showFilters && (
           <div className="filter-section">
@@ -197,10 +198,24 @@ const HomeBedrijf = () => {
             </div>
 
             <div className="filter-buttons">
-              <button className="apply-btn" onClick={applyFilters}>Filters toepassen</button>
-              <button className="reset-btn" onClick={resetFilters}>Reset filters</button>
-            </div>
-          </div>
+  <button 
+    className="reset-btn"
+    onClick={() => {
+      setSelectedOpleiding("");
+      setSelectedSpecialisatie("");
+      setSelectedTalen([]);
+    }}
+  >
+    <i className="fas fa-undo mr-2"></i> Reset filters
+  </button>
+  <button 
+    className="apply-btn"
+    onClick={() => setShowFilters(false)}
+  >
+    <i className="fas fa-check mr-2"></i> Filters toepassen
+  </button>
+</div> 
+</div>
         )}
 
         <div className="results-section">

@@ -43,10 +43,10 @@ function Login() {
 
         if (data.role === "student") {
           localStorage.setItem("studentId", data.userId);
-          navigate("/speeddates");
+          navigate("/basis");
         } else if (data.role === "bedrijf") {
           localStorage.setItem("bedrijfId", data.userId);
-          navigate("/bedrijf-home");
+          navigate("/basis");
         } else if (data.role === "admin") { // Deze zal nu correct worden uitgevoerd
           localStorage.setItem("adminId", data.userId);
           navigate("/admin-home"); // Stuurt naar de admin homepagina
