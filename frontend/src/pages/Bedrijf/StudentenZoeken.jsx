@@ -7,7 +7,7 @@ function StudentenZoeken() {
   const [selectedSpecialisatie, setSelectedSpecialisatie] = useState("");
   const [selectedTalen, setSelectedTalen] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(true); // Standaard tonen we filters
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchStudenten = async () => {
@@ -195,7 +195,7 @@ function StudentenZoeken() {
             )}
   
             <div className="results-section">
-              <h2>Gevonden Studenten <span className="result-count">({filteredStudenten.length})</span></h2>
+              <h2>Gevonden studenten <span className="result-count">({filteredStudenten.length})</span></h2>
   
               {filteredStudenten.length === 0 ? (
                 <div className="no-results">
