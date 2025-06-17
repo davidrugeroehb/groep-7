@@ -1,0 +1,253 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --success-color: #4cc9f0;
+    --danger-color: #f72585;
+    --warning-color: #f8961e;
+    --info-color: #4895ef;
+}
+
+.profiel-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #333;
+}
+
+.profiel-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.profiel-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+}
+
+.profiel-main {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+}
+
+.profiel-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.profiel-card-header {
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    border-radius: 10px 10px 0 0;
+}
+
+.profiel-card-header h2 {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    font-weight: 600;
+    margin: 0;
+}
+
+.profiel-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.profiel-info-item {
+    margin-bottom: 1rem;
+}
+
+.profiel-info-item label {
+    display: block;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.profiel-info-item p {
+    font-size: 1rem;
+    color: var(--dark-color);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.profiel-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.profiel-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+.profiel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.profiel-btn {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.profiel-btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.profiel-btn-primary:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.profiel-btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.profiel-btn-success:hover {
+    background-color: #3aa8d8;
+    transform: translateY(-2px);
+}
+
+.profiel-btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.profiel-btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.profiel-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .profiel-info-item {
+    width: 100%;
+  }
+  
+  .profiel-info-item label {
+    display: block;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+  
+  .profiel-info-item p {
+    font-size: 1rem;
+    color: var(--dark-color);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f1f1;
+    margin: 0;
+  }
+
+  /*profiel bedrijf*/
+  /* Voeg toe aan MijnProfiel.css */
+.profiel-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .profiel-info-item {
+    width: 100%;
+  }
+  
+  .profiel-info-item label {
+    display: block;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .profiel-info-item p {
+    font-size: 1rem;
+    color: var(--dark-color);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f1f1;
+    margin: 0;
+  }
+  
+  .profiel-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .profiel-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+  }
+  
+  .profiel-input[disabled] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+  }
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .profiel-container {
+        padding: 1rem;
+    }
+
+    .profiel-header h1 {
+        font-size: 2rem;
+    }
+
+    .profiel-main {
+        padding: 1rem;
+    }
+
+    .profiel-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profiel-actions {
+        flex-direction: column;
+    }
+
+    .profiel-btn {
+        width: 100%;
+    }
+}
