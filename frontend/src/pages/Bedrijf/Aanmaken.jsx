@@ -80,31 +80,16 @@ function Aanmaken() {
   }, []);
 
   useEffect(() => {
-    calculateSpeeddateSlots();
-  }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent]);
-
-  const generateTimeOptions = (minTime, maxTime, stepMinutes) => {
-    const options = [];
-    const parse = (timeStr) => {
-        const [h, m] = timeStr.split(':').map(Number);
-        return h * 60 + m;
-    };
-    const format = (totalMinutes) => {
-        const h = Math.floor(totalMinutes / 60);
-        const m = totalMinutes % 60;
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    };
-
-    const startTotalMinutes = minTime ? parse(minTime) : 0;
-    const endTotalMinutes = maxTime ? parse(maxTime) : (23 * 60 + 55); // Max 23:55 for 5-min step
-
-    for (let totalMinutes = startTotalMinutes; totalMinutes <= endTotalMinutes; totalMinutes += stepMinutes) {
-        options.push(format(totalMinutes));
+    if (globalSettings) {
+        calculateSpeeddateSlots();
     }
-    return options;
-  };
+  }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent, globalSettings]);
+
 
   const parseTime = (timeStr) => {
+    if (!timeStr || !timeStr.includes(':')) {
+        return new Date(0, 0, 0, 0, 0, 0);
+    }
     const [hours, minutes] = timeStr.split(':').map(Number);
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
@@ -112,6 +97,9 @@ function Aanmaken() {
   };
 
   const formatTime = (date) => {
+    if (isNaN(date.getTime())) {
+        return "00:00";
+    }
     return date.toTimeString().slice(0, 5);
   };
 
@@ -127,7 +115,7 @@ function Aanmaken() {
     const end = parseTime(eindtijd);
     const slotDuration = parseInt(timePerStudent, 10);
 
-    if (isNaN(slotDuration) || slotDuration <= 0) {
+    if (isNaN(slotDuration) || slotDuration <= 0 || start.getTime() >= end.getTime()) {
       setSpeeddateSlots([]);
       return;
     }
@@ -135,71 +123,69 @@ function Aanmaken() {
     const slots = [];
     let currentTime = new Date(start);
 
-    const parsedBreakStart = breakStart ? parseTime(breakStart) : null;
-    const parsedBreakEnd = breakEnd ? parseTime(breakEnd) : null;
+    let parsedBreakStart = breakStart ? parseTime(breakStart) : null;
+    let parsedBreakEnd = breakEnd ? parseTime(breakEnd) : null;
 
-    while (currentTime < end) {
-      let slotEndTime = new Date(currentTime.getTime() + slotDuration * 60 * 1000);
-
-      // Check if current time falls within a defined break
-      if (parsedBreakStart && parsedBreakEnd && currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
-          const actualBreakEndTime = (slotEndTime > parsedBreakEnd) ? parsedBreakEnd : slotEndTime;
-          slots.push({
-              startTime: formatTime(currentTime),
-              endTime: formatTime(actualBreakEndTime),
-              type: 'break',
-          });
-          currentTime = new Date(parsedBreakEnd);
-          continue;
-      }
-      
-      // Check if a regular slot would cross the break
-      if (parsedBreakStart && parsedBreakEnd && currentTime < parsedBreakStart && slotEndTime > parsedBreakEnd) {
-          slots.push({
-              startTime: formatTime(currentTime),
-              endTime: formatTime(parsedBreakStart),
-              type: 'slot',
-          });
-          slots.push({
-              startTime: formatTime(parsedBreakStart),
-              endTime: formatTime(parsedBreakEnd),
-              type: 'break',
-          });
-          currentTime = new Date(parsedBreakEnd);
-          continue;
-      }
-      
-      // If a slot ends during a break but starts before it
-      if (parsedBreakStart && parsedBreakEnd && currentTime < parsedBreakStart && slotEndTime > parsedBreakStart && slotEndTime <= parsedBreakEnd) {
-          slots.push({
-              startTime: formatTime(currentTime),
-              endTime: formatTime(parsedBreakStart),
-              type: 'slot',
-          });
-          slots.push({
-              startTime: formatTime(parsedBreakStart),
-              endTime: formatTime(parsedBreakEnd),
-              type: 'break',
-          });
-          currentTime = new Date(parsedBreakEnd);
-          continue;
-      }
+    // Validate and normalize break times: must be within main speeddate period
+    if (parsedBreakStart && parsedBreakEnd) {
+        if (parsedBreakStart.getTime() >= parsedBreakEnd.getTime() ||
+            parsedBreakStart.getTime() < start.getTime() ||
+            parsedBreakEnd.getTime() > end.getTime()) {
+            console.warn("Ongeldige pauzetijden genegeerd: pauze is buiten de speeddate periode of heeft ongeldige start/eindtijd.");
+            parsedBreakStart = null; // Ignore invalid break
+            parsedBreakEnd = null;
+        }
+    }
 
 
-      if (slotEndTime > end) {
-        slotEndTime = end;
-      }
+    while (currentTime.getTime() < end.getTime()) {
+        // Controleer of de huidige tijd binnen een pauze valt of een pauze nadert
+        if (parsedBreakStart && parsedBreakEnd) {
+            // Als we bij de start van de pauze zijn of erin vallen
+            if (currentTime.getTime() < parsedBreakEnd.getTime() && currentTime.getTime() >= parsedBreakStart.getTime()) {
+                // Voeg de pauze toe als een enkel blok
+                slots.push({
+                    startTime: formatTime(parsedBreakStart),
+                    endTime: formatTime(parsedBreakEnd),
+                    type: 'break',
+                });
+                currentTime = new Date(parsedBreakEnd); // Spring over de pauze heen
+                continue; // Ga naar de volgende iteratie
+            }
+        }
 
-      if (currentTime < slotEndTime) {
-        slots.push({
-          startTime: formatTime(currentTime),
-          endTime: formatTime(slotEndTime),
-          type: 'slot',
-          status: 'open',
-          student: null,
-        });
-      }
-      currentTime = new Date(slotEndTime);
+        // Genereer een potentieel slot
+        let potentialSlotEnd = new Date(currentTime.getTime() + slotDuration * 60 * 1000);
+
+        // Als een slot de pauze zou overlappen, cap het dan bij de start van de pauze
+        if (parsedBreakStart && potentialSlotEnd.getTime() > parsedBreakStart.getTime() && currentTime.getTime() < parsedBreakStart.getTime()) {
+            potentialSlotEnd = parsedBreakStart;
+        }
+
+        // Zorg ervoor dat het slot niet voorbij de eindtijd van de totale periode gaat
+        if (potentialSlotEnd.getTime() > end.getTime()) {
+            potentialSlotEnd = end;
+        }
+
+        // Voeg het slot alleen toe als het een geldige duur heeft
+        if (currentTime.getTime() < potentialSlotEnd.getTime()) {
+            slots.push({
+                startTime: formatTime(currentTime),
+                endTime: formatTime(potentialSlotEnd),
+                type: 'slot',
+                status: 'open',
+                student: null,
+            });
+            currentTime = potentialSlotEnd; // Verplaats de huidige tijd naar het einde van het zojuist toegevoegde slot
+        } else {
+            // Voorkom oneindige lussen als currentTime niet vooruitgaat
+            if (currentTime.getTime() === potentialSlotEnd.getTime()) {
+                currentTime = new Date(currentTime.getTime() + 1 * 60 * 1000); // Advance by a minute
+            } else {
+                // Should not happen with correct logic, but a safeguard
+                break;
+            }
+        }
     }
     setSpeeddateSlots(slots);
   };
@@ -231,9 +217,9 @@ function Aanmaken() {
     } else {
       const [field, subField] = name.split('_');
       if (subField === 'hour' || subField === 'minute') {
-          const currentCombinedTime = form[field];
-          const currentHour = currentCombinedTime ? currentCombinedTime.split(':')[0] : '00';
-          const currentMinute = currentCombinedTime ? currentCombinedTime.split(':')[1] : '00';
+          const currentCombinedTime = form[field] || "00:00";
+          const currentHour = currentCombinedTime.split(':')[0];
+          const currentMinute = currentCombinedTime.split(':')[1];
 
           let newHour = subField === 'hour' ? value : currentHour;
           let newMinute = subField === 'minute' ? value : currentMinute;
@@ -265,15 +251,40 @@ function Aanmaken() {
         return;
     }
 
+    // Validatie van de tijden in handleSubmit
+    const overallStart = parseTime(form.starttijd);
+    const overallEnd = parseTime(form.eindtijd);
+    if (overallStart.getTime() >= overallEnd.getTime()) {
+        alert("Eindtijd periode moet na starttijd periode liggen.");
+        return;
+    }
+    
+    // Validatie van de pauzetijden
+    const parsedBreakStart = form.breakStart ? parseTime(form.breakStart) : null;
+    const parsedBreakEnd = form.breakEnd ? parseTime(form.breakEnd) : null;
+
+    if (parsedBreakStart && parsedBreakEnd && parsedBreakStart.getTime() >= parsedBreakEnd.getTime()) {
+        alert("Eindtijd pauze moet na starttijd pauze liggen.");
+        return;
+    }
+
+
     if (globalSettings) {
-        const overallStart = parseTime(form.starttijd);
-        const overallEnd = parseTime(form.eindtijd);
         const globalDayStart = parseTime(globalSettings.dayStartTime);
         const globalDayEnd = parseTime(globalSettings.dayEndTime);
 
-        if (overallStart < globalDayStart || overallEnd > globalDayEnd || overallStart >= overallEnd) {
+        // Controleer of de totale speeddate periode binnen de globale dagtijden valt
+        if (overallStart < globalDayStart || overallEnd > globalDayEnd) {
             alert(`De totale speeddate periode moet liggen tussen ${globalSettings.dayStartTime} en ${globalSettings.dayEndTime}.`);
             return;
+        }
+        
+        // Controleer of pauzetijden binnen globale dagtijden vallen (als ze ingevuld zijn)
+        if (parsedBreakStart && parsedBreakEnd) {
+            if (parsedBreakStart < globalDayStart || parsedBreakEnd > globalDayEnd) {
+                alert(`Pauzetijden moeten binnen de globale speeddate dag (${globalSettings.dayStartTime}-${globalSettings.dayEndTime}) vallen.`);
+                return;
+            }
         }
     }
 
@@ -289,7 +300,7 @@ function Aanmaken() {
       const dataToSend = {
         ...form,
         bedrijfId: bedrijfId,
-        lokaal: form.lokaalId, // lokaalId wordt nu 'lokaal' voor de backend (ObjectId)
+        lokaal: form.lokaalId,
         speeddateSlots: bookableSpeeddateSlots,
       };
 
@@ -338,12 +349,15 @@ function Aanmaken() {
   };
 
   // Functie om de select-opties voor uren en minuten te renderen
-  const renderTimeSelect = (fieldName, currentValue, minConstraint, maxConstraint) => { // Removed isBreakField
+  const renderTimeSelect = (fieldName, currentValue) => {
     const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
     const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 00, 05, 10, ..., 55
 
     const selectedHour = currentValue ? currentValue.split(':')[0] : '00';
     const selectedMinute = currentValue ? currentValue.split(':')[1] : '00';
+
+    const globalDayStart = globalSettings ? parseTime(globalSettings.dayStartTime) : null;
+    const globalDayEnd = globalSettings ? parseTime(globalSettings.dayEndTime) : null;
 
     return (
       <div className="flex gap-1">
@@ -355,22 +369,15 @@ function Aanmaken() {
           className="w-full border p-2 rounded"
         >
           {hours.map(h => {
-              const currentHourTime = parseTime(`${h}:00`);
-              let isDisabled = false; // Standaard niet disabled
+              const hourTime = parseTime(`${h}:00`);
+              let isDisabled = false;
               let className = '';
 
-              if (globalSettings && minConstraint && maxConstraint) { // Alleen beperken als globale tijden zijn ingesteld
-                  const globalDayStart = parseTime(globalSettings.dayStartTime);
-                  const globalDayEnd = parseTime(globalSettings.dayEndTime);
-
-                  // Controleer of het uur buiten de toegestane globale tijden valt
-                  // Een uur is disabled als het begint vóór de starttijd van de dag
-                  // OF als het op of na de eindtijd van de dag begint (om te voorkomen dat 17:00 gekozen wordt als de dag om 17:00 eindigt)
-                  isDisabled = (currentHourTime < globalDayStart || currentHourTime >= globalDayEnd);
+              if (globalSettings) {
+                  isDisabled = (hourTime < globalDayStart || hourTime >= globalDayEnd);
                   className = isDisabled ? 'text-gray-400' : 'text-green-700 font-semibold';
               } else {
-                  // Als geen globale tijden of constraints, alle uren groen
-                  className = 'text-green-700 font-semibold';
+                  className = 'text-black';
               }
 
               return (
@@ -409,11 +416,11 @@ function Aanmaken() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block font-medium mb-1">Starttijd periode</label>
-                {renderTimeSelect('starttijd', form.starttijd, globalSettings?.dayStartTime, globalSettings?.dayEndTime)}
+                {renderTimeSelect('starttijd', form.starttijd)}
               </div>
               <div>
                 <label className="block font-medium mb-1">Eindtijd periode</label>
-                {renderTimeSelect('eindtijd', form.eindtijd, globalSettings?.dayStartTime, globalSettings?.dayEndTime)}
+                {renderTimeSelect('eindtijd', form.eindtijd)}
               </div>
             </div>
 
@@ -423,11 +430,11 @@ function Aanmaken() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium mb-1">Pauze starttijd</label>
-                  {renderTimeSelect('breakStart', form.breakStart, globalSettings?.dayStartTime, globalSettings?.dayEndTime)} {/* Nu ook met globale tijden */}
+                  {renderTimeSelect('breakStart', form.breakStart)}
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Pauze eindtijd</label>
-                  {renderTimeSelect('breakEnd', form.breakEnd, globalSettings?.dayStartTime, globalSettings?.dayEndTime)} {/* Nu ook met globale tijden */}
+                  {renderTimeSelect('breakEnd', form.breakEnd)}
                 </div>
               </div>
             </div>
