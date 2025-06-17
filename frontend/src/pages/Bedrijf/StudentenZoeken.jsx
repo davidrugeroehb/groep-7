@@ -97,6 +97,9 @@ function StudentenZoeken() {
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
           Studenten zoeken
         </h1>
+        <h3 className="text-gray-500 m-6 p-6">
+          Zoek je een gepaste student dat waarvan je wilt dat die naar jouw speeddate komt, zoek hem op en stuur hem een mailtje!
+        </h3>
 
         {error && (
           <p className="text-center text-red-600 font-medium mb-6">{error}</p>
