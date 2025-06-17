@@ -229,9 +229,13 @@ const HomeBedrijf = () => {
                     >
                       {expandedId === date._id ? 'Minder details' : 'Bekijk meer'}
                     </button>
-                    <button onClick={() => verwijderSpeeddate(date._id)} className='bg-red-600 text-white w-full py-2 rounded-md text-base transition mt-2'>
-                      Verwijder SpeedDate
-                    </button>
+                    <button 
+  onClick={() => verwijderSpeeddate(date._id)} 
+  className="delete-btn"
+>
+  <i className="fas fa-trash-alt"></i>
+  Verwijder speeddate
+</button>
                   </div>
 
                   {expandedId === date._id && (
