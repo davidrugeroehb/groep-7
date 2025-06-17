@@ -2,22 +2,28 @@ import React, { useState, useEffect } from "react";
 
 function Aanmaken() {
   const [form, setForm] = useState({
-    starttijd: "",
-    eindtijd: "",
-    breakStart: "", // NEW: Break start time
-    breakEnd: "",   // NEW: Break end time
-    timePerStudent: "15", // NEW: Default time per student
-    lokaal: "",
+    starttijd: "", // Formatted as "HH:MM"
+    eindtijd: "",   // Formatted as "HH:MM"
+    breakStart: "", // Formatted as "HH:MM"
+    breakEnd: "",   // Formatted as "HH:MM"
+    timePerStudent: "15",
+    lokaalId: "",
     vakgebied: "",
     focus: "",
     opportuniteit: [],
     talen: [],
+    talenChecked: {
+        Nederlands: false,
+        Engels: false,
+        Frans: false,
+    },
     beschrijving: "",
-    naamVertegenwoordiger: "",
   });
 
   const [bedrijfId, setBedrijfId] = useState(null);
-  const [speeddateSlots, setSpeeddateSlots] = useState([]); // To display calculated slots
+  const [speeddateSlots, setSpeeddateSlots] = useState([]);
+  const [availableLokalen, setAvailableLokalen] = useState([]);
+  const [globalSettings, setGlobalSettings] = useState(null); // { dayStartTime: "HH:MM", dayEndTime: "HH:MM" }
 
   useEffect(() => {
     const storedBedrijfId = localStorage.getItem('bedrijfId');
@@ -26,12 +32,77 @@ function Aanmaken() {
     } else {
       console.warn("Bedrijf ID niet gevonden in localStorage. Gelieve in te loggen.");
     }
+
+    const fetchLokalen = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/lokalen");
+        if (!res.ok) {
+          throw new Error("Kon lokalen niet ophalen.");
+        }
+        const data = await res.json();
+        setAvailableLokalen(data.lokalen);
+      } catch (err) {
+        console.error("Fout bij ophalen lokalen:", err);
+        alert("Fout bij het laden van lokalen: " + (err.message || "Onbekende fout"));
+      }
+    };
+
+    const fetchGlobalSettings = async () => {
+        try {
+            const res = await fetch("http://localhost:4000/api/speeddate-dag");
+            if (!res.ok) {
+                const defaultSettings = { dayStartTime: "09:00", dayEndTime: "17:00" };
+                const createRes = await fetch("http://localhost:4000/api/speeddate-dag", {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(defaultSettings)
+                });
+                if (!createRes.ok) throw new Error("Kon default instellingen niet aanmaken.");
+                const createdData = await createRes.json();
+                setGlobalSettings(createdData.settings);
+                console.warn("Globale instellingen niet gevonden, defaults aangemaakt en toegepast.");
+            } else {
+                const data = await res.json();
+                setGlobalSettings(data.settings);
+            }
+        } catch (err) {
+            console.error("Fout bij ophalen/aanmaken globale instellingen:", err);
+            setGlobalSettings({
+                dayStartTime: "09:00",
+                dayEndTime: "17:00"
+            });
+            alert("Fout bij het laden van globale dagtijden. Standaardwaarden (09:00-17:00) worden gebruikt.");
+        }
+    };
+
+    fetchLokalen();
+    fetchGlobalSettings();
   }, []);
 
   useEffect(() => {
-    // Recalculate speeddate slots whenever main time inputs or break/slot duration change
     calculateSpeeddateSlots();
   }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent]);
+
+  const generateTimeOptions = (minTime, maxTime, stepMinutes) => {
+    const options = [];
+    const parse = (timeStr) => {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    };
+    const format = (totalMinutes) => {
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    };
+
+    const startTotalMinutes = minTime ? parse(minTime) : 0;
+    const endTotalMinutes = maxTime ? parse(maxTime) : (23 * 60 + 55); // Max 23:55 for 5-min step
+
+    for (let totalMinutes = startTotalMinutes; totalMinutes <= endTotalMinutes; totalMinutes += stepMinutes) {
+        options.push(format(totalMinutes));
+    }
+    return options;
+  };
 
   const parseTime = (timeStr) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -41,7 +112,7 @@ function Aanmaken() {
   };
 
   const formatTime = (date) => {
-    return date.toTimeString().slice(0, 5); // Returns HH:MM
+    return date.toTimeString().slice(0, 5);
   };
 
   const calculateSpeeddateSlots = () => {
@@ -70,77 +141,65 @@ function Aanmaken() {
     while (currentTime < end) {
       let slotEndTime = new Date(currentTime.getTime() + slotDuration * 60 * 1000);
 
-      // Check if current slot needs to include a break or is entirely a break
-      if (parsedBreakStart && parsedBreakEnd) {
-        // Case 1: Current slot starts before break and ends within break
-        if (currentTime < parsedBreakStart && slotEndTime > parsedBreakStart && slotEndTime <= parsedBreakEnd) {
-          // Add the part before the break as a regular slot
-          if (currentTime < parsedBreakStart) {
-            slots.push({
+      // Check if current time falls within a defined break
+      if (parsedBreakStart && parsedBreakEnd && currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
+          const actualBreakEndTime = (slotEndTime > parsedBreakEnd) ? parsedBreakEnd : slotEndTime;
+          slots.push({
+              startTime: formatTime(currentTime),
+              endTime: formatTime(actualBreakEndTime),
+              type: 'break',
+          });
+          currentTime = new Date(parsedBreakEnd);
+          continue;
+      }
+      
+      // Check if a regular slot would cross the break
+      if (parsedBreakStart && parsedBreakEnd && currentTime < parsedBreakStart && slotEndTime > parsedBreakEnd) {
+          slots.push({
               startTime: formatTime(currentTime),
               endTime: formatTime(parsedBreakStart),
               type: 'slot',
-            });
-          }
-          // Then add the break itself
-          slots.push({
-            startTime: formatTime(parsedBreakStart),
-            endTime: formatTime(parsedBreakEnd),
-            type: 'break',
           });
-          currentTime = new Date(parsedBreakEnd); // Jump past the break
+          slots.push({
+              startTime: formatTime(parsedBreakStart),
+              endTime: formatTime(parsedBreakEnd),
+              type: 'break',
+          });
+          currentTime = new Date(parsedBreakEnd);
           continue;
-        }
-        // Case 2: Current slot starts within break
-        if (currentTime >= parsedBreakStart && currentTime < parsedBreakEnd) {
-          // Add the break itself, extending to its end if the slot duration would exceed it
-          const actualBreakEnd = slotEndTime > parsedBreakEnd ? parsedBreakEnd : slotEndTime;
+      }
+      
+      // If a slot ends during a break but starts before it
+      if (parsedBreakStart && parsedBreakEnd && currentTime < parsedBreakStart && slotEndTime > parsedBreakStart && slotEndTime <= parsedBreakEnd) {
           slots.push({
-            startTime: formatTime(currentTime),
-            endTime: formatTime(actualBreakEnd),
-            type: 'break',
+              startTime: formatTime(currentTime),
+              endTime: formatTime(parsedBreakStart),
+              type: 'slot',
           });
-          currentTime = new Date(actualBreakEnd); // Move past this portion of the break
-          if (currentTime < parsedBreakEnd) { // If still within the defined break, jump to its end
-            currentTime = new Date(parsedBreakEnd);
-          }
+          slots.push({
+              startTime: formatTime(parsedBreakStart),
+              endTime: formatTime(parsedBreakEnd),
+              type: 'break',
+          });
+          currentTime = new Date(parsedBreakEnd);
           continue;
-        }
-        // Case 3: Current slot spans across the entire break (starts before, ends after)
-        if (currentTime < parsedBreakStart && slotEndTime > parsedBreakEnd) {
-          // Add part before break
-          slots.push({
-            startTime: formatTime(currentTime),
-            endTime: formatTime(parsedBreakStart),
-            type: 'slot',
-          });
-          // Add the break itself
-          slots.push({
-            startTime: formatTime(parsedBreakStart),
-            endTime: formatTime(parsedBreakEnd),
-            type: 'break',
-          });
-          currentTime = new Date(parsedBreakEnd); // Jump past the break for the next slot
-          continue; // Re-evaluate the new currentTime
-        }
       }
 
-      // Ensure slot does not extend beyond overall end time
+
       if (slotEndTime > end) {
         slotEndTime = end;
       }
 
-      // Only add regular slot if it has a positive duration and isn't a partial break
       if (currentTime < slotEndTime) {
         slots.push({
           startTime: formatTime(currentTime),
           endTime: formatTime(slotEndTime),
-          type: 'slot', // Default type for regular slots
-          status: 'open', // Default status for sub-speeddates
-          student: null, // Initially no student assigned
+          type: 'slot',
+          status: 'open',
+          student: null,
         });
       }
-      currentTime = new Date(slotEndTime); // Move to the end of the current slot for the next iteration
+      currentTime = new Date(slotEndTime);
     }
     setSpeeddateSlots(slots);
   };
@@ -150,14 +209,42 @@ function Aanmaken() {
     const { name, value, type, checked } = e.target;
 
     if (type === "checkbox") {
-      setForm((prev) => ({
-        ...prev,
-        [name]: checked
-          ? [...prev[name], value]
-          : prev[name].filter((item) => item !== value),
-      }));
+      if (name === "talen") {
+          setForm((prev) => ({
+              ...prev,
+              talenChecked: {
+                  ...prev.talenChecked,
+                  [value]: checked,
+              },
+              talen: checked
+                  ? [...prev.talen, value]
+                  : prev.talen.filter((item) => item !== value),
+          }));
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          [name]: checked
+            ? [...prev[name], value]
+            : prev[name].filter((item) => item !== value),
+        }));
+      }
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      const [field, subField] = name.split('_');
+      if (subField === 'hour' || subField === 'minute') {
+          const currentCombinedTime = form[field];
+          const currentHour = currentCombinedTime ? currentCombinedTime.split(':')[0] : '00';
+          const currentMinute = currentCombinedTime ? currentCombinedTime.split(':')[1] : '00';
+
+          let newHour = subField === 'hour' ? value : currentHour;
+          let newMinute = subField === 'minute' ? value : currentMinute;
+
+          setForm(prev => ({
+              ...prev,
+              [field]: `${newHour}:${newMinute}`
+          }));
+      } else {
+          setForm((prev) => ({ ...prev, [name]: value }));
+      }
     }
   };
 
@@ -168,11 +255,29 @@ function Aanmaken() {
       alert("Kan speeddate niet aanmaken: Bedrijf ID is niet beschikbaar. Log opnieuw in.");
       return;
     }
-      if (form.talen.length === 0) {
+    if (form.talen.length === 0) {
       alert("Gelieve minstens één taal aan te duiden.");
       return
     }
-    // Filter out break slots before sending to backend, as backend only cares about bookable slots
+
+    if (!form.lokaalId) {
+        alert("Gelieve een lokaal te selecteren.");
+        return;
+    }
+
+    if (globalSettings) {
+        const overallStart = parseTime(form.starttijd);
+        const overallEnd = parseTime(form.eindtijd);
+        const globalDayStart = parseTime(globalSettings.dayStartTime);
+        const globalDayEnd = parseTime(globalSettings.dayEndTime);
+
+        if (overallStart < globalDayStart || overallEnd > globalDayEnd || overallStart >= overallEnd) {
+            alert(`De totale speeddate periode moet liggen tussen ${globalSettings.dayStartTime} en ${globalSettings.dayEndTime}.`);
+            return;
+        }
+    }
+
+
     const bookableSpeeddateSlots = speeddateSlots.filter(slot => slot.type === 'slot');
 
     if (bookableSpeeddateSlots.length === 0) {
@@ -184,14 +289,16 @@ function Aanmaken() {
       const dataToSend = {
         ...form,
         bedrijfId: bedrijfId,
-        speeddateSlots: bookableSpeeddateSlots, // Send only bookable slots
+        lokaal: form.lokaalId, // lokaalId wordt nu 'lokaal' voor de backend (ObjectId)
+        speeddateSlots: bookableSpeeddateSlots,
       };
 
-      // Remove breakStart, breakEnd, timePerStudent from the main form data before sending
-      // as they are used to generate slots, not stored as separate fields on the main speeddate.
       delete dataToSend.breakStart;
       delete dataToSend.breakEnd;
       delete dataToSend.timePerStudent;
+      delete dataToSend.lokaalId;
+      delete dataToSend.talenChecked;
+
 
       const res = await fetch("http://localhost:4000/api/speeddates", {
         method: "POST",
@@ -211,20 +318,82 @@ function Aanmaken() {
         breakStart: "",
         breakEnd: "",
         timePerStudent: "15",
-        lokaal: "",
+        lokaalId: "",
         vakgebied: "",
         focus: "",
         opportuniteit: [],
         talen: [],
+        talenChecked: {
+            Nederlands: false,
+            Engels: false,
+            Frans: false,
+        },
         beschrijving: "",
-        naamVertegenwoordiger: "",
       });
-      setSpeeddateSlots([]); // Clear displayed slots after submission
+      setSpeeddateSlots([]);
     } catch (err) {
       console.error(err);
       alert(`Er ging iets mis bij het aanmaken: ${err.message || "Onbekende fout"}`);
     }
   };
+
+  // Functie om de select-opties voor uren en minuten te renderen
+  const renderTimeSelect = (fieldName, currentValue, minConstraint, maxConstraint) => { // Removed isBreakField
+    const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+    const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 00, 05, 10, ..., 55
+
+    const selectedHour = currentValue ? currentValue.split(':')[0] : '00';
+    const selectedMinute = currentValue ? currentValue.split(':')[1] : '00';
+
+    return (
+      <div className="flex gap-1">
+        <select
+          name={`${fieldName}_hour`}
+          value={selectedHour}
+          onChange={handleChange}
+          required
+          className="w-full border p-2 rounded"
+        >
+          {hours.map(h => {
+              const currentHourTime = parseTime(`${h}:00`);
+              let isDisabled = false; // Standaard niet disabled
+              let className = '';
+
+              if (globalSettings && minConstraint && maxConstraint) { // Alleen beperken als globale tijden zijn ingesteld
+                  const globalDayStart = parseTime(globalSettings.dayStartTime);
+                  const globalDayEnd = parseTime(globalSettings.dayEndTime);
+
+                  // Controleer of het uur buiten de toegestane globale tijden valt
+                  // Een uur is disabled als het begint vóór de starttijd van de dag
+                  // OF als het op of na de eindtijd van de dag begint (om te voorkomen dat 17:00 gekozen wordt als de dag om 17:00 eindigt)
+                  isDisabled = (currentHourTime < globalDayStart || currentHourTime >= globalDayEnd);
+                  className = isDisabled ? 'text-gray-400' : 'text-green-700 font-semibold';
+              } else {
+                  // Als geen globale tijden of constraints, alle uren groen
+                  className = 'text-green-700 font-semibold';
+              }
+
+              return (
+                  <option key={h} value={h} className={className} disabled={isDisabled}>
+                      {h}
+                  </option>
+              );
+          })}
+        </select>
+        <span>:</span>
+        <select
+          name={`${fieldName}_minute`}
+          value={selectedMinute}
+          onChange={handleChange}
+          required
+          className="w-full border p-2 rounded"
+        >
+          {minutes.map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
+    );
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -240,25 +409,11 @@ function Aanmaken() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block font-medium mb-1">Starttijd periode</label>
-                <input
-                  type="time"
-                  name="starttijd"
-                  value={form.starttijd}
-                  onChange={handleChange}
-                  required
-                  className="w-full border p-2 rounded"
-                />
+                {renderTimeSelect('starttijd', form.starttijd, globalSettings?.dayStartTime, globalSettings?.dayEndTime)}
               </div>
               <div>
                 <label className="block font-medium mb-1">Eindtijd periode</label>
-                <input
-                  type="time"
-                  name="eindtijd"
-                  value={form.eindtijd}
-                  onChange={handleChange}
-                  required
-                  className="w-full border p-2 rounded"
-                />
+                {renderTimeSelect('eindtijd', form.eindtijd, globalSettings?.dayStartTime, globalSettings?.dayEndTime)}
               </div>
             </div>
 
@@ -268,23 +423,11 @@ function Aanmaken() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium mb-1">Pauze starttijd</label>
-                  <input
-                    type="time"
-                    name="breakStart"
-                    value={form.breakStart}
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  />
+                  {renderTimeSelect('breakStart', form.breakStart, globalSettings?.dayStartTime, globalSettings?.dayEndTime)} {/* Nu ook met globale tijden */}
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Pauze eindtijd</label>
-                  <input
-                    type="time"
-                    name="breakEnd"
-                    value={form.breakEnd}
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  />
+                  {renderTimeSelect('breakEnd', form.breakEnd, globalSettings?.dayStartTime, globalSettings?.dayEndTime)} {/* Nu ook met globale tijden */}
                 </div>
               </div>
             </div>
@@ -317,10 +460,11 @@ function Aanmaken() {
                     {speeddateSlots.map((slot, index) => (
                       <li
                         key={index}
-                        className={`py-1 px-2 rounded-md ${slot.type === 'break'
-                            ? 'bg-red-100 text-red-800' // Distinct color for break slots
-                            : 'bg-green-100 text-green-800' // Default color for regular slots
-                          }`}
+                        className={`py-1 px-2 rounded-md ${
+                          slot.type === 'break'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}
                       >
                         {slot.startTime} - {slot.endTime} {slot.type === 'break' && "(Pauze)"}
                       </li>
@@ -332,34 +476,24 @@ function Aanmaken() {
               )}
             </div>
 
-            {/* Lokaal invoerveld */}
+            {/* Lokaal selectieveld */}
             <div className="mt-4">
-              <label className="block font-medium mb-1">Lokaal</label>
-              <input
-                type="text"
-                name="lokaal"
-                value={form.lokaal}
+              <label className="block font-medium mb-1">Selecteer Lokaal</label>
+              <select
+                name="lokaalId"
+                value={form.lokaalId}
                 onChange={handleChange}
-                placeholder="bv. Lokaal A1.01"
                 required
                 className="w-full border p-2 rounded"
-              />
+              >
+                <option value="">Kies een lokaal</option>
+                {availableLokalen.map((lokaal) => (
+                  <option key={lokaal._id} value={lokaal._id}>
+                    {lokaal.name} (Capaciteit: {lokaal.capacity})
+                  </option>
+                ))}
+              </select>
             </div>
-
-              {/*Vertegenwoordiger invoerveld */}
-            <div className="mt-4">
-              <label className="block font-medium mb-1">Naam vertegenwoordiger</label>
-              <input
-                type="text"
-                name="naamVertegenwoordiger"
-                value={form.naamVertegenwoordiger}
-                onChange={handleChange}
-                placeholder="bv. Jan Jansen"
-                required
-                className="w-full border p-2 rounded"
-              />
-            </div>
-
           </div>
 
           {/* Focus */}
@@ -428,7 +562,7 @@ function Aanmaken() {
                   name="talen"
                   value="Nederlands"
                   onChange={handleChange}
-                  checked={form.talen.includes("Nederlands")}
+                  checked={form.talenChecked.Nederlands}
                 />{" "}
                 Nederlands
               </label>
@@ -438,7 +572,7 @@ function Aanmaken() {
                   name="talen"
                   value="Engels"
                   onChange={handleChange}
-                  checked={form.talen.includes("Engels")}
+                  checked={form.talenChecked.Engels}
                 />{" "}
                 Engels
               </label>
@@ -448,7 +582,7 @@ function Aanmaken() {
                   name="talen"
                   value="Frans"
                   onChange={handleChange}
-                  checked={form.talen.includes("Frans")}
+                  checked={form.talenChecked.Frans}
                 />{" "}
                 Frans
               </label>

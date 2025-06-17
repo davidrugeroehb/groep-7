@@ -28,12 +28,12 @@ const SpeedDates = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/speeddates"); // Adjusted endpoint to fetch all speeddates with their slots
+        // De backend `getAllSpeeddates` populeert nu het lokaal
+        const res = await fetch("http://localhost:4000/api/speeddates");
         if (!res.ok) {
           throw new Error("Kon speeddates niet ophalen.");
         }
         const data = await res.json();
-        // Assuming data.speeddates will now include 'slots' array
         setSpeedDates(data.speeddates);
 
         // Unieke waarden ophalen voor dynamische filters
@@ -199,14 +199,16 @@ const SpeedDates = () => {
       return 'Afspraak aanvragen';
   };
 
-  const isSlotDisabled = (slot, mainSpeeddate) => {
-    // Disable if slot is not open
-    if (slot.status !== 'open') return true;
-    // Disable if student has already applied for any slot in this main speeddate
-    if (hasAppliedForThisMainSpeeddate(mainSpeeddate)) return true;
-    // Disable if no slot is selected OR if a different slot is selected
-    return !selectedSlot || selectedSlot._id !== slot._id;
-  };
+  // This function is defined but not explicitly used in the provided code snippet for the button's disabled state
+  // It's usually used for radio buttons for slot selection.
+  // const isSlotDisabled = (slot, mainSpeeddate) => {
+  //   // Disable if slot is not open
+  //   if (slot.status !== 'open') return true;
+  //   // Disable if student has already applied for any slot in this main speeddate
+  //   if (hasAppliedForThisMainSpeeddate(mainSpeeddate)) return true;
+  //   // Disable if no slot is selected OR if a different slot is selected
+  //   return !selectedSlot || selectedSlot._id !== slot._id;
+  // };
 
 
   if (loading) {
@@ -240,7 +242,7 @@ const SpeedDates = () => {
         {showFilters && (
           <div className="filter-section">
             <div className="filter-group">
-              <h3>Vakgebied</h3>
+              <h3>Sector / Focus</h3>
               <div className="checkbox-grid">
                 {uniqueSectors.map((sector) => (
                   <label key={sector} className="checkbox-label">
@@ -289,7 +291,7 @@ const SpeedDates = () => {
               </div>
             </div>
 
-            {/* NIEUW: Sortering op tijd */}
+            {/* Sortering op tijd */}
             <div className="filter-group">
               <h3>Sorteren op Tijd</h3>
               <div className="radio-group">
@@ -327,7 +329,7 @@ const SpeedDates = () => {
         )}
 
         <div className="results-section">
-          <h2>Beschikbare speeddates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
+          <h2>Beschikbare SpeedDates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
 
           {filteredAndSortedDates.length > 0 ? (
             <div className="speeddates-grid">
@@ -339,7 +341,8 @@ const SpeedDates = () => {
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
-                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p>
+                    {/* AANGEPAST: Toon lokaalnaam van het gepopuleerde lokaalobject */}
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal?.name || 'Lokaal onbekend'}</p>
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
                     <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
                     <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
