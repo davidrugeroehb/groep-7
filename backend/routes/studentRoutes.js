@@ -1,24 +1,21 @@
-// backend/routes/studentRoutes.js
 import express from "express";
 import {
   getStudentProfile,
   updateStudentProfile,
   getAllStudenten,
-  countAllStudents
-} from '../controllers/studentController.js'; // Let op: getAllSpeeddates is hier niet langer nodig
+  countAllStudents,
+  deleteStudent // Importeer de nieuwe functie
+} from '../controllers/studentController.js';
 
 const router = express.Router();
 
-// Ophalen van alle studenten (wordt /api/students)
 router.get('/', getAllStudenten);
-
-// Route om totaal aantal studenten op te halen (wordt /api/students/count)
 router.get('/count', countAllStudents);
-
-// Route voor studentenprofiel ophalen (wordt /api/students/mijnprofiel/:studentId)
 router.get('/mijnprofiel/:studentId', getStudentProfile);
-
-// Route om profiel student up te daten (wordt /api/students/mijnprofiel/:studentId)
 router.put('/mijnprofiel/:studentId', updateStudentProfile);
+
+// NIEUWE ROUTE: Verwijderen van een student
+// Deze route is verantwoordelijk voor DELETE /api/students/:studentId
+router.delete('/:studentId', deleteStudent); // <-- Zorg dat deze regel correct is en een DELETE methode heeft!
 
 export default router;
