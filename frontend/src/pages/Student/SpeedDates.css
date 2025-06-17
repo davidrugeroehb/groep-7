@@ -449,6 +449,18 @@
   color: var(--primary-color); /* Gebruik je primaire kleur */
 }
 
+.mail-link {
+  color: var(--primary-color); /* of kies een andere mooie kleur */
+  text-decoration: none; /* standaard geen onderlijning */
+  transition: color 0.3s ease, text-decoration 0.3s ease; /* zachte animatie */
+}
+
+.mail-link:hover {
+  color: blue; /* kleur bij hover */
+  text-decoration: underline; /* onderlijning bij hover */
+}
+
+
 /* Voeg deze toe aan je bestaande sector-tag stijlen in SpeedDates.css */
 .sector-tag.NieuweSector1 { /* Bijv. als 'Nieuwe Sector 1' wordt toegevoegd */
   background-color: #ff5733; /* Een nieuwe kleur */

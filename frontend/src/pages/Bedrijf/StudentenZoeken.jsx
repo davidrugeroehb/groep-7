@@ -96,7 +96,7 @@ function StudentenZoeken() {
     <div className="speeddates-container">
       <header className="header">
         <h1 className="speeddates__title">Studenten zoeken</h1>
-        <p className="speeddates__subtitle">Vind geschikte studenten voor jouw speeddates</p>
+        <p className="speeddates__subtitle">Vind geschikte studenten voor jouw speeddates, druk op hun email en stuur een mailtje!</p>
       </header>
   
       <div className="main-content">
@@ -220,7 +220,7 @@ function StudentenZoeken() {
                         <h3>{s.voornaam} {s.achternaam}</h3>
                       </div>
                       <div className="card-body">
-                        <p><i className="fas fa-envelope"></i> <a href={`mailto:${s.email}`}> {s.email} </a> </p>
+                        <p><i className="fas fa-envelope"></i> <a href={`mailto:${s.email}`} className="mail-link"> {s.email} </a> </p>
                         <p><i className="fas fa-graduation-cap"></i> {s.opleiding}</p>
                         <p><i className="fas fa-book"></i> {s.specialisatie || "—"}</p>
                         <p><i className="fas fa-language"></i> {formatTalen(s.talen)}</p>
