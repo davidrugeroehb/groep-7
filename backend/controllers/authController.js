@@ -47,7 +47,7 @@ export const loginUser = async (req, res) => {
       if (user) {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
-          // NIEUW: Controleer de status van het bedrijf, inclusief oudere bedrijven zonder status
+          // Controleer de status van het bedrijf, inclusief oudere bedrijven zonder status
           if (user.status === 'pending') {
             return res.status(403).json({ message: 'Je account is nog in afwachting van goedkeuring door de beheerder.' });
           }

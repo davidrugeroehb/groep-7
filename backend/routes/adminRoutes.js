@@ -1,14 +1,18 @@
 import express from "express";
-import { loginAdmin } from "../controllers/adminAuthController.js";
+import { loginAdmin, registerAdmin } from "../controllers/adminAuthController.js"; // Importeer nu ook registerAdmin
 import { getAdminProfile, updateAdminProfile } from "../controllers/adminController.js";
 
 const router = express.Router();
 
 router.post("/login", loginAdmin);
 
-// Deze routes zijn correct als de frontend '/api/admin/mijnprofiel/EEN_ID' aanroept.
-// Binnen deze router zijn de paden relatief aan het voorvoegsel dat in server.js wordt gebruikt.
-router.get("/mijnprofiel/:adminId", getAdminProfile); // Wordt /api/admin/mijnprofiel/:adminId
-router.put("/mijnprofiel/:adminId", updateAdminProfile); // Wordt /api/admin/mijnprofiel/:adminId
+// NIEUWE ROUTE: Registreer een nieuwe admin
+// Wordt: /api/admin/register
+router.post("/register", registerAdmin);
+
+// Routes voor admin profielbeheer
+// Worden: /api/admin/mijnprofiel/:adminId
+router.get("/mijnprofiel/:adminId", getAdminProfile);
+router.put("/mijnprofiel/:adminId", updateAdminProfile);
 
 export default router;
