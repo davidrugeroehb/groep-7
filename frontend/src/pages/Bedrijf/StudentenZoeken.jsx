@@ -98,7 +98,7 @@ function StudentenZoeken() {
           Studenten zoeken
         </h1>
         <h3 className="text-gray-500 m-6 p-6">
-          Zoek je een gepaste student dat waarvan je wilt dat die naar jouw speeddate komt, zoek hem op en stuur hem een mailtje!
+          Zoek je een gepaste student waarvan je wilt dat hij/zij naar jouw speeddate komt, filter naar keuze, druk op de email en stuur hem/haar een mailtje!
         </h3>
 
         {error && (
@@ -207,8 +207,9 @@ function StudentenZoeken() {
                       {s.voornaam} {s.achternaam}
                     </h2>
                     <p className="text-blue-500">
-                      <strong>Email:</strong> {s.email}
+                        <strong>Email:</strong>  <a href={`mailto:${s.email}`} className="hover:underline">{s.email}</a>
                     </p>
+
                     <p className="text-gray-700">
                       <strong>Opleiding:</strong> {s.opleiding}
                     </p>
