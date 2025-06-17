@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import './MijnProfiel.css'; 
 function MijnProfiel() {
   const [profiel, setProfiel] = useState(null);
   const [error, setError] = useState(null);
@@ -153,123 +153,182 @@ function MijnProfiel() {
   const inputStyle = 'bg-white border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">Mijn Profiel</h1>
-
-        <div className="space-y-6 text-gray-700">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Accountgegevens:</h2>
+    <div className="profiel-container">
+      <div className="profiel-header">
+        <h1 className="speeddates__title">Mijn Profiel</h1>
+        <p className="speeddates__subtitle">Beheer je persoonlijke gegevens</p>
+      </div>
+  
+      <div className="profiel-main">
+        {/* Accountgegevens Card */}
+        <div className="profiel-card">
+          <div className="profiel-card-header">
+            <h2>Accountgegevens</h2>
+          </div>
+          
+          <div className="profiel-info-list"> {/* Changed from grid to list */}
             {wijzig ? (
               <>
-                <label className="block text-gray-700 text-sm font-bold mb-1">Voornaam:</label>
-                <input
-                  type="text"
-                  name="voornaam"
-                  value={editableProfiel.voornaam}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Achternaam:</label>
-                <input
-                  type="text"
-                  name="achternaam"
-                  value={editableProfiel.achternaam}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">E-mail:</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={editableProfiel.email}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                  disabled
-                />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">GSM nr:</label>
-                <input
-                  type="text"
-                  name="gsm"
-                  value={editableProfiel.gsm}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                />
+                <div className="profiel-info-item">
+                  <label>Voornaam</label>
+                  <input
+                    type="text"
+                    name="voornaam"
+                    value={editableProfiel.voornaam}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                  />
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Achternaam</label>
+                  <input
+                    type="text"
+                    name="achternaam"
+                    value={editableProfiel.achternaam}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                  />
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>E-mail</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editableProfiel.email}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                    disabled
+                  />
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>GSM nummer</label>
+                  <input
+                    type="text"
+                    name="gsm"
+                    value={editableProfiel.gsm}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                  />
+                </div>
               </>
             ) : (
               <>
-                <p><strong>Voornaam:</strong> {profiel.voornaam}</p>
-                <p><strong>Achternaam:</strong> {profiel.achternaam}</p>
-                <p><strong>E-mail:</strong> {profiel.email}</p>
-                <p><strong>GSM nr:</strong> {profiel.gsm || 'N.v.t.'}</p>
+                <div className="profiel-info-item">
+                  <label>Voornaam</label>
+                  <p>{profiel.voornaam}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Achternaam</label>
+                  <p>{profiel.achternaam}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>E-mail</label>
+                  <p>{profiel.email}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>GSM nummer</label>
+                  <p>{profiel.gsm || 'N.v.t.'}</p>
+                </div>
               </>
             )}
           </div>
-
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Academiegegevens:</h2>
+        </div>
+  
+        {/* Academiegegevens Card */}
+        <div className="profiel-card">
+          <div className="profiel-card-header">
+            <h2>Academiegegevens</h2>
+          </div>
+          
+          <div className="profiel-info-list"> {/* Changed from grid to list */}
             {wijzig ? (
               <>
-                <label className="block text-gray-700 text-sm font-bold mb-1">Opleiding:</label>
-                <input
-                  type="text"
-                  name="opleiding"
-                  value={editableProfiel.opleiding}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Specialisatie:</label>
-                <input
-                  type="text"
-                  name="specialisatie"
-                  value={editableProfiel.specialisatie}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                />
-                <label className="block text-gray-700 text-sm font-bold mb-1 mt-2">Talen (komma-gescheiden: Nederlands, Frans, Engels):</label>
-                <input
-                  type="text"
-                  name="talenInput"
-                  value={editableProfiel.talenInput}
-                  onChange={handleEditChange}
-                  className={inputStyle}
-                  placeholder="bv. Nederlands, Engels"
-                />
+                <div className="profiel-info-item">
+                  <label>Opleiding</label>
+                  <input
+                    type="text"
+                    name="opleiding"
+                    value={editableProfiel.opleiding}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                  />
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Specialisatie</label>
+                  <input
+                    type="text"
+                    name="specialisatie"
+                    value={editableProfiel.specialisatie}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                  />
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Talen (komma gescheiden)</label>
+                  <input
+                    type="text"
+                    name="talenInput"
+                    value={editableProfiel.talenInput}
+                    onChange={handleEditChange}
+                    className="profiel-input"
+                    placeholder="Nederlands, Engels, Frans"
+                  />
+                </div>
               </>
             ) : (
               <>
-                <p><strong>Opleiding:</strong> {profiel.opleiding}</p>
-                <p><strong>Specialisatie:</strong> {profiel.specialisatie || 'N.v.t.'}</p>
-                <p><strong>Talen:</strong> {(profiel.talen && profiel.talen.length > 0) ? profiel.talen.join(', ') : 'N.v.t.'}</p>
+                <div className="profiel-info-item">
+                  <label>Opleiding</label>
+                  <p>{profiel.opleiding}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Specialisatie</label>
+                  <p>{profiel.specialisatie || 'N.v.t.'}</p>
+                </div>
+                
+                <div className="profiel-info-item">
+                  <label>Talen</label>
+                  <p>{(profiel.talen && profiel.talen.length > 0) ? profiel.talen.join(', ') : 'N.v.t.'}</p>
+                </div>
               </>
             )}
           </div>
-
-          <div className="text-right mt-4">
-            {wijzig ? (
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={OpslaanBewerk}
-                  className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                >
-                  Opslaan
-                </button>
-                <button
-                  onClick={() => setWijzig(false)}
-                  className="bg-gray-400 text-white px-5 py-2 rounded hover:bg-gray-500 transition"
-                >
-                  Annuleren
-                </button>
-              </div>
-            ) : (
+        </div>
+  
+        {/* Actie Knoppen */}
+        <div className="profiel-actions">
+          {wijzig ? (
+            <>
               <button
-                onClick={() => setWijzig(true)}
-                className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+                onClick={OpslaanBewerk}
+                className="profiel-btn profiel-btn-success"
               >
-                Profiel Bewerken
+                <i className="fas fa-save mr-2"></i> Opslaan
               </button>
-            )}
-          </div>
+              <button
+                onClick={() => setWijzig(false)}
+                className="profiel-btn profiel-btn-secondary"
+              >
+                <i className="fas fa-times mr-2"></i> Annuleren
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setWijzig(true)}
+              className="profiel-btn profiel-btn-primary"
+            >
+              <i className="fas fa-edit mr-2"></i> Profiel Bewerken
+            </button>
+          )}
         </div>
       </div>
     </div>

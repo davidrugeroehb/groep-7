@@ -327,7 +327,7 @@ const SpeedDates = () => {
         )}
 
         <div className="results-section">
-          <h2>Beschikbare Speeddates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
+          <h2>Beschikbare speeddates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
 
           {filteredAndSortedDates.length > 0 ? (
             <div className="speeddates-grid">
@@ -356,7 +356,7 @@ const SpeedDates = () => {
 
                   {expandedId === date._id && (
                     <div className="expanded-details mt-4 p-3 border-t border-gray-200">
-                      <h4 className="font-semibold text-lg mb-2">Beschikbare Tijdslots:</h4>
+                      <h4 className="font-semibold text-lg mb-2">Beschikbare tijdslots:</h4>
                       {date.slots && date.slots.length > 0 ? (
                         <div className="space-y-2">
                           {date.slots.map(slot => (

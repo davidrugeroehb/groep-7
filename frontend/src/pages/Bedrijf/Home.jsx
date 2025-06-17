@@ -132,7 +132,7 @@ const HomeBedrijf = () => {
   return (
     <div className="speeddates-container">
       <header className="header">
-        <h1 className="speeddates__title">Jouw Speeddates</h1>
+        <h1 className="speeddates__title">Jouw speeddates</h1>
         <p className="speeddates__subtitle">Beheer de speeddates die je hebt aangemaakt</p>
       </header>
 
@@ -204,7 +204,7 @@ const HomeBedrijf = () => {
         )}
 
         <div className="results-section">
-          <h2>Jouw Aangemaakte SpeedDates <span className="result-count">({filteredDates.length})</span></h2>
+          <h2>Jouw aangemaakte speeddates <span className="result-count">({filteredDates.length})</span></h2>
 
           {filteredDates.length > 0 ? (
             <div className="speeddates-grid">
@@ -229,9 +229,13 @@ const HomeBedrijf = () => {
                     >
                       {expandedId === date._id ? 'Minder details' : 'Bekijk meer'}
                     </button>
-                    <button onClick={() => verwijderSpeeddate(date._id)} className='bg-red-600 text-white w-full py-2 rounded-md text-base transition mt-2'>
-                      Verwijder SpeedDate
-                    </button>
+                    <button 
+  onClick={() => verwijderSpeeddate(date._id)} 
+  className="delete-btn"
+>
+  <i className="fas fa-trash-alt"></i>
+  Verwijder speeddate
+</button>
                   </div>
 
                   {expandedId === date._id && (

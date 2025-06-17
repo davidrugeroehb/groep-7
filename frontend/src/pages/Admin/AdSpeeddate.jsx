@@ -116,6 +116,8 @@ const AdminSpeedDates = () => {
       console.error("Fout bij verwijderen:", err);
       alert(`Fout bij verwijderen: ${err.message || "Onbekende fout"}`);
     }
+     // Update filtert de verwijderde speeddate eruit
+     setSpeeddates(prev => prev.filter(sd => sd._id !== id));
   };
 
   const filteredAndSortedDates = speedDates
