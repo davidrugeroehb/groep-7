@@ -15,13 +15,13 @@ function Basis() {
             </p>
             <hr/>
             <br/>
-            <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Wat is Career Launch</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Wat is Career Launch</h2>
             <p className="text-gray-700 mb-6 leading-relaxed">Career Launch is de springplank van talent naar toekomst. Het is een intensief en doelgericht traject waarin je niet alleen ontdekt wie je bent en wat je kunt, maar ook leert hoe je dat overtuigend kunt inzetten in de praktijk.</p>
             <hr/>
             <br/>
-            <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Applicatie gemaakt door</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Applicatie gemaakt door</h2>
             <p className="text-gray-700 mb-6 leading-relaxed">Deze applicatie werd ontwikkeld door de getalenteerde studenten Toegepaste Informatica aan de Erasmushogeschool Brussel (EhB): Lars Biczysko, Brend De Greef, Wiam Bola, Nehad Tabbakhe, David Rugero en Fariss Boughaba.
-              De ontwikkeling van deze applicatie gebeurde in opdracht van de Erasmushogeschool Brussel.
+            De ontwikkeling van deze applicatie gebeurde in opdracht van de Erasmushogeschool Brussel.
             </p>
         </div>
          <div className="flex justify-center mt-8">

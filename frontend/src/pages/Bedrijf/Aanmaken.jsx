@@ -405,7 +405,7 @@ function Aanmaken() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-800">
           Speeddate aanmaken
         </h1>
 
@@ -413,7 +413,7 @@ function Aanmaken() {
           {/* Tijd & Lokaal */}
           <div>
             <h2 className="text-xl font-semibold mb-2">⏰ Tijd & Lokaal</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block font-medium mb-1">Starttijd periode</label>
                 {renderTimeSelect('starttijd', form.starttijd)}
@@ -427,7 +427,7 @@ function Aanmaken() {
             {/* Pauze toevoegen */}
             <div className="mt-4 border p-4 rounded-md bg-gray-50">
               <h3 className="text-lg font-semibold mb-2">Pauze (optioneel)</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium mb-1">Pauze starttijd</label>
                   {renderTimeSelect('breakStart', form.breakStart)}
