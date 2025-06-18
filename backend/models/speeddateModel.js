@@ -34,12 +34,14 @@ const speeddateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  eindtijd: { // This is the overall period end time
+  eindtijd: { // This is the overall end time of the period
     type: String,
     required: true,
   },
+  // AANGEPAST: lokaal verwijst nu naar het Lokaal model
   lokaal: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId, // Verwijst naar het Lokaal model
+    ref: 'Lokaal', // Naam van het model
     required: true,
   },
   vakgebied: {

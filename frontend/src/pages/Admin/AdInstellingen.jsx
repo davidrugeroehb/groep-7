@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import teamImage from "../../assets/team-placeholder.png";
 
 function About() {
-  const [profiel, setProfiel]   = useState(null);
-  const [error,   setError]     = useState(null);
-  const [tekst,   setTekst]     = useState(
+  const [profiel, setProfiel] = useState(null);
+  const [error, setError] = useState(null);
+  const [tekst, setTekst] = useState(
     "Career Match is een platform ontworpen ..."
   );
   const [isEditing, setIsEditing] = useState(false);
+
+  //controle dat Admin = admin en controleert in de localStorage
+  const isAdmin = profiel?.role?.trim().toLowerCase() === "admin" || (localStorage.getItem('role')?.trim().toLowerCase() === 'admin');
+
 
   // Hulpfunctie voor geauthenticeerde fetches
   const authenticatedFetch = async (url, options = {}) => {
@@ -18,23 +22,24 @@ function About() {
       'Authorization': `Bearer ${token}`
     };
     try {
-        const response = await fetch(url, { ...options, headers });
-        if (!response.ok) {
-            let errorData = { message: 'Onbekende fout' };
-            try {
-                errorData = await response.json();
-            } catch (jsonErr) {
-                console.warn(`Geen JSON response bij fout ${response.status} van ${url}`);
-                errorData.message = `Netwerk- of serverfout: Status ${response.status}.`;
-            }
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const response = await fetch(url, { ...options, headers });
+      if (!response.ok) {
+        let errorData = { message: 'Onbekende fout' };
+        try {
+          errorData = await response.json();
+        } catch (jsonErr) {
+          console.warn(`Geen JSON response bij fout ${response.status} van ${url}`);
+          errorData.message = `Netwerk- of serverfout: Status ${response.status}.`;
         }
-        return response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      return response.json();
     } catch (err) {
-        console.error("Fout in authenticatedFetch:", err);
-        throw err;
+      console.error("Fout in authenticatedFetch:", err);
+      throw err;
     }
   };
+
 
 
   /* 1️⃣ ABOUT maar één keer ophalen  */
@@ -43,11 +48,11 @@ function About() {
       try {
         setError(null);
         const data = await authenticatedFetch("http://localhost:4000/api/about");
-        
+
         if (data && data.tekst_about !== undefined) {
-            setTekst(data.tekst_about);
+          setTekst(data.tekst_about);
         } else {
-            throw new Error("Ongeldig formaat voor 'About' data ontvangen van server.");
+          throw new Error("Ongeldig formaat voor 'About' data ontvangen van server.");
         }
       } catch (err) {
         console.error("Fout bij ophalen About:", err);
@@ -65,19 +70,21 @@ function About() {
       try {
         const adminId = localStorage.getItem('userId');
         const role = localStorage.getItem('role');
-        
+
         if (!adminId || role !== 'admin') {
-            setError("Geen admin ID of rol gevonden. Log opnieuw in als admin.");
-            setProfiel({ role: 'guest' });
-            return;
+          setError("Geen admin ID of rol gevonden. Log opnieuw in als admin.");
+          setProfiel({ role: 'guest' });
+          return;
         }
 
         const data = await authenticatedFetch(`http://localhost:4000/api/admin/mijnprofiel/${adminId}`);
-        
+
         if (data && data.profile) {
-            setProfiel(data.profile);
+
+          setProfiel(data.profile);
+
         } else {
-            throw new Error("Ongeldig profiel data van server.");
+          throw new Error("Ongeldig profiel data van server.");
         }
 
       } catch (err) {
@@ -116,12 +123,11 @@ function About() {
         <h1 className="text-3xl font-bold text-center mb-6">Over Career Match</h1>
 
         {/* Admin kan bewerken */}
-        {profiel && profiel.role === "admin" && !isEditing && (
+        {isAdmin && !isEditing && (
           <div className="flex justify-end mb-4">
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-blue-600 text-white px-4 py-1 rounded"
-            >
+              className="bg-blue-600 text-white px-4 py-1 rounded">
               Bewerken
             </button>
           </div>

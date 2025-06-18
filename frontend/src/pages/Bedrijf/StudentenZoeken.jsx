@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import '../student/speedDates.css';
+
 function StudentenZoeken() {
   const [studenten, setStudenten] = useState([]);
   const [error, setError] = useState(null);
@@ -7,21 +8,17 @@ function StudentenZoeken() {
   const [selectedSpecialisatie, setSelectedSpecialisatie] = useState("");
   const [selectedTalen, setSelectedTalen] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(true); // Standaard tonen we filters
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchStudenten = async () => {
       try {
         setLoading(true);
         const res = await fetch("http://localhost:4000/api/students", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("bedrijfToken")}` },
         });
 
-        if (!res.ok) {
-          throw new Error("Fout bij ophalen van studenten.");
-        }
+        if (!res.ok) throw new Error("Fout bij ophalen van studenten.");
 
         const data = await res.json();
         setStudenten(data);
@@ -37,14 +34,9 @@ function StudentenZoeken() {
     fetchStudenten();
   }, []);
 
-  // functie om talen mooi weer te geven
   const formatTalen = (talen) => {
     if (!talen || talen.length === 0) return "—";
-
-    if (Array.isArray(talen)) {
-      return talen.join(", ");
-    }
-
+    if (Array.isArray(talen)) return talen.join(", ");
     return talen
       .split(",")
       .map(t => t.trim())
@@ -96,14 +88,12 @@ function StudentenZoeken() {
     <div className="speeddates-container">
       <header className="header">
         <h1 className="speeddates__title">Studenten zoeken</h1>
-        <p className="speeddates__subtitle">Vind geschikte studenten voor jouw speeddates</p>
+        <p className="speeddates__subtitle">Vind geschikte studenten voor jouw speeddates, druk op hun email en stuur een mailtje!</p>
       </header>
-  
+
       <div className="main-content">
-        {error && (
-          <p className="text-center text-red-600 font-medium mb-6">{error}</p>
-        )}
-  
+        {error && <p className="text-center text-red-600 font-medium mb-6">{error}</p>}
+
         <button 
           className={`filter-toggle ${showFilters ? 'active' : ''}`}
           onClick={() => setShowFilters(!showFilters)}
@@ -111,7 +101,7 @@ function StudentenZoeken() {
           <i className={`fas fa-${showFilters ? 'times' : 'filter'}`}></i>
           {showFilters ? 'Filters verbergen' : 'Filters tonen'}
         </button>
-  
+
         {loading ? (
           <p className="text-center text-gray-500">Studenten worden geladen...</p>
         ) : studenten.length === 0 && !error ? (
@@ -140,7 +130,7 @@ function StudentenZoeken() {
                     ))}
                   </div>
                 </div>
-  
+
                 <div className="filter-group">
                   <h3>Opleiding</h3>
                   <select
@@ -150,13 +140,11 @@ function StudentenZoeken() {
                   >
                     <option value="">Alle opleidingen</option>
                     {uniekeOpleidingen.map((opleiding) => (
-                      <option key={opleiding} value={opleiding}>
-                        {opleiding}
-                      </option>
+                      <option key={opleiding} value={opleiding}>{opleiding}</option>
                     ))}
                   </select>
                 </div>
-  
+
                 <div className="filter-group">
                   <h3>Specialisatie</h3>
                   <select
@@ -166,13 +154,11 @@ function StudentenZoeken() {
                   >
                     <option value="">Alle specialisaties</option>
                     {uniekeSpecialisaties.map((specialisatie) => (
-                      <option key={specialisatie} value={specialisatie}>
-                        {specialisatie}
-                      </option>
+                      <option key={specialisatie} value={specialisatie}>{specialisatie}</option>
                     ))}
                   </select>
                 </div>
-  
+
                 <div className="filter-buttons">
                   <button 
                     onClick={() => {
@@ -184,18 +170,14 @@ function StudentenZoeken() {
                   >
                     <i className="fas fa-undo mr-2"></i> Reset filters
                   </button>
-                  <button 
-                    onClick={() => setShowFilters(false)} 
-                    className="apply-btn"
-                  >
-                    <i className="fas fa-check mr-2"></i> Filters toepassen
-                  </button>
                 </div>
               </div>
             )}
-  
+
             <div className="results-section">
-              <h2>Gevonden Studenten <span className="result-count">({filteredStudenten.length})</span></h2>
+
+              <h2>Gevonden studenten <span className="result-count">({filteredStudenten.length})</span></h2>
+  
   
               {filteredStudenten.length === 0 ? (
                 <div className="no-results">
@@ -220,7 +202,7 @@ function StudentenZoeken() {
                         <h3>{s.voornaam} {s.achternaam}</h3>
                       </div>
                       <div className="card-body">
-                        <p><i className="fas fa-envelope"></i> {s.email}</p>
+                        <p><i className="fas fa-envelope"></i> <a href={`mailto:${s.email}`} className="mail-link"> {s.email} </a> </p>
                         <p><i className="fas fa-graduation-cap"></i> {s.opleiding}</p>
                         <p><i className="fas fa-book"></i> {s.specialisatie || "—"}</p>
                         <p><i className="fas fa-language"></i> {formatTalen(s.talen)}</p>

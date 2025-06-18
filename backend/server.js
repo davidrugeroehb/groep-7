@@ -1,3 +1,4 @@
+// backend/server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -7,11 +8,13 @@ import connectCloudinary from './config/cloudinary.js';
 // Import routes
 import aboutRoutes from './routes/aboutRoutes.js';
 import bedrijfRoutes from './routes/bedrijfRoutes.js';
-import studentRoutes from './routes/studentRoutes.js'; // Zorg dat deze import er is
+import studentRoutes from './routes/studentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import aanvraagRoutes from './routes/aanvraagRoutes.js';
 import speeddateRoutes from './routes/speeddateRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import lokaalRoutes from './routes/lokaalRoutes.js'; // Importeer lokaalRoutes
+import speeddateDagRoutes from './routes/speeddateDagRoutes.js'; // Importeer speeddateDagRoutes
 
 
 // app config
@@ -30,13 +33,16 @@ connectCloudinary();
 // api endpoints
 app.use('/api/auth', authRoutes);
 
+
 // Gebruik van de routes met hun logische voorvoegsels
 app.use('/api/about', aboutRoutes);
 app.use('/api/bedrijven', bedrijfRoutes);
-app.use('/api/students', studentRoutes); // <-- Zorg dat deze regel correct is: '/api/students'
+app.use('/api/students', studentRoutes);
 app.use('/api/aanvragen', aanvraagRoutes);
 app.use('/api/speeddates', speeddateRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/lokalen', lokaalRoutes); // Koppel lokaalRoutes aan de /api/lokalen prefix
+app.use('/api/speeddate-dag', speeddateDagRoutes); // Koppel speeddateDagRoutes aan de /api/speeddate-dag prefix
 
 
 app.get('/', (req, res) => {

@@ -8,6 +8,7 @@ import ProtectRoute from './components/ProtectRoute'; // Zorg dat deze import co
 // Algemeen
 import About from './pages/About';
 import Login from './pages/Login';
+import Basis from './pages/Basis';
 
 // Bedrijf
 import BedrijfSignup from './pages/Bedrijf/BedrijfSignup';
@@ -53,9 +54,10 @@ function App() {
       {!hideNavbar && currentNavbar}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/speeddates" />} />
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/basis" element={<Basis />} />
 
 
         {/* Bedrijf Routes */}

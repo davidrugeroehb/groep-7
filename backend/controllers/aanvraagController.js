@@ -133,6 +133,8 @@ const createAanvraag = async (req, res) => {
   }
 };
 
+// ... (rest van de imports en functies)
+
 // 2. Functie om alle aanvragen van een specifieke student op te halen (voor "Mijn Aanvragen")
 const getStudentAanvragen = async (req, res) => {
   try {
@@ -145,19 +147,19 @@ const getStudentAanvragen = async (req, res) => {
     const aanvragen = await Aanvraag.find({ student: studentId })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf lokaal slots', // Include slots and lokaal
-        populate: {
-          path: 'bedrijf',
-          select: 'name sector',
-        }
+        select: 'starttijd eindtijd vakgebied focus opportuniteit talen beschrijving bedrijf lokaal slots', // Include 'lokaal' and 'slots'
+        populate: [
+            { path: 'bedrijf', select: 'name sector' },
+            { path: 'lokaal', select: 'name' } // NIEUW: Populeer het lokaal object om de naam te krijgen
+        ]
       })
       .sort({ createdAt: -1 });
 
     const formattedAanvragen = aanvragen.map(aanvraag => {
-      const selectedSlot = aanvraag.speeddate?.slots.id(aanvraag.slot); // Find the specific slot
+      const selectedSlot = aanvraag.speeddate?.slots?.id(aanvraag.slot); // Find the specific slot
       const slotStartTime = selectedSlot ? selectedSlot.startTime : 'N/B';
       const slotEndTime = selectedSlot ? selectedSlot.endTime : 'N/B';
-      const slotLokaal = aanvraag.speeddate?.lokaal || 'N/B';
+      const slotLokaalName = aanvraag.speeddate?.lokaal?.name || 'Nader te bepalen'; // NIEUW: Haal de naam van het lokaal op
 
       return {
         _id: aanvraag._id,
@@ -165,20 +167,18 @@ const getStudentAanvragen = async (req, res) => {
         slotId: aanvraag.slot,
         bedrijfNaam: aanvraag.speeddate?.bedrijf?.name || 'Onbekend Bedrijf',
         sector: aanvraag.speeddate?.bedrijf?.sector || 'N/B',
-        // Use slot specific times
         starttijd: slotStartTime,
         eindtijd: slotEndTime,
-        lokaal: slotLokaal, // Use main speeddate lokaal
+        // lokaal: aanvraag.speeddate?.lokaal || 'Nader te bepalen', // Oude manier
         vakgebied: aanvraag.speeddate?.vakgebied,
         focus: aanvraag.speeddate?.focus,
         opportuniteit: aanvraag.speeddate?.opportuniteit,
         talen: aanvraag.speeddate?.talen,
         beschrijving: aanvraag.speeddate?.beschrijving,
         status: aanvraag.status,
-        // afspraakDetails is now primarily derived from the slot for display
         afspraakDetails: {
           tijd: `${slotStartTime} - ${slotEndTime}`,
-          lokaal: slotLokaal,
+          lokaal: slotLokaalName, // NIEUW: Gebruik de gepopuleerde lokaalnaam
         },
         createdAt: aanvraag.createdAt,
       };
@@ -194,6 +194,10 @@ const getStudentAanvragen = async (req, res) => {
   }
 };
 
+// ... (rest van de functies)
+
+// ... (rest van de imports en functies)
+
 // 3. Functie om alle aanvragen voor een specifiek bedrijf op te halen (voor "Aanvragen" pagina van bedrijf)
 const getBedrijfAanvragen = async (req, res) => {
   try {
@@ -206,29 +210,36 @@ const getBedrijfAanvragen = async (req, res) => {
     const aanvragen = await Aanvraag.find({ bedrijf: bedrijfId })
       .populate({
         path: 'student',
-        select: 'name opleiding email taal',
+        select: 'voornaam achternaam opleiding email talen', // NIEUW: Selecteer voornaam, achternaam, talen
       })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus lokaal slots', // Include slots and lokaal
+        select: 'starttijd eindtijd vakgebied focus lokaal slots',
+        populate: {
+            path: 'lokaal', // NIEUW: Populeer het lokaal object om de naam te krijgen
+            select: 'name'
+        }
       })
       .sort({ createdAt: -1 });
 
     const formattedAanvragen = aanvragen.map(aanvraag => {
-      const selectedSlot = aanvraag.speeddate?.slots.id(aanvraag.slot); // Find the specific slot
+      const selectedSlot = aanvraag.speeddate?.slots?.id(aanvraag.slot);
       const slotTijd = selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : 'N/B';
-      const slotLokaal = aanvraag.speeddate?.lokaal || 'N/B';
+      const slotLokaal = aanvraag.speeddate?.lokaal?.name || 'N/B'; // NIEUW: Gebruik de gepopuleerde lokaalnaam
+
+      const studentNaam = `${aanvraag.student?.voornaam || ''} ${aanvraag.student?.achternaam || ''}`.trim() || 'Onbekend'; // NIEUW: Combineer voor- en achternaam
+      const studentTalen = aanvraag.student?.talen?.join(', ') || 'N/B'; // NIEUW: Haal talen op en join ze
 
       return {
         _id: aanvraag._id,
         speeddateId: aanvraag.speeddate?._id,
         slotId: aanvraag.slot,
         studentId: aanvraag.student?._id,
-        studentNaam: aanvraag.student?.name || 'Onbekend',
+        studentNaam: studentNaam, // Gebruik de gecombineerde naam
         studentOpleiding: aanvraag.student?.opleiding || 'N/B',
         studentEmail: aanvraag.student?.email || 'N/B',
-        studentTaal: aanvraag.student?.taal || 'N/B',
-        speeddateTijd: slotTijd, // Use specific slot time
+        studentTalen: studentTalen, // Gebruik de geformatteerde talen
+        speeddateTijd: slotTijd,
         speeddateFocus: aanvraag.speeddate?.focus,
         speeddateLokaal: slotLokaal,
         status: aanvraag.status,
@@ -246,6 +257,8 @@ const getBedrijfAanvragen = async (req, res) => {
     });
   }
 };
+
+// ... (rest van de functies en exports)
 
 
 // 4. Functie om de status van een aanvraag bij te werken (door bedrijf)
@@ -362,28 +375,27 @@ const getStudentAfspraken = async (req, res) => {
     const afspraken = await Aanvraag.find({ student: studentId, status: 'goedgekeurd' })
       .populate({
         path: 'speeddate',
-        select: 'starttijd eindtijd vakgebied focus bedrijf lokaal slots', // Include slots and lokaal
-        populate: {
-          path: 'bedrijf',
-          select: 'name sector',
-        }
+        select: 'starttijd eindtijd vakgebied focus bedrijf lokaal', // Include 'lokaal'
+        populate: [
+            { path: 'bedrijf', select: 'name sector' },
+            { path: 'lokaal', select: 'name' } // NIEUW: Populeer het lokaal object om de naam te krijgen
+        ]
       })
       .sort({ createdAt: 1 });
 
     const formattedAfspraken = afspraken.map(afspraak => {
-      const selectedSlot = afspraak.speeddate?.slots.id(afspraak.slot); // Find the specific slot
-      const slotTime = selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : 'N/B';
-      const slotLokaal = afspraak.speeddate?.lokaal || 'N/B';
+      // De lokaalnaam is nu direct beschikbaar via afspraak.speeddate.lokaal.name
+      const lokaalNaam = afspraak.speeddate?.lokaal?.name || 'Nader te bepalen';
 
       return {
         _id: afspraak._id,
         speeddateId: afspraak.speeddate?._id,
-        slotId: afspraak.slot,
+        slotId: afspraak.slot, // slotId is nog steeds relevant hier
         bedrijfNaam: afspraak.speeddate?.bedrijf?.name || 'Onbekend Bedrijf',
         sector: afspraak.speeddate?.bedrijf?.sector || 'N/B',
         focus: afspraak.speeddate?.focus,
-        tijd: slotTime, // Use specific slot time
-        lokaal: slotLokaal, // Use main speeddate lokaal
+        tijd: `${afspraak.speeddate?.starttijd} - ${afspraak.speeddate?.eindtijd}`,
+        lokaal: lokaalNaam, // Gebruik de gepopuleerde lokaalnaam
       };
     });
 
@@ -396,6 +408,7 @@ const getStudentAfspraken = async (req, res) => {
     });
   }
 };
+
 
 export {
   createAanvraag,
