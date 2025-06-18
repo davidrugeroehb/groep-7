@@ -12,7 +12,6 @@ const HomeBedrijf = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const bedrijfId = localStorage.getItem('userId'); // Haal bedrijf ID op uit localStorage
-  // Bepaal unieke vakgebieden op basis van de speedDates
   const uniekeVakgebieden = Array.from(new Set(speedDates.map(date => date.vakgebied))).filter(Boolean);
 
   // Functie om speeddates van DIT bedrijf op te halen
@@ -26,14 +25,12 @@ const HomeBedrijf = () => {
       setLoading(true);
       setError(null);
       try {
-        // AANGEPAST: Correcte route met '/api/speeddates/bedrijf'
-        // Let op: 'bedrijf' hier is deel van de route zelf, niet de algemene prefix
         const res = await fetch(`http://localhost:4000/api/speeddates/bedrijf/${bedrijfId}`);
         if (!res.ok) {
           throw new Error("Kon speeddates niet ophalen.");
         }
         const data = await res.json();
-        setSpeedDates(data.speeddates); // De API response heeft 'speeddates' als een array
+        setSpeedDates(data.speeddates);
       } catch (err) {
         console.error("Fout bij ophalen bedrijfs speeddates:", err);
         setError("Fout bij het laden van jouw speeddates.");
@@ -43,7 +40,7 @@ const HomeBedrijf = () => {
     };
 
     fetchCompanySpeeddates();
-  }, [bedrijfId]); // Herlaad bij wijziging van bedrijfId
+  }, [bedrijfId]);
 
 
   const verwijderSpeeddate = async (id) => {
@@ -51,8 +48,6 @@ const HomeBedrijf = () => {
       return;
     }
     try {
-      // AANGEPAST: Correcte route voor verwijderen speeddate
-      // Let op: Geen '/bedrijf' in de delete route, want die zit direct onder /api/speeddates
       const res = await fetch(`http://localhost:4000/api/speeddates/${id}`, {
         method: "DELETE",
       });
@@ -64,7 +59,6 @@ const HomeBedrijf = () => {
       }
 
       alert(data.message);
-      // Verwijder lokaal uit de lijst na succesvolle verwijdering
       setSpeedDates((prev) => prev.filter((date) => date._id !== id));
     } catch (err) {
       console.error("Fout bij verwijderen speeddate:", err);
@@ -166,7 +160,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
               <div className="checkbox-grid">
-                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => ( // Updated: consistent with Aanmaken.jsx and Speeddates.jsx
+                {["Stage", "Studentenjob", "Bachelorproef"].map((type) => (
                   <label key={type} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -183,7 +177,7 @@ const HomeBedrijf = () => {
             <div className="filter-group">
               <h3>Taal</h3>
               <div className="checkbox-grid">
-                {["Nederlands", "Engels", "Frans"].map((taal) => ( // Updated: consistent with Aanmaken.jsx and Speeddates.jsx
+                {["Nederlands", "Engels", "Frans"].map((taal) => (
                   <label key={taal} className="checkbox-label">
                     <input
                       type="checkbox"
@@ -198,23 +192,21 @@ const HomeBedrijf = () => {
             </div>
 
             <div className="filter-buttons">
-  <button 
+  <button
     className="reset-btn"
     onClick={() => {
-      setSelectedOpleiding("");
-      setSelectedSpecialisatie("");
-      setSelectedTalen([]);
+      resetFilters(); // Gebruik de bestaande resetFilters functie
     }}
   >
     <i className="fas fa-undo mr-2"></i> Reset filters
   </button>
-  <button 
+  <button
     className="apply-btn"
     onClick={() => setShowFilters(false)}
   >
     <i className="fas fa-check mr-2"></i> Filters toepassen
   </button>
-</div> 
+</div>
 </div>
         )}
 
@@ -231,7 +223,8 @@ const HomeBedrijf = () => {
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
-                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p>
+                    {/* AANGEPAST: Toon de naam van het lokaalobject */}
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal?.name || 'Lokaal onbekend'}</p>
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
                     <p><i className="fas fa-handshake"></i> {date.opportuniteit.join(', ')}</p>
                     <p><i className="fas fa-language"></i> {date.talen.join(', ')}</p>
@@ -244,8 +237,8 @@ const HomeBedrijf = () => {
                     >
                       {expandedId === date._id ? 'Minder details' : 'Bekijk meer'}
                     </button>
-                    <button 
-  onClick={() => verwijderSpeeddate(date._id)} 
+                    <button
+  onClick={() => verwijderSpeeddate(date._id)}
   className="delete-btn"
 >
   <i className="fas fa-trash-alt"></i>
@@ -265,10 +258,10 @@ const HomeBedrijf = () => {
                               </span>
                               <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getSlotStatusClass(slot.status)}`}>
                                 {slot.status === 'aangevraagd' && slot.student ? `Aangevraagd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
-                                  slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
-                                    slot.status === 'open' ? 'Open' :
-                                      slot.status === 'afgekeurd' ? 'Afgekeurd' :
-                                        slot.status
+                                 slot.status === 'bevestigd' && slot.student ? `Bevestigd (${slot.student.voornaam || ''} ${slot.student.achternaam || ''})` :
+                                 slot.status === 'open' ? 'Open' :
+                                 slot.status === 'afgekeurd' ? 'Afgekeurd' :
+                                 slot.status
                                 }
                               </span>
                             </li>
@@ -294,5 +287,6 @@ const HomeBedrijf = () => {
     </div>
   );
 };
+
 
 export default HomeBedrijf;
