@@ -475,15 +475,19 @@ function Aanmaken() {
 
       return lokaal.capacity - maxOccupancy;
   }, [form.starttijd, form.eindtijd, form.timePerStudent, form.breakStart, form.breakEnd, parseTime, formatTime, globalSettings]);
-
-
   return (
+    
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-800">
-          Speeddate aanmaken
-        </h1>
+    
+    {/* Header buiten de witte box */}
+    <header className="max-w-4xl mx-auto mb-8 text-center">
+      <h1 className="speeddates__title">Speeddates aanmaken</h1>
+      <p className="speeddates__subtitle">Hier kun je nieuwe speeddates aanmaken</p>
+    </header>
 
+    {/* De witte box */}
+    <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
+      <form className="space-y-6" onSubmit={handleSubmit}></form>
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Tijd & Lokaal */}
           <div>
