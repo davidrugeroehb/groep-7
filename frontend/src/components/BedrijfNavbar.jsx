@@ -108,4 +108,3 @@ const BedrijfNavbar = () => {
 };
  
 export default BedrijfNavbar;
- 
