@@ -35,7 +35,8 @@ const createLokaal = async (req, res) => {
 // Functie om alle lokalen op te halen
 const getAllLokalen = async (req, res) => {
   try {
-    const lokalen = await Lokaal.find({}).sort({ name: 1 }); // Sorteren op naam
+    // AANGEPAST: Selecteer nu ook expliciet de 'occupiedSlots'
+    const lokalen = await Lokaal.find({}).select('name capacity occupiedSlots').sort({ name: 1 }); // Sorteren op naam
     res.status(200).json({ lokalen });
   } catch (error) {
     console.error('Fout bij het ophalen van lokalen:', error);
@@ -50,7 +51,8 @@ const getAllLokalen = async (req, res) => {
 const getLokaalById = async (req, res) => {
   try {
     const { id } = req.params;
-    const lokaal = await Lokaal.findById(id);
+    // AANGEPAST: Selecteer nu ook expliciet de 'occupiedSlots'
+    const lokaal = await Lokaal.findById(id).select('name capacity occupiedSlots');
 
     if (!lokaal) {
       return res.status(404).json({ message: 'Lokaal niet gevonden.' });
@@ -79,7 +81,7 @@ const updateLokaal = async (req, res) => {
       id,
       { name, capacity },
       { new: true, runValidators: true } // Return updated document and run schema validators
-    );
+    ).select('name capacity occupiedSlots'); // AANGEPAST: Selecteer ook occupiedSlots bij return
 
     if (!updatedLokaal) {
       return res.status(404).json({ message: 'Lokaal niet gevonden.' });
@@ -114,6 +116,8 @@ const deleteLokaal = async (req, res) => {
     // 1. Voorkomen dat een lokaal met actieve speeddates wordt verwijderd.
     // 2. Speeddates die dit lokaal gebruiken, op 'lokaal onbekend' zetten of markeren.
     // Voor nu: alleen het lokaal verwijderen.
+    // BELANGRIJK: Als je lokaal verwijdert, zullen speeddates die naar dit lokaal verwijzen, een ongeldige referentie hebben.
+    // Je moet mogelijk ook de speeddates bijwerken om de lokaalreferentie te verwijderen of op null te zetten.
 
     res.status(200).json({ message: 'Lokaal succesvol verwijderd.' });
   } catch (error) {
