@@ -61,7 +61,7 @@ const Navbar = () => {
         ) : (
           <NavLink
             to="/login"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full transition duration-200 shadow-sm"
+            className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full transition duration-200 shadow-sm"
           >
             Login
           </NavLink>
@@ -76,12 +76,23 @@ const Navbar = () => {
       <li><NavLink to="/mijnprofiel" className={navLinkClass}>Mijn Profiel</NavLink></li>
       <li><NavLink to="/about" className={navLinkClass}>About</NavLink></li>
       <li>
-        <button
-          onClick={handleLogout}
-          className="w-full text-left bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded transition"
-        >
-          Logout
-        </button>
+        <div>
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className=" bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full transition duration-200 shadow-sm"
+          >
+            Logout
+          </button>
+        ) : (
+          <NavLink
+            to="/login"
+            className=" bg-blue-500 hover:bg-blue-600 text-white px-5 py-2  transition duration-200 shadow-sm"
+          >
+            Login
+          </NavLink>
+        )}
+      </div>
       </li>
     </ul>
   </div>
