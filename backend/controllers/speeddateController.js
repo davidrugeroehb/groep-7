@@ -3,11 +3,7 @@ import Speeddate from '../models/speeddateModel.js';
 import Bedrijf from '../models/bedrijfModel.js';
 import Aanvraag from '../models/aanvraagModel.js';
 import Lokaal from '../models/lokaalModel.js'; // NIEUW: Importeer Lokaal model
-
-// Simuleer globale instellingen voor de speeddate dag (moet later uit een database komen)
-// Voor nu hardcoded, later op te halen uit een Admin Instellingen Model
-const GLOBAL_SPEEDDATE_DAY_START = "09:00"; // Bijv. 9 AM
-const GLOBAL_SPEEDDATE_DAY_END = "17:00";   // Bijv. 5 PM
+import SpeeddateDag from '../models/SpeeddateDagModel.js'; // NIEUW: Importeer SpeeddateDagModel
 
 // Helper functie om tijdstrings te parsen naar Date objecten voor vergelijking
 const parseTime = (timeStr) => {
@@ -19,12 +15,20 @@ const parseTime = (timeStr) => {
 
 // Functie om een nieuwe speeddate aan te maken met individuele slots
 const createSpeeddate = async (req, res) => {
+  // --- START DEBUGGING LOG ---
+  console.log("Ontvangen data in createSpeeddate:", req.body);
+  console.log("Bedrijf ID:", req.body.bedrijfId);
+  console.log("Lokaal ID:", req.body.lokaal); // Dit is nu de lokaal ID
+  console.log("Speeddate Slots ontvangen (lengte):", req.body.speeddateSlots ? req.body.speeddateSlots.length : 'undefined/null');
+  console.log("Speeddate Slots inhoud:", req.body.speeddateSlots);
+  // --- EINDE DEBUGGING LOG ---
+
   try {
     const {
       bedrijfId,
       starttijd, // Overall period start time (e.g., 13:00)
       eindtijd,   // Overall period end time (e.g., 14:00)
-      lokaalId,   // NIEUW: ID van het geselecteerde lokaal
+      lokaal,   // AANGEPAST: Dit is nu de ID van het geselecteerde lokaal
       vakgebied,
       focus,
       opportuniteit,
@@ -33,7 +37,8 @@ const createSpeeddate = async (req, res) => {
       speeddateSlots, // Array of pre-calculated slots from frontend
     } = req.body;
 
-    if (!bedrijfId || !starttijd || !eindtijd || !lokaalId || !vakgebied || !focus || !opportuniteit || !talen || !beschrijving || !speeddateSlots || speeddateSlots.length === 0) {
+    // AANGEPAST: Validatie van 'lokaal' (moet de ID zijn)
+    if (!bedrijfId || !starttijd || !eindtijd || !lokaal || !vakgebied || !focus || !opportuniteit || !Array.isArray(talen) || talen.length === 0 || !beschrijving || !Array.isArray(speeddateSlots) || speeddateSlots.length === 0) {
       return res.status(400).json({ message: 'Alle velden inclusief ten minste één speeddate slot en een lokaal zijn verplicht.' });
     }
 
@@ -44,20 +49,33 @@ const createSpeeddate = async (req, res) => {
     }
 
     // 2. Controleer of lokaal bestaat en haal capaciteit op
-    const lokaal = await Lokaal.findById(lokaalId);
-    if (!lokaal) {
+    const lokaalDoc = await Lokaal.findById(lokaal); // AANGEPAST: lokaalId is nu 'lokaal'
+    if (!lokaalDoc) {
       return res.status(404).json({ message: 'Geselecteerd lokaal niet gevonden.' });
     }
 
     // 3. Valideer speeddate periode binnen globale dagtijden
+    // Haal globale instellingen op uit de database
+    const globalSettings = await SpeeddateDag.findOne({}); // Vind het enige settings document
+    let globalDayStart, globalDayEnd;
+
+    if (globalSettings) {
+        globalDayStart = parseTime(globalSettings.dayStartTime);
+        globalDayEnd = parseTime(globalSettings.dayEndTime);
+    } else {
+        // Fallback als admin nog geen settings heeft ingesteld
+        globalDayStart = parseTime("09:00");
+        globalDayEnd = parseTime("17:00");
+        console.warn("Globale speeddate dag instellingen niet gevonden in DB, standaardwaarden gebruikt.");
+    }
+
     const overallStart = parseTime(starttijd);
     const overallEnd = parseTime(eindtijd);
-    const globalDayStart = parseTime(GLOBAL_SPEEDDATE_DAY_START);
-    const globalDayEnd = parseTime(GLOBAL_SPEEDDATE_DAY_END);
+    
 
-    if (overallStart < globalDayStart || overallEnd > globalDayEnd || overallStart >= overallEnd) {
+    if (overallStart < globalDayStart || overallEnd > globalDayEnd || overallStart.getTime() >= overallEnd.getTime()) {
         return res.status(400).json({
-            message: `De totale speeddate periode moet liggen tussen ${GLOBAL_SPEEDDATE_DAY_START} en ${GLOBAL_SPEEDDATE_DAY_END}.`
+            message: `De totale speeddate periode moet liggen tussen ${formatTime(globalDayStart)} en ${formatTime(globalDayEnd)} en eindtijd moet na starttijd liggen.`
         });
     }
 
@@ -67,18 +85,20 @@ const createSpeeddate = async (req, res) => {
         const newSlotEnd = parseTime(newSlot.endTime);
 
         // Filter bestaande bezette slots in dit lokaal die overlappen met het nieuwe slot
-        const overlappingOccupiedSlots = lokaal.occupiedSlots.filter(occupied => {
+        const overlappingOccupiedSlots = lokaalDoc.occupiedSlots.filter(occupied => { // AANGEPAST: lokaal.occupiedSlots naar lokaalDoc.occupiedSlots
             const occupiedStart = parseTime(occupied.startTime);
             const occupiedEnd = parseTime(occupied.endTime);
 
-            // Overlap check: [start1, end1] overlapt met [start2, end2] als start1 < end2 en end1 > start2
-            return (newSlotStart < occupiedEnd && newSlotEnd > occupiedStart);
+            return (newSlotStart.getTime() < occupiedEnd.getTime() && newSlotEnd.getTime() > occupiedStart.getTime());
         });
 
+        // Tellen hoeveel unieke speeddates (niet slots) al dit lokaal bezetten voor dit tijdsblok
+        const uniqueOccupyingSpeeddates = new Set(overlappingOccupiedSlots.map(s => s.speeddateId.toString()));
+
         // Controleer de capaciteit
-        if (overlappingOccupiedSlots.length >= lokaal.capacity) {
+        if (uniqueOccupyingSpeeddates.size >= lokaalDoc.capacity) { // AANGEPAST: lokaal.capacity naar lokaalDoc.capacity
             return res.status(400).json({
-                message: `Lokaal '${lokaal.name}' is niet beschikbaar of heeft onvoldoende capaciteit voor het tijdslot ${newSlot.startTime} - ${newSlot.endTime}.`
+                message: `Lokaal '${lokaalDoc.name}' is niet beschikbaar of heeft onvoldoende capaciteit voor het tijdslot ${newSlot.startTime} - ${newSlot.endTime}.`
             });
         }
     }
@@ -89,7 +109,7 @@ const createSpeeddate = async (req, res) => {
       bedrijf: bedrijfId,
       starttijd,
       eindtijd,
-      lokaal: lokaalId, // Gebruik nu de lokaal ID
+      lokaal: lokaal, // Gebruik nu de lokaal ID
       vakgebied,
       focus,
       opportuniteit,
@@ -102,17 +122,15 @@ const createSpeeddate = async (req, res) => {
 
     // 6. Werk de occupiedSlots van het lokaal bij
     // Voor elke slot in de nieuw aangemaakte speeddate, voeg deze toe aan de occupiedSlots van het lokaal
-    // We slaan de speeddateId en de slotId op om later te kunnen verwijzen (voor annulering/verwijdering)
     for (const slot of savedSpeeddate.slots) {
-        lokaal.occupiedSlots.push({
+        lokaalDoc.occupiedSlots.push({ // AANGEPAST: lokaal.occupiedSlots naar lokaalDoc.occupiedSlots
             speeddateId: savedSpeeddate._id,
             startTime: slot.startTime,
             endTime: slot.endTime,
-            slotId: slot._id, // Voeg de specifieke _id van het sub-slot toe
-            // studentId is hier nog null, wordt pas gevuld bij aanvraag/bevestiging
+            slotId: slot._id,
         });
     }
-    await lokaal.save(); // Sla de bijgewerkte lokaal op
+    await lokaalDoc.save(); // AANGEPAST: Sla de bijgewerkte lokaalDoc op
 
     res.status(201).json({
       message: 'Speeddate succesvol aangemaakt met individuele slots en lokaal gereserveerd!',
