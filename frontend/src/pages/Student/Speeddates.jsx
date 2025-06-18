@@ -329,7 +329,7 @@ const SpeedDates = () => {
         )}
 
         <div className="results-section">
-          <h2>Beschikbare SpeedDates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
+          <h2>Beschikbare Speeddates <span className="result-count">({filteredAndSortedDates.length})</span></h2>
 
           {filteredAndSortedDates.length > 0 ? (
             <div className="speeddates-grid">
