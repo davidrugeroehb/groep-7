@@ -259,7 +259,7 @@ function Dashboard() {
       </div>
 
       {/* Overzichtskaartjes (bestaand) */}
-      <div className="grid grid-cols-4 gap-5 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
         <div className="flex flex-col justify-around p-4 rounded-md bg-red-600 text-white">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-lg font-semibold">SPEEDDATES</h3>
