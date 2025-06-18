@@ -2,20 +2,17 @@ import mongoose from "mongoose";
 
 const studentSchema = new mongoose.Schema(
   {
-    // Bestaande velden:
-    // name: { type: String, required: true }, // Optioneel: verwijder 'name' als je voornaam/achternaam apart wilt
 
-    voornaam: { type: String, required: true }, // NIEUW: Voornaam
-    achternaam: { type: String, required: true }, // NIEUW: Achternaam
 
+    voornaam: { type: String, required: true },
+    achternaam: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     opleiding: { type: String, required: true },
-    // taal: { type: String, required: true }, // Als dit een enkele taal is
-    talen: { type: [String],enum: ["Nederlands","Frans","Engels"] , default: [] }, // NIEUW: Aanbevolen als array voor meerdere talen
+    talen: { type: [String],enum: ["Nederlands","Frans","Engels"] , default: [] },
 
-    gsm: { type: String }, // NIEUW: GSM nummer
-    specialisatie: { type: String }, // NIEUW: Specialisatie (bijv. "Web Development")
+    gsm: { type: String },
+    specialisatie: { type: String },
   },
   { minimize: false }
 );

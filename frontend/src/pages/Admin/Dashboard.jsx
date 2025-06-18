@@ -63,7 +63,7 @@ function Dashboard() {
   };
 
   // Helper function to render time select dropdowns (copied from Aanmaken.jsx)
-  const renderTimeSelect = (fieldName, currentValue) => { // Removed minConstraint, maxConstraint, isBreakField as they are not needed for admin settings.
+  const renderTimeSelect = (fieldName, currentValue) => {
     const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
     const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 00, 05, 10, ..., 55
 
@@ -75,12 +75,12 @@ function Dashboard() {
         <select
           name={`${fieldName}_hour`}
           value={selectedHour}
-          onChange={handleSettingsChange} // Use handleSettingsChange for admin form
+          onChange={handleSettingsChange}
           required
           className="w-full border p-2 rounded"
         >
           {hours.map(h => (
-              <option key={h} value={h} className="text-black"> {/* No specific color needed here, just selectable */}
+              <option key={h} value={h} className="text-black">
                   {h}
               </option>
           ))}
@@ -89,7 +89,7 @@ function Dashboard() {
         <select
           name={`${fieldName}_minute`}
           value={selectedMinute}
-          onChange={handleSettingsChange} // Use handleSettingsChange for admin form
+          onChange={handleSettingsChange}
           required
           className="w-full border p-2 rounded"
         >
@@ -157,11 +157,14 @@ function Dashboard() {
   const handleSettingsChange = (e) => {
     const { name, value } = e.target;
     // Special handling for hour/minute selects
-    const [field, subField] = name.split('_');
+    const [field, subField] = name.split('_'); // e.g., "dayStartTime_hour", "dayStartTime_minute"
+
     if (subField === 'hour' || subField === 'minute') {
-        const currentCombinedTime = globalSettings[field];
-        const currentHour = currentCombinedTime ? currentCombinedTime.split(':')[0] : '00';
-        const currentMinute = currentCombinedTime ? currentCombinedTime[field].split(':')[1] : '00';
+        // Initialiseer met de huidige waarde uit globalSettings, of een default "00:00" als leeg
+        const currentCombinedTime = globalSettings[field] || "00:00";
+        const parts = currentCombinedTime.split(':');
+        const currentHour = parts[0];
+        const currentMinute = parts[1];
 
         let newHour = subField === 'hour' ? value : currentHour;
         let newMinute = subField === 'minute' ? value : currentMinute;
@@ -286,7 +289,7 @@ function Dashboard() {
 
         <div className="flex flex-col justify-around p-4 rounded-md bg-green-600 text-white">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">AANVRAGEN</h3> {/* Aangepaste label */}
+            <h3 className="text-lg font-semibold">AANVRAGEN</h3>
             <h1>{alertsCount}</h1>
           </div>
           <BsCheckCircleFill className="text-2xl" />
