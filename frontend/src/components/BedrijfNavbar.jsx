@@ -22,25 +22,22 @@ const BedrijfNavbar = () => {
       : 'relative text-black hover:text-blue-600 after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-blue-600 hover:after:w-full after:transition-all after:duration-300';
  
   return (
-    <nav className="bg-white shadow-md px-4 sm:px-8 py-4">
-  <div className="flex items-center justify-between w-full">
-    {/* Logo + Titel */}
-    <div className="flex items-center space-x-3">
-      <img src={logo} alt="logo" className="h-10 w-auto" />
-      <NavLink to="/bedrijf-home" className="text-xl font-bold whitespace-nowrap">
-        Career Match
-      </NavLink>
-    </div>
-
-    {/* Hamburger button */}
-    <button
-      onClick={() => setMenuOpen(!menuOpen)}
-      className="md:hidden text-gray-700"
-      aria-label="Toggle menu"
-    >
-      ☰
-    </button>
-  </div>
+    <nav className="bg-white shadow-md px-8 py-4 flex items-center justify-between">
+      {/* Logo + Titel */}
+      <div className="flex items-center space-x-3">
+        <img src={logo} alt="logo" className="h-10 w-auto" />
+        <NavLink to="/bedrijf-home" className="text-xl font-bold whitespace-nowrap">
+          Career Match
+        </NavLink>
+      </div>
+      {/* Hamburger button (alleen op mobiel zichtbaar) */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden text-gray-700"
+          aria-label="Toggle menu"
+        >
+          ☰
+        </button>
  
       {/* Links */}
       <ul className="hidden md:flex space-x-6 text-sm font-medium justify-center flex-1">
