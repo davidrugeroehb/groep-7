@@ -84,10 +84,12 @@ function Aanvragen() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-6">
-      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
-        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
-          Aanvragen beheren
-        </h1>
+    <header className="max-w-6xl mx-auto mb-8 text-center">
+      <h1 className="speeddates__title">Aanvragen beheren</h1>
+      <p className="speeddates__subtitle">Hier kun je alle aanvragen bekijken en beheren</p>
+    </header>
+  
+    <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-8 border border-gray-200">
 
         {error && (
           <p className="text-center text-red-600 font-medium mb-6">{error}</p>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import './SpeedDates.css';
 function MijnAfspraken() {
   const [afspraken, setAfspraken] = useState([]);
   const [error, setError] = useState(null);
@@ -69,13 +69,10 @@ function MijnAfspraken() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          Mijn afspraken
-        </h1>
-
-        <p className="text-center text-gray-600 mb-8">
-          Hier zie je alle bevestigde speeddate-afspraken:
-        </p>
+      <header className="header">
+        <h1 className="speeddates__title">Mijn afspraken</h1>
+        <p className="speeddates__subtitle">Hier zie je alle bevestigde speeddate-afspraken:</p>
+      </header>
 
         {error && (
           <p className="text-center text-red-600 mb-6">{error}</p>
