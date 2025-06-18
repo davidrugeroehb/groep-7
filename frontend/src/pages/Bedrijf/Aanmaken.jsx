@@ -1,4 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+
+// Helper functions outside the component, as they are pure and don't depend on component state/props
+const parseTime = (timeStr) => {
+  if (!timeStr || !timeStr.includes(':')) {
+      return new Date(0, 0, 0, 0, 0, 0);
+  }
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+};
+
+const formatTime = (date) => {
+  if (isNaN(date.getTime())) {
+      return "00:00";
+  }
+  return date.toTimeString().slice(0, 5);
+};
 
 function Aanmaken() {
   const [form, setForm] = useState({
@@ -23,7 +41,50 @@ function Aanmaken() {
   const [bedrijfId, setBedrijfId] = useState(null);
   const [speeddateSlots, setSpeeddateSlots] = useState([]);
   const [availableLokalen, setAvailableLokalen] = useState([]);
-  const [globalSettings, setGlobalSettings] = useState(null); // { dayStartTime: "HH:MM", dayEndTime: "HH:MM" }
+  const [globalSettings, setGlobalSettings] = useState(null);
+
+  const fetchLokalen = useCallback(async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/lokalen");
+      if (!res.ok) {
+        throw new Error("Kon lokalen niet ophalen.");
+      }
+      const data = await res.json();
+      setAvailableLokalen(data.lokalen);
+    } catch (err) {
+      console.error("Fout bij ophalen lokalen:", err);
+      alert("Fout bij het laden van lokalen: " + (err.message || "Onbekende fout"));
+    }
+  }, []);
+
+  const fetchGlobalSettings = useCallback(async () => {
+      try {
+          const res = await fetch("http://localhost:4000/api/speeddate-dag");
+          if (!res.ok) {
+              const defaultSettings = { dayStartTime: "09:00", dayEndTime: "17:00" };
+              const createRes = await fetch("http://localhost:4000/api/speeddate-dag", {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(defaultSettings)
+              });
+              if (!createRes.ok) throw new Error("Kon default instellingen niet aanmaken.");
+              const createdData = await createRes.json();
+              setGlobalSettings(createdData.settings);
+              console.warn("Globale instellingen niet gevonden, defaults aangemaakt en toegepast.");
+          } else {
+              const data = await res.json();
+              setGlobalSettings(data.settings);
+          }
+      } catch (err) {
+          console.error("Fout bij ophalen/aanmaken globale instellingen:", err);
+          setGlobalSettings({
+              dayStartTime: "09:00",
+              dayEndTime: "17:00"
+          });
+          alert("Fout bij het laden van globale dagtijden. Standaardwaarden (09:00-17:00) worden gebruikt.");
+      }
+  }, []);
+
 
   useEffect(() => {
     const storedBedrijfId = localStorage.getItem('bedrijfId');
@@ -33,83 +94,14 @@ function Aanmaken() {
       console.warn("Bedrijf ID niet gevonden in localStorage. Gelieve in te loggen.");
     }
 
-    const fetchLokalen = async () => {
-      try {
-        const res = await fetch("http://localhost:4000/api/lokalen");
-        if (!res.ok) {
-          throw new Error("Kon lokalen niet ophalen.");
-        }
-        const data = await res.json();
-        setAvailableLokalen(data.lokalen);
-      } catch (err) {
-        console.error("Fout bij ophalen lokalen:", err);
-        alert("Fout bij het laden van lokalen: " + (err.message || "Onbekende fout"));
-      }
-    };
-
-    const fetchGlobalSettings = async () => {
-        try {
-            const res = await fetch("http://localhost:4000/api/speeddate-dag");
-            if (!res.ok) {
-                const defaultSettings = { dayStartTime: "09:00", dayEndTime: "17:00" };
-                const createRes = await fetch("http://localhost:4000/api/speeddate-dag", {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(defaultSettings)
-                });
-                if (!createRes.ok) throw new Error("Kon default instellingen niet aanmaken.");
-                const createdData = await createRes.json();
-                setGlobalSettings(createdData.settings);
-                console.warn("Globale instellingen niet gevonden, defaults aangemaakt en toegepast.");
-            } else {
-                const data = await res.json();
-                setGlobalSettings(data.settings);
-            }
-        } catch (err) {
-            console.error("Fout bij ophalen/aanmaken globale instellingen:", err);
-            setGlobalSettings({
-                dayStartTime: "09:00",
-                dayEndTime: "17:00"
-            });
-            alert("Fout bij het laden van globale dagtijden. Standaardwaarden (09:00-17:00) worden gebruikt.");
-        }
-    };
-
     fetchLokalen();
     fetchGlobalSettings();
-  }, []);
+  }, [fetchLokalen, fetchGlobalSettings]);
 
-  useEffect(() => {
-    if (globalSettings) {
-        calculateSpeeddateSlots();
-    }
-  }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent, globalSettings]);
-
-
-  const parseTime = (timeStr) => {
-    if (!timeStr || !timeStr.includes(':')) {
-        return new Date(0, 0, 0, 0, 0, 0);
-    }
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
-    return date;
-  };
-
-  const formatTime = (date) => {
-    if (isNaN(date.getTime())) {
-        return "00:00";
-    }
-    return date.toTimeString().slice(0, 5);
-  };
-
-  const calculateSpeeddateSlots = () => {
+  // AANGEPAST: calculateSpeeddateSlots hoeft niet als dependency meegegeven te worden als het al triggers op de form state
+  // en parseTime/formatTime zijn nu extern
+  const calculateSpeeddateSlots = useCallback(() => {
     const { starttijd, eindtijd, breakStart, breakEnd, timePerStudent } = form;
-
-    if (!starttijd || !eindtijd || !timePerStudent) {
-      setSpeeddateSlots([]);
-      return;
-    }
 
     const start = parseTime(starttijd);
     const end = parseTime(eindtijd);
@@ -126,40 +118,40 @@ function Aanmaken() {
     let parsedBreakStart = breakStart ? parseTime(breakStart) : null;
     let parsedBreakEnd = breakEnd ? parseTime(breakEnd) : null;
 
-    // Validate and normalize break times: must be within main speeddate period
     if (parsedBreakStart && parsedBreakEnd) {
         if (parsedBreakStart.getTime() >= parsedBreakEnd.getTime() ||
             parsedBreakStart.getTime() < start.getTime() ||
             parsedBreakEnd.getTime() > end.getTime()) {
             console.warn("Ongeldige pauzetijden genegeerd: pauze is buiten de speeddate periode of heeft ongeldige start/eindtijd.");
-            parsedBreakStart = null; // Ignore invalid break
+            parsedBreakStart = null;
             parsedBreakEnd = null;
         }
     }
 
-
+    // --- HERZIENE PAUZELOGICA VOOR SLOT GENERATIE ---
     while (currentTime.getTime() < end.getTime()) {
-        // Controleer of de huidige tijd binnen een pauze valt of een pauze nadert
-        if (parsedBreakStart && parsedBreakEnd) {
-            // Als we bij de start van de pauze zijn of erin vallen
-            if (currentTime.getTime() < parsedBreakEnd.getTime() && currentTime.getTime() >= parsedBreakStart.getTime()) {
-                // Voeg de pauze toe als een enkel blok
-                slots.push({
-                    startTime: formatTime(parsedBreakStart),
-                    endTime: formatTime(parsedBreakEnd),
-                    type: 'break',
-                });
-                currentTime = new Date(parsedBreakEnd); // Spring over de pauze heen
-                continue; // Ga naar de volgende iteratie
-            }
+        // Stap 1: Voeg een pauzeblok toe als we bij de pauze start zijn of erin vallen
+        if (parsedBreakStart && parsedBreakEnd &&
+            currentTime.getTime() < parsedBreakEnd.getTime() && // Zorg dat we niet voorbij de pauze eind zijn
+            currentTime.getTime() >= parsedBreakStart.getTime()) { // We zijn bij of in de pauze
+
+            slots.push({
+                startTime: formatTime(parsedBreakStart),
+                endTime: formatTime(parsedBreakEnd),
+                type: 'break',
+            });
+            currentTime = new Date(parsedBreakEnd); // Spring over de pauze heen
+            continue; // Ga naar de volgende iteratie van de while-loop
         }
 
-        // Genereer een potentieel slot
+        // Stap 2: Voeg een regulier slot toe vóór de pauze als deze overlapt
         let potentialSlotEnd = new Date(currentTime.getTime() + slotDuration * 60 * 1000);
-
-        // Als een slot de pauze zou overlappen, cap het dan bij de start van de pauze
-        if (parsedBreakStart && potentialSlotEnd.getTime() > parsedBreakStart.getTime() && currentTime.getTime() < parsedBreakStart.getTime()) {
-            potentialSlotEnd = parsedBreakStart;
+        
+        if (parsedBreakStart && parsedBreakEnd &&
+            potentialSlotEnd.getTime() > parsedBreakStart.getTime() && // Slot gaat over pauze start
+            currentTime.getTime() < parsedBreakStart.getTime()) { // Slot start voor pauze start
+            
+            potentialSlotEnd = parsedBreakStart; // Cap het slot bij de pauze start
         }
 
         // Zorg ervoor dat het slot niet voorbij de eindtijd van de totale periode gaat
@@ -179,16 +171,26 @@ function Aanmaken() {
             currentTime = potentialSlotEnd; // Verplaats de huidige tijd naar het einde van het zojuist toegevoegde slot
         } else {
             // Voorkom oneindige lussen als currentTime niet vooruitgaat
+            // Dit kan gebeuren als potentialSlotEnd gelijk is aan currentTime (e.g., door capping bij de pauze)
             if (currentTime.getTime() === potentialSlotEnd.getTime()) {
-                currentTime = new Date(currentTime.getTime() + 1 * 60 * 1000); // Advance by a minute
+                currentTime = new Date(currentTime.getTime() + 1 * 60 * 1000); // Advance by a small margin
             } else {
-                // Should not happen with correct logic, but a safeguard
-                break;
+                break; // Er is iets mis, breek de lus
             }
         }
     }
     setSpeeddateSlots(slots);
-  };
+  }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent, form.timePerStudent]); // Removed parseTime, formatTime as dependencies, added form.timePerStudent (again, just to be sure)
+
+
+  useEffect(() => {
+    // Trigger calculateSpeeddateSlots alleen als de formuliervelden zinvol zijn ingevuld EN globalSettings geladen is.
+    if (form.starttijd && form.eindtijd && form.timePerStudent && globalSettings) {
+        calculateSpeeddateSlots();
+    } else {
+        setSpeeddateSlots([]); // Leeg slots als input nog niet compleet is
+    }
+  }, [form.starttijd, form.eindtijd, form.breakStart, form.breakEnd, form.timePerStudent, globalSettings, calculateSpeeddateSlots]);
 
 
   const handleChange = (e) => {
@@ -251,7 +253,6 @@ function Aanmaken() {
         return;
     }
 
-    // Validatie van de tijden in handleSubmit
     const overallStart = parseTime(form.starttijd);
     const overallEnd = parseTime(form.eindtijd);
     if (overallStart.getTime() >= overallEnd.getTime()) {
@@ -259,7 +260,6 @@ function Aanmaken() {
         return;
     }
     
-    // Validatie van de pauzetijden
     const parsedBreakStart = form.breakStart ? parseTime(form.breakStart) : null;
     const parsedBreakEnd = form.breakEnd ? parseTime(form.breakEnd) : null;
 
@@ -273,13 +273,11 @@ function Aanmaken() {
         const globalDayStart = parseTime(globalSettings.dayStartTime);
         const globalDayEnd = parseTime(globalSettings.dayEndTime);
 
-        // Controleer of de totale speeddate periode binnen de globale dagtijden valt
         if (overallStart < globalDayStart || overallEnd > globalDayEnd) {
             alert(`De totale speeddate periode moet liggen tussen ${globalSettings.dayStartTime} en ${globalSettings.dayEndTime}.`);
             return;
         }
         
-        // Controleer of pauzetijden binnen globale dagtijden vallen (als ze ingevuld zijn)
         if (parsedBreakStart && parsedBreakEnd) {
             if (parsedBreakStart < globalDayStart || parsedBreakEnd > globalDayEnd) {
                 alert(`Pauzetijden moeten binnen de globale speeddate dag (${globalSettings.dayStartTime}-${globalSettings.dayEndTime}) vallen.`);
@@ -342,16 +340,18 @@ function Aanmaken() {
         beschrijving: "",
       });
       setSpeeddateSlots([]);
+      
+      await fetchLokalen(); // Refetch locales after successful creation
+
     } catch (err) {
       console.error(err);
       alert(`Er ging iets mis bij het aanmaken: ${err.message || "Onbekende fout"}`);
     }
   };
 
-  // Functie om de select-opties voor uren en minuten te renderen
   const renderTimeSelect = (fieldName, currentValue) => {
     const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-    const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 00, 05, 10, ..., 55
+    const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
 
     const selectedHour = currentValue ? currentValue.split(':')[0] : '00';
     const selectedMinute = currentValue ? currentValue.split(':')[1] : '00';
@@ -400,6 +400,81 @@ function Aanmaken() {
       </div>
     );
   };
+
+  const getRemainingCapacity = useCallback((lokaal) => {
+      // Als essentiële formuliervelden voor tijdberekening leeg zijn, toon dan volledige capaciteit.
+      // Dit voorkomt dat de capaciteit 0 wordt weergegeven voordat de gebruiker input heeft gegeven.
+      if (!form.starttijd || !form.eindtijd || !form.timePerStudent || !globalSettings) {
+          return lokaal.capacity;
+      }
+
+      const newSpeeddateStart = parseTime(form.starttijd);
+      const newSpeeddateEnd = parseTime(form.eindtijd);
+      const newSlotDuration = parseInt(form.timePerStudent, 10);
+
+      // Controleer op ongeldige numerieke conversie of tijdslogica
+      if (isNaN(newSlotDuration) || newSlotDuration <= 0 || newSpeeddateStart.getTime() >= newSpeeddateEnd.getTime()) {
+          return lokaal.capacity; // Ongeldige input, toon volledige capaciteit
+      }
+
+      // Genereer de slots voor de *nieuwe* speeddate om te controleren op overlap
+      const potentialNewSlots = [];
+      let currentCheckTime = new Date(newSpeeddateStart);
+      const breakStart = form.breakStart ? parseTime(form.breakStart) : null;
+      const breakEnd = form.breakEnd ? parseTime(form.breakEnd) : null;
+
+      while (currentCheckTime.getTime() < newSpeeddateEnd.getTime()) {
+          // Pauzelogica in de capaciteitsberekening
+          if (breakStart && breakEnd && currentCheckTime.getTime() < breakEnd.getTime() && currentCheckTime.getTime() >= breakStart.getTime()) {
+              currentCheckTime = new Date(breakEnd); // Spring over de pauze heen
+              continue;
+          }
+
+          let potentialEnd = new Date(currentCheckTime.getTime() + newSlotDuration * 60 * 1000);
+
+          if (breakStart && breakEnd && potentialEnd.getTime() > breakStart.getTime() && currentCheckTime.getTime() < breakStart.getTime()) {
+              potentialEnd = breakStart;
+          }
+
+          if (potentialEnd.getTime() > newSpeeddateEnd.getTime()) {
+              potentialEnd = newSpeeddateEnd;
+          }
+
+          if (currentCheckTime.getTime() < potentialEnd.getTime()) {
+              potentialNewSlots.push({ startTime: formatTime(currentCheckTime), endTime: formatTime(potentialEnd) });
+              currentCheckTime = potentialEnd;
+          } else {
+              break; // Voorkom oneindige lussen
+          }
+      }
+
+      let maxOccupancy = 0;
+
+      if (lokaal && Array.isArray(lokaal.occupiedSlots)) {
+        for (const newPotentialSlot of potentialNewSlots) {
+            const newPotentialSlotStart = parseTime(newPotentialSlot.startTime);
+            const newPotentialSlotEnd = parseTime(newPotentialSlot.endTime);
+
+            const currentOccupancy = new Set();
+            
+            lokaal.occupiedSlots.forEach(occupied => {
+                const occupiedStart = parseTime(occupied.startTime);
+                const occupiedEnd = parseTime(occupied.endTime);
+
+                if (newPotentialSlotStart.getTime() < occupiedEnd.getTime() && newPotentialSlotEnd.getTime() > occupiedStart.getTime()) {
+                    currentOccupancy.add(occupied.speeddateId.toString());
+                }
+            });
+            maxOccupancy = Math.max(maxOccupancy, currentOccupancy.size);
+        }
+      } else {
+          console.warn("Lokaal of occupiedSlots is ongeldig in getRemainingCapacity:", lokaal);
+          return lokaal.capacity; // Terugval indien lokaal data corrupt is
+      }
+
+
+      return lokaal.capacity - maxOccupancy;
+  }, [form.starttijd, form.eindtijd, form.timePerStudent, form.breakStart, form.breakEnd, parseTime, formatTime, globalSettings]);
 
 
   return (
@@ -494,11 +569,16 @@ function Aanmaken() {
                 className="w-full border p-2 rounded"
               >
                 <option value="">Kies een lokaal</option>
-                {availableLokalen.map((lokaal) => (
-                  <option key={lokaal._id} value={lokaal._id}>
-                    {lokaal.name} (Capaciteit: {lokaal.capacity})
-                  </option>
-                ))}
+                {availableLokalen.map((lokaal) => {
+                  const remainingCapacity = getRemainingCapacity(lokaal);
+                  const optionText = `${lokaal.name} (Beschikbaar: ${remainingCapacity})`;
+                  const isDisabled = remainingCapacity <= 0;
+                  return (
+                    <option key={lokaal._id} value={lokaal._id} disabled={isDisabled} className={isDisabled ? 'text-gray-500' : ''}>
+                      {optionText}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
