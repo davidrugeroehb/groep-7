@@ -98,7 +98,7 @@ Als je Windows gebruikt en je krijgt een foutmelding over scriptuitvoering (bijv
 ## Testaccounts
 
 ### Student
--   **Email**: `lars.vandamme@studentehb.be`
+-   **Email**: `sarah.janssen@studentehb.be`
 -   **Wachtwoord**: `studenttest123`
 
 ### Bedrijf
