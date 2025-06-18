@@ -26,6 +26,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md px-8 py-4 flex items-center">
+      <div className="flex items-center w-full">
       {/* Logo + Titel */}
       <div className="flex items-center space-x-3">
         <img src={logo} alt="logo" className="h-10 w-auto" />
@@ -97,6 +98,7 @@ const Navbar = () => {
       >
         ☰
       </button>
+      </div>
     </nav>
   );
 };
