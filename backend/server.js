@@ -13,8 +13,8 @@ import authRoutes from './routes/authRoutes.js';
 import aanvraagRoutes from './routes/aanvraagRoutes.js';
 import speeddateRoutes from './routes/speeddateRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import lokaalRoutes from './routes/lokaalRoutes.js';
-import speeddateDagRoutes from './routes/speeddateDagRoutes.js'; // NIEUW: Importeer speeddateDagRoutes
+import lokaalRoutes from './routes/lokaalRoutes.js'; // Importeer lokaalRoutes
+import speeddateDagRoutes from './routes/speeddateDagRoutes.js'; // Importeer speeddateDagRoutes
 
 
 // app config
@@ -41,8 +41,8 @@ app.use('/api/students', studentRoutes);
 app.use('/api/aanvragen', aanvraagRoutes);
 app.use('/api/speeddates', speeddateRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/lokalen', lokaalRoutes);
-app.use('/api/speeddate-dag', speeddateDagRoutes); // NIEUW: Koppel speeddateDagRoutes aan de /api/speeddate-dag prefix
+app.use('/api/lokalen', lokaalRoutes); // Koppel lokaalRoutes aan de /api/lokalen prefix
+app.use('/api/speeddate-dag', speeddateDagRoutes); // Koppel speeddateDagRoutes aan de /api/speeddate-dag prefix
 
 
 app.get('/', (req, res) => {
