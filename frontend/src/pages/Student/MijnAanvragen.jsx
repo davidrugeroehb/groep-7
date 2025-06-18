@@ -70,7 +70,11 @@ function MijnAanvragen() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-10 text-gray-800">Mijn Aanvragen</h1>
+      <header className="header">
+        <h1 className="speeddates__title">Mijn aanvragen</h1>
+        <p className="speeddates__subtitle">Hier zie je alle speeddates-aanvragen die je hebt ingediend</p>
+      </header>
+      
 
         {error && <p className="text-center text-red-600 mb-4">{error}</p>}
 
