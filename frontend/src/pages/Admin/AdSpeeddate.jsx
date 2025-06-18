@@ -1,6 +1,6 @@
 // AdminSpeedDates.jsx
 import React, { useState, useEffect } from 'react';
-import '../Student/SpeedDates.css'; // Zorg ervoor dat dit CSS-bestand correct is
+import '../Student/SpeedDates.css';
 
 const AdminSpeedDates = () => {
   const [speedDates, setSpeedDates] = useState([]);
@@ -31,7 +31,7 @@ const AdminSpeedDates = () => {
       console.error(`API Fout (${url}):`, response.status, errorData);
       if (response.status === 401 || response.status === 403) {
         alert("Je sessie is verlopen of niet toegestaan. Gelieve opnieuw in te loggen.");
-        // window.location.href = '/login'; // Of gebruik useNavigate voor React Router
+        // window.location.href = '/login';
       }
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
@@ -46,14 +46,9 @@ const AdminSpeedDates = () => {
     setLoading(true);
     setError(null);
     try {
-      // **** AANPASSING HIER: Roep de algemene speeddates route aan ****
-      const data = await authenticatedFetch("http://localhost:4000/api/speeddates"); // Roep de nieuwe route aan
+      const data = await authenticatedFetch("http://localhost:4000/api/speeddates");
+      setSpeedDates(data.speeddates);
 
-      // De data structuur van getAllSpeeddates in studentController.js
-      // retourneert { message: ..., speeddates: [] }. We hebben de array nodig.
-      setSpeedDates(data.speeddates); // Zorg ervoor dat 'speeddates' de array is
-
-      // Unieke waarden ophalen voor filters
       const sectors = new Set();
       const languages = new Set();
       data.speeddates.forEach(date => {
@@ -65,7 +60,7 @@ const AdminSpeedDates = () => {
 
     } catch (err) {
       console.error("Fout bij ophalen speeddates:", err);
-      setError("Fout bij het laden van speeddates: " + err.message); // Toon de specifieke foutmelding
+      setError("Fout bij het laden van speeddates: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -104,8 +99,7 @@ const AdminSpeedDates = () => {
     }
 
     try {
-      // Gebruik hier ook authenticatedFetch
-      await authenticatedFetch(`http://localhost:4000/api/speeddates/${id}`, { // Zorg dat je een DELETE route hebt voor speeddates in speeddateRoutes.js
+      await authenticatedFetch(`http://localhost:4000/api/speeddates/${id}`, {
         method: 'DELETE',
       });
 
@@ -116,19 +110,17 @@ const AdminSpeedDates = () => {
       console.error("Fout bij verwijderen:", err);
       alert(`Fout bij verwijderen: ${err.message || "Onbekende fout"}`);
     }
-     // Update filtert de verwijderde speeddate eruit
-     setSpeeddates(prev => prev.filter(sd => sd._id !== id));
   };
 
   const filteredAndSortedDates = speedDates
   .filter(date => {
     const term = searchTerm.toLowerCase();
 
-    const matchesSearch = 
+    const matchesSearch =
       date.bedrijf?.name?.toLowerCase().includes(term) ||
       date.vakgebied?.toLowerCase().includes(term);
 
-    const matchesFilters = 
+    const matchesFilters =
       (filters.sector.length === 0 || filters.sector.includes(date.vakgebied)) &&
       (filters.opportuniteit.length === 0 || (date.opportuniteit && filters.opportuniteit.some(o => date.opportuniteit.includes(o)))) &&
       (filters.taal.length === 0 || (date.talen && date.talen.some(t => filters.taal.includes(t))));
@@ -136,9 +128,8 @@ const AdminSpeedDates = () => {
     return matchesSearch && matchesFilters;
   })
     .sort((a, b) => {
-      // Voeg een check toe voor geldige tijdwaarden
-      const timeA = a.starttijd ? new Date(`2000-01-01T${a.starttijd}:00`) : new Date(0); // Fallback naar epoch
-      const timeB = b.starttijd ? new Date(`2000-01-01T${b.starttijd}:00`) : new Date(0); // Fallback naar epoch
+      const timeA = a.starttijd ? new Date(`2000-01-01T${a.starttijd}:00`) : new Date(0);
+      const timeB = b.starttijd ? new Date(`2000-01-01T${b.starttijd}:00`) : new Date(0);
 
 
       if (sortOrder === 'earliest') {
@@ -157,7 +148,7 @@ const AdminSpeedDates = () => {
   }
 
   const getSectorClassName = (sector) => {
-    if (!sector) return ''; // Handel null/undefined sector af
+    if (!sector) return '';
     return sector.replace(/[^a-zA-Z0-9]/g, '');
   };
 
@@ -188,9 +179,7 @@ const AdminSpeedDates = () => {
 
         {showFilters && (
           <div className="filter-section">
-            
 
-          
 
             <div className="filter-group">
               <h3>Type opportuniteit</h3>
@@ -255,8 +244,18 @@ const AdminSpeedDates = () => {
             </div>
 
             <div className="filter-buttons">
-              <button className="apply-btn" onClick={applyFilters}>Filters toepassen</button>
-              <button className="reset-btn" onClick={resetFilters}>Reset filters</button>
+              <button
+                className="reset-btn"
+                onClick={() => resetFilters()} // AANGEPAST: roep resetFilters direct aan
+              >
+                <i className="fas fa-undo mr-2"></i> Reset filters
+              </button>
+              <button
+                className="apply-btn"
+                onClick={() => setShowFilters(false)}
+              >
+                <i className="fas fa-check mr-2"></i> Filters toepassen
+              </button>
             </div>
           </div>
         )}
@@ -269,16 +268,16 @@ const AdminSpeedDates = () => {
               {filteredAndSortedDates.map((date) => (
                 <div key={date._id} className="speeddate-card">
                   <div className="card-header">
-                    {/* Zorg ervoor dat date.bedrijf en date.bedrijf.name bestaan voordat je ze gebruikt */}
                     <h3>{date.bedrijf?.name || 'Onbekend Bedrijf'}</h3>
                     <span className={`sector-tag ${getSectorClassName(date.vakgebied)}`}>{date.vakgebied}</span>
                   </div>
                   <div className="card-body">
                     <p><i className="far fa-clock"></i> {date.starttijd} - {date.eindtijd}</p>
-                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal}</p>
+                    {/* AANGEPAST: Toon de naam van het lokaalobject */}
+                    <p><i className="fas fa-map-marker-alt"></i> {date.lokaal?.name || 'Lokaal onbekend'}</p>
                     <p><i className="fas fa-microscope"></i> {date.focus}</p>
-                    <p><i className="fas fa-handshake"></i> {date.opportuniteit?.join(', ') || 'N/B'}</p> {/* Null check toegevoegd */}
-                    <p><i className="fas fa-language"></i> {date.talen?.join(', ') || 'N/B'}</p> {/* Null check toegevoegd */}
+                    <p><i className="fas fa-handshake"></i> {date.opportuniteit?.join(', ') || 'N/B'}</p>
+                    <p><i className="fas fa-language"></i> {date.talen?.join(', ') || 'N/B'}</p>
                     <p className="description">{date.beschrijving}</p>
                   </div>
                   <div className="card-footer">
