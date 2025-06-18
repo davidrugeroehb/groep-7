@@ -22,22 +22,25 @@ const BedrijfNavbar = () => {
       : 'relative text-black hover:text-blue-600 after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-blue-600 hover:after:w-full after:transition-all after:duration-300';
  
   return (
-    <nav className="bg-white shadow-md px-8 py-4 flex items-center justify-between">
-      {/* Logo + Titel */}
-      <div className="flex items-center space-x-3">
-        <img src={logo} alt="logo" className="h-10 w-auto" />
-        <NavLink to="/bedrijf-home" className="text-xl font-bold">
-          Career Match
-        </NavLink>
-      </div>
-      {/* Hamburger button (alleen op mobiel zichtbaar) */}
-  <button
-    onClick={() => setMenuOpen(!menuOpen)}
-    className="md:hidden text-gray-700 ml-auto"
-    aria-label="Toggle menu"
-  >
-    ☰
-  </button>
+    <nav className="bg-white shadow-md px-4 sm:px-8 py-4">
+  <div className="flex items-center justify-between w-full">
+    {/* Logo + Titel */}
+    <div className="flex items-center space-x-3">
+      <img src={logo} alt="logo" className="h-10 w-auto" />
+      <NavLink to="/bedrijf-home" className="text-xl font-bold whitespace-nowrap">
+        Career Match
+      </NavLink>
+    </div>
+
+    {/* Hamburger button */}
+    <button
+      onClick={() => setMenuOpen(!menuOpen)}
+      className="md:hidden text-gray-700"
+      aria-label="Toggle menu"
+    >
+      ☰
+    </button>
+  </div>
  
       {/* Links */}
       <ul className="hidden md:flex space-x-6 text-sm font-medium justify-center flex-1">
@@ -85,12 +88,12 @@ const BedrijfNavbar = () => {
       {menuOpen && (
   <div className="absolute top-16 left-0 w-full bg-white border-t z-50 shadow-md md:hidden">
     <ul className="flex flex-col p-4 space-y-2 text-sm font-medium">
-      <li><NavLink to="/bedrijf-home" className={navLinkClass}>Geplande Speeddates</NavLink></li>
-      <li><NavLink to="/aanmaken" className={navLinkClass}>Aanmaken</NavLink></li>
-      <li><NavLink to="/bedrijf-aanvragen" className={navLinkClass}>Aanvragen</NavLink></li>
-      <li><NavLink to="/bedrijf-profiel" className={navLinkClass}>Profiel</NavLink></li>
-      <li><NavLink to="/studenten-zoeken" className={navLinkClass}>Studenten zoeken</NavLink></li>
-      <li><NavLink to="/about" className={navLinkClass}>About</NavLink></li>
+      <li><NavLink to="/bedrijf-home" className={navLinkClass} onClick={() => setMenuOpen(false)}>Geplande Speeddates</NavLink></li>
+      <li><NavLink to="/aanmaken" className={navLinkClass} onClick={() => setMenuOpen(false)}>Aanmaken</NavLink></li>
+      <li><NavLink to="/bedrijf-aanvragen" className={navLinkClass} onClick={() => setMenuOpen(false)}>Aanvragen</NavLink></li>
+      <li><NavLink to="/bedrijf-profiel" className={navLinkClass} onClick={() => setMenuOpen(false)}>Profiel</NavLink></li>
+      <li><NavLink to="/studenten-zoeken" className={navLinkClass} onClick={() => setMenuOpen(false)}>Studenten zoeken</NavLink></li>
+      <li><NavLink to="/about" className={navLinkClass} onClick={() => setMenuOpen(false)}>About</NavLink></li>
       <li>
         <button
           onClick={handleLogout}
