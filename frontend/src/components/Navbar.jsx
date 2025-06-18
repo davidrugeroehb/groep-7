@@ -29,7 +29,7 @@ const Navbar = () => {
       {/* Logo + Titel */}
       <div className="flex items-center space-x-3">
         <img src={logo} alt="logo" className="h-10 w-auto" />
-        <Link to="/speeddates" className="text-xl font-bold">Career Match</Link>
+        <Link to="/speeddates" className="text-xl font-bold whitespace-nowrap">Career Match</Link>
       </div>
       {/* Hamburger button (alleen zichtbaar op mobiel) */}
       <button
