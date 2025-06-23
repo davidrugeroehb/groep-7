@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import './SpeedDates.css';
+
 function MijnAfspraken() {
   const [afspraken, setAfspraken] = useState([]);
   const [error, setError] = useState(null);
@@ -36,31 +37,6 @@ function MijnAfspraken() {
 
     fetchAfspraken();
   }, [studentId]); // Herlaad bij wijziging van studentId
-
-  const annuleerAfspraak = async (id) => {
-    if (!window.confirm("Weet u zeker dat u deze afspraak wilt annuleren? Dit kan alleen als het bedrijf nog niet heeft geaccepteerd of als het een lopende aanvraag is.")) { // Added clarity to message
-      return;
-    }
-    try {
-      // Annuleer de aanvraag (niet de afspraak direct, maar de onderliggende aanvraag)
-      const res = await fetch(`http://localhost:4000/api/aanvragen/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Annuleren mislukt.");
-      }
-
-      alert(data.message);
-      setAfspraken((prev) => prev.filter((a) => a._id !== id));
-      // Optioneel: refresh de MijnAanvragen pagina of speeddates pagina
-    } catch (err) {
-      console.error("Fout bij annuleren afspraak:", err);
-      alert(`Annuleren mislukt: ${err.message || "Onbekende fout"}`);
-    }
-  };
 
   if (loading) {
     return <div className="text-center py-10">Laden van afspraken...</div>;
@@ -102,12 +78,6 @@ function MijnAfspraken() {
                 <p className="text-gray-700 mb-3">
                   <strong>Lokaal:</strong> {afspraak.lokaal}
                 </p>
-                <button
-                  onClick={() => annuleerAfspraak(afspraak._id)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"
-                >
-                  Annuleer
-                </button>
               </div>
             ))}
           </div>
