@@ -80,7 +80,9 @@ function About() {
         const data = await authenticatedFetch(`http://localhost:4000/api/admin/mijnprofiel/${adminId}`);
 
         if (data && data.profile) {
+
           setProfiel(data.profile);
+
         } else {
           throw new Error("Ongeldig profiel data van server.");
         }

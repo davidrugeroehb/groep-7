@@ -13,6 +13,7 @@ function Dashboard() {
   const [alertsCount, setAlertsCount] = useState(0);
   const [showAdminFormModal, setShowAdminFormModal] = useState(false);
 
+
   // NIEUW: States voor Globale Speeddate Instellingen
   const [globalSettings, setGlobalSettings] = useState({ dayStartTime: '', dayEndTime: '' });
   const [settingsMessage, setSettingsMessage] = useState('');
@@ -24,6 +25,7 @@ function Dashboard() {
   const [editingLokaal, setEditingLokaal] = useState(null); // Voor lokaal dat wordt bewerkt
   const [lokaalMessage, setLokaalMessage] = useState('');
   const [lokaalError, setLokaalError] = useState('');
+
 
   const API_BASE_URL = 'http://localhost:4000/api';
 
@@ -47,7 +49,9 @@ function Dashboard() {
         }
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
+
       return await response.json();
+
     } catch (error) {
       console.error(`Fout bij het ophalen van gegevens van ${url}:`, error);
       throw error;
@@ -104,6 +108,7 @@ function Dashboard() {
   useEffect(() => {
     const getCounts = async () => {
       try {
+
         const sdCountData = await authenticatedFetch(`${API_BASE_URL}/speeddates/count`);
         setSpeeddatesCount(sdCountData.count);
 
@@ -115,6 +120,7 @@ function Dashboard() {
 
         const alCountData = await authenticatedFetch(`${API_BASE_URL}/aanvragen/pending/count`);
         setAlertsCount(alCountData.count);
+
       } catch (err) {
         console.error("Fout bij het laden van dashboard tellers:", err);
       }
@@ -289,7 +295,9 @@ function Dashboard() {
 
         <div className="flex flex-col justify-around p-4 rounded-md bg-green-600 text-white">
           <div className="flex justify-between items-center mb-2">
+
             <h3 className="text-lg font-semibold">AANVRAGEN</h3>
+
             <h1>{alertsCount}</h1>
           </div>
           <BsCheckCircleFill className="text-2xl" />
@@ -299,6 +307,7 @@ function Dashboard() {
       <div className="charts">
         {/* hier plaatsen we eventuele charts-componenten, geen prioriteit */}
       </div>
+
 
       {/* NIEUWE SECTIE: Globale Speeddate Instellingen */}
       <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200 mt-8">
@@ -450,10 +459,13 @@ function Dashboard() {
       </div>
 
       {/* NIEUWE SECTIE: Knop om Admin formulier te openen (bestaand) */}
+
       {localStorage.getItem('role') === 'admin' && (
         <div className="mt-8 text-center">
           <button
             onClick={() => setShowAdminFormModal(true)}
+
+
             className="bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-700 transition duration-300 ease-in-out shadow-md"
           >
             Nieuwe Administrator Aanmaken
@@ -461,7 +473,9 @@ function Dashboard() {
         </div>
       )}
 
+
       {/* NIEUWE COMPONENT: De modale overlay voor het admin formulier (bestaand) */}
+
       {showAdminFormModal && (
         <AdminFormModal onClose={() => setShowAdminFormModal(false)}>
           <h2 className="text-2xl font-semibold mb-6 text-black">Nieuwe Administrator Aanmaken</h2>
@@ -543,7 +557,9 @@ const AdminRegistratieForm = ({ authenticatedFetch }) => {
       </div>
       <button
         type="submit"
+
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+
       >
         Administrator aanmaken
       </button>

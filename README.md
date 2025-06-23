@@ -98,8 +98,9 @@ Als je Windows gebruikt en je krijgt een foutmelding over scriptuitvoering (bijv
 ## Testaccounts
 
 ### Student
+
 -   **Email**: `sarah.janssen@student.ehb.be`
--   **Wachtwoord**: `studenttest123`
+
 
 ### Bedrijf
 -   **Email**: `ines.dumont@brightvision.be`
